@@ -143,6 +143,9 @@ public class RoundedRectangle implements GraphicalPrimitive<ShapeRenderer, Vect2
          * */
         public SObrubou(Vect2f dims, Style style){this(dims, style.edgeRoundness, style.borderThickness, style.innerColor, style.outerColor);}
 
+        /**
+         * @return Zaoblenost obou komponent
+         * */
         public Property<Float> roundness(){return obj1.roundness();}
     }
 

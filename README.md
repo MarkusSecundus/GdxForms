@@ -2,7 +2,7 @@
 * Pro dokumentaci viz: https://markussecundus.github.io/GdxForms/
 *
 *
-* Mělo by zkompilovatelné v Android Studiu 4.0+, testováno s Android API 15, 19, 29
+* Mělo by být zkompilovatelné v Android Studiu 4.0+, testováno s Android API 15, 19, 29
 *
 *
 * Demo s názornou ukázkou použití knihovny... core/src/com/markussecundus/formsgdx/FormsGdxExample

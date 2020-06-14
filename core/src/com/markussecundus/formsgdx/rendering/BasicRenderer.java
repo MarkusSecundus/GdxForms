@@ -106,7 +106,7 @@ public class BasicRenderer implements BatchRenderer, BasicShapeRenderer {
     /**
      * @return Grafické primitivum ze vstupu obalené ve wrapperu přijímajícím {@link BasicRenderer} jako renderovací utilitu.
      * */
-    public static<Vect, Scalar extends Comparable<Scalar>> GraphicalPrimitive<BasicRenderer, Vect, Scalar> conv(GraphicalPrimitive<ShapeRenderer, Vect, Scalar> base){
+    public static<Vect, Scalar extends Comparable<Scalar>, Type extends GraphicalPrimitive<ShapeRenderer, Vect, Scalar>> ShapeToBasicDrw<Vect, Scalar, Type>  conv(Type base){
         return new ShapeToBasicDrw<>(base);
     }
 

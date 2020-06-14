@@ -89,13 +89,13 @@ public class FormsGdxExample extends BasicFormApplication {
 		//vytvoříme kořenový layout
 		Ly ly = Ly.make(Vect2f.make(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 		ly.ignoreTooShort.set(true);	//je nám jedno, když z něj prvky vytečou
-		ly.setDimension(1);	//linearita v něm bude uplatněna podle osy y
+		ly.setDimension(1);	//prvky v něm budou uspořádané podle osy y
+		ly.setAlignment(1, 0.5f); //v souřadnici y budou zarovnané na střed
 		ly.setAlignment(0, 0.25f); //v souřadnici x budou jeho prvky zarovnané na 1/4 délky zleva
 
-		//vytvoříme nějaké obrázkové ikony
+		//vytvoříme nějaké obrázkové ikony - 'RoundedRectangle' bere jako renderer 'SpriteBatch' - je třeba je obalit do převodníku
 		It i = It.make( BasicRenderer.conv(new RoundedRectangle.SObrubou(Vect2f.make(200,200), 0.6f, Vect2f.make(30,30), Color.ORANGE, Color.BROWN)));
 		It i1 = It.make( BasicRenderer.conv(new RoundedRectangle.SObrubou(Vect2f.make(50,200), 0.6f, Vect2f.make(30,30), Color.CYAN, Color.BROWN)));
-
 		It i2 = It.make( BasicRenderer.conv(new RoundedRectangle.SObrubou(Vect2f.make(100,100), 0.9f, Vect2f.make(30,30), Color.WHITE, Color.GOLD)));
 
 		//vytvoříme Styl, abychom další prvky GUI mohli inicializovat pohodlněji
@@ -103,31 +103,28 @@ public class FormsGdxExample extends BasicFormApplication {
 
 		//vytvoříme dva Slidery, délka je přestřelená, jelikož layout si je zarovná
 		Slider.Basic slider = new Slider.Basic(style, Vect2f.make(12000,80), Vect2f.make(50,100));
+		Slider.Basic slider2 = new Slider.Basic(style, Vect2f.make(12000,80), Vect2f.make(100,100));
 
 		//délka ikony i se bude měnit podle hodnoty na 1. posuvníku
 		slider.value().getSetterListeners().add(e->i.setPrefSize(Vect2f.make(ly.getSize().x*e.newVal.get(), i.getPrefSize().y).withFloor(style.borderThickness.scl(2))));
 
 
-		//přidáme do layoutu nevykreslitelného potomka, který akorát každý snímek provede svou funkci update
+		//přidáme do layoutu nevykreslitelného potomka, který akorát každý snímek provede svou funkci update - každý snímek povyroste ikona 'i1' o hodnotu 'rychlostRustu'
 		Wrapper<Vect2f> rychlostRustu = Wrapper.make(Vect2f.make(0.1f, 0.05f));
 		ly.getChildren().add((d, num)->i1.setPrefSize(i1.getPrefSize().add(rychlostRustu.get()).withFloor(Vect2f.ZERO).withCeiling(ly.getSize())));
 
-		Slider.Basic slider2 = new Slider.Basic(style, Vect2f.make(12000,80), Vect2f.make(100,100));
+		//hodnota 'rychlostRustu' bude záviset na hodnotách posuvníků
 		slider2.value().getSetterListeners().add(e->rychlostRustu.set(rychlostRustu.get().withX(e.newVal.get()*2f-1f)));
 		slider.value().getSetterListeners().add(e->rychlostRustu.set(rychlostRustu.get().withY(e.newVal.get()*2f-1f)));
 
 
+		//vytvoříme další slider
 		Slider.Basic slider3 = new Slider.Basic(style, Vect2f.make(12000,80), Vect2f.make(100,100));
+
+		//hodnota slideru bude určovat zarovnání kořenového layoutu
 		slider3.value().getSetterListeners().add(e->ly.setAlignment(0, e.newVal.get()));
 
-		//další náhodné výpisy do konzole, abychom demonstrovali, že umíme odchytávat vstup z obrazovky
-		i.getOnClickedListener().add(e->Gdx.app.log("abc", String.format("..%d-%d", e.x, e.y)));
-		i.getOnTouchDraggedListener().add(e->Gdx.app.log("abc", String.format("..%d,%d", e.x, e.y)));
-		i1.getOnTouchDownListener().add(e->Gdx.app.log("abc", String.format("|.%d-%d", e.x, e.y)));
-		i2.getOnTouchDownListener().add(e->Gdx.app.log("abc", String.format("::.%d-%d", e.x, e.y)));
-		ly.getOnClickedListener().add(e->Gdx.app.log("abc", String.format("--.%d-%d", e.x, e.y)));
 
-		i.getOnUnclickedListener().add(e->Gdx.app.log("abc", "UNCLICKED!"));
 
 		//přidáme všechny prvky do kořenového layoutu
 		ly.getDrawableChildren().add(slider3);
@@ -146,21 +143,24 @@ public class FormsGdxExample extends BasicFormApplication {
 		Ly ll2 = new Ly.Impl(Vect2f.make(ly.getSize().x, 500));
 		ll2.ignoreTooShort.set(true);
 
-		//přidáme do vnitřního layoutu slidery a úhledně je uspořádáme
+		//vytvoříme slider a nastavíme, že hodnota na něm udává zarovnání vnitřního layoutu 'll'
 		Slider.Basic sl1 = new Slider.Basic(style, Vect2f.make(300,80), Vect2f.make(50,100));
 		sl1.value().getSetterListeners().add(e->ll.setAlignment(1, e.newVal.get()));
 
+		//vytvoříme další slider, od jeho hodnoty se bude odvíjet kulatost jeho čudlíku
 		Slider.Basic sl2 = new Slider.Basic(style, Vect2f.make(300,80), Vect2f.make(100,100));
 		sl2.value().getSetterListeners().add(e->sl2.cudlik.base.roundness().set(e.newVal.get()));
 
+		//přidáme prvky do vnitřního layoutu
 		ll2.getDrawableChildren().add(sl1);
 		ll2.getDrawableChildren().add( sl2);
-		ll2.setInnerPadding(40f);
+		ll2.setInnerPadding(40f);				//nastavíme pěkné odsazení a zarovnání
 		ll2.setAlignment(0,1f);
 
-		//nastavíme layout přesně na velikost, kterou mají jeho prvky dohromady
+		//nastavíme layout přesně na velikost, kterou mají dohromady všechny jeho prvky
 		ll2.setPrefSize(ll2.computeRealSize());
 
+		//ještě vytvoříme několik ikon a přidáme je do 2. vnitřního layoutu
 		Style style2 = new Style(Color.CYAN, Color.BLACK, Color.BROWN, 0.9f, 0.1f, Vect2f.make(10,10));
 		ll.getDrawableChildren().add(It.make( BasicRenderer.conv(new RoundedRectangle.SObrubou(Vect2f.make(250,254), style2))));
 		It i4 = It.make( BasicRenderer.conv(new RoundedRectangle.SObrubou(Vect2f.make(250,134), style2)));//do vnitřního layoutu přidáme nový prvek
