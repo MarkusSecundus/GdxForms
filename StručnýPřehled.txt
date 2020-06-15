@@ -236,6 +236,15 @@ Ukázka:
 			root.getChildren().add(cudl2);
 			root.getChildren().add(horizontal);
 
+
+
+			//vytvoříme manager na zpracování vstupu od uživatele
+			InputManager.AsInputProcessor man = new InputManager.AsInputProcessor();
+			Gdx.input.setInputProcessor(man); //zaregistujeme ho, aby dostával vstup ze systému
+
+			man.getTouchConsumers().add(root); //zaregistrujeme do něj kořenový layout
+
+
 			//vrátíme kořenový layout
 			return root;
 		}

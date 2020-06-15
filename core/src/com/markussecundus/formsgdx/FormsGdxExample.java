@@ -82,81 +82,6 @@ public class FormsGdxExample extends BasicFormApplication {
 	}
 
 
-	// zdědíme základní chování z ImageIcon; chceme se renderovat přes BasicRenderer a používat Vect2f jako vektor (3. parametr pak je skalár náležící vektorovému typu);
-	// RoundedRectangle.SObrubou se renderuje přes ShapeRenderer - je třeba ho zkonvertovat;
-	// díky tomu, že si tu přesně pamatujeme, co za typ uvnitř používáme, budeme se moct následně odkazovat
-	// na jeho vnitřní prvky, což se hodí (pokud to nepotřebujeme a chceme si ušetřit psaní, je tu typ ImageIcon.Plain)
-	class Cudlik extends ImageIcon<BasicRenderer, Vect2f, Float, BasicRenderer.ShapeToBasicDrw<Vect2f, Float,RoundedRectangle.SObrubou> >
-				 implements IListeneredUniversalConsumer{  	//k funkcionalitě ImageIcon přidáme zpracování uživatelského vstupu
-
-		static final float ROUNDNESS = 0.5f;		//zakulacenost hran čudlíku, abychom pro ni měli aspoň nějakou hodnotu a nemuseli ji pokaždé předávat
-		static final float BORDER_RATIO = 0.3f;		//podle toho určíme tloušťku stěn čudlíku
-
-		//bere rozměry pro čudlík a jeho barvy
-		public Cudlik(Vect2f dims, Color bcgCol, Color frgCol, Color middleCol) {
-
-			//zkonstruujeme ImageIcon - vytvoříme a předáme jí její vnitřní grafické primitivum
-			super(BasicRenderer.conv(new RoundedRectangle.SObrubou(dims, ROUNDNESS, dims.scl(BORDER_RATIO), frgCol, bcgCol)));
-
-			//při kliknutí na ikonu změníme barvu jejího vnitřku na middleCol
-			this.getOnClickedListener().add(e->img.base.getInner().setColor(middleCol));
-
-			//při odkliknutí vrátíme barvu do původního stavu
-			this.getOnUnclickedListener().add(e->img.base.getInner().setColor(frgCol));
-		}
-	}
-
-
-	//zdědíme funkcionalitu od BasicLinearLayout
-	class LinearLayout extends BasicLinearLayout<BasicRenderer, Vect2f, Float>
-			implements IListeneredUniversalConsumer.ForLayout{	//přidáme zpracování vstupu - tato varianta přidá i jeho distribuci mezi podprvky
-
-		//Zkonstruujeme vnitřní layout, víc netřeba
-		public LinearLayout(Vect2f prefSize, VectUtil<Vect2f, Float> posUtil) {
-			super(prefSize, posUtil);
-		}
-	}
-
-
-	class Formular extends BasicFormApplication{
-
-		@Override public Drawable<BasicRenderer, Vect2f> createForm() {
-			//vytvoříme layout přesně o velikosti obrazovky
-			LinearLayout root = new LinearLayout(Vect2f.make(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()), Vect2f.getUtility());
-
-			root.setDimension(1); 								//chceme ho mít zarovnaný podle osy y
-			root.setAlignment(1, 0.5f);	//zarovnaný na prostředek
-
-			//vytvoříme nějaké dva čudlíky
-			Cudlik cudl1 = new Cudlik(Vect2f.make(100, 100), Color.BROWN, Color.WHITE, Color.PINK);
-			Cudlik cudl2 = new Cudlik(Vect2f.make(120, 80), Color.CHARTREUSE, Color.FOREST, Color.GOLD);
-
-			// kliknutím na cudl2 se zvětší cudl1
-			cudl2.getOnClickedListener().add(e->cudl1.setPrefSize(cudl1.getPrefSize().add(20,30)));
-
-			//vytvoříme další layout, který pak do kořenového vložíme
-			LinearLayout horizontal = new LinearLayout(Vect2f.make(500, 200), Vect2f.getUtility());
-			horizontal.setDimension(0);             //zarovnaný podle osy x - není potřeba, taková je implicitní hodnota
-
-			//vytvoříme další čudlíky
-			Cudlik cudl3 = new Cudlik(Vect2f.make(250, 200), Color.CHARTREUSE, Color.BLUE, Color.RED);
-			Cudlik cudl4 = new Cudlik(Vect2f.make(200, 150), Color.SCARLET, Color.CYAN, Color.CORAL);
-
-			horizontal.setInnerPadding(50f);		//nastavíme vnitřní zarovnání v layoutu
-
-			//přidáme prvky do vnořeného layoutu
-			horizontal.getChildren().add(cudl3);
-			horizontal.getChildren().add(cudl4);
-
-			//všechno přidáme do kořenového layoutu
-			root.getChildren().add(cudl1);
-			root.getChildren().add(cudl2);
-			root.getChildren().add(horizontal);
-
-			//vrátíme kořenový layout
-			return root;
-		}
-	}
 
 
 	@Override
@@ -211,7 +136,6 @@ public class FormsGdxExample extends BasicFormApplication {
 		ly.getDrawableChildren().add(i1);
 		ly.getDrawableChildren().add(slider2);
 		ly.getDrawableChildren().add(i2);
-		ly.getDrawableChildren().add(new Cudlik(Vect2f.make(200,200), Color.BROWN, Color.WHITE, Color.YELLOW));
 
 
 		//vytvoříme další layout, x si můžeme dovolit přestřelit
