@@ -164,8 +164,7 @@ public class BasicLinearLayout<Rend, Pos, Scalar extends Comparable<Scalar>> ext
      * */
     @Override
     public ReadonlyProperty<Pos> childPosition(Drawable<Rend, Pos> child) {
-        if(childPositionsDirty)
-            recomputeChildrenPositions();
+        applySizeChanges();
         return super.childPosition(child);
     }
 
@@ -203,13 +202,6 @@ public class BasicLinearLayout<Rend, Pos, Scalar extends Comparable<Scalar>> ext
     /**the rightmost layout allignment that makes sense*/
     public static final double ALIGNMENT_RIGHT = 1d;
 
-    /**
-     * {@inheritDoc}
-     * */
-    @Override public void draw(Rend renderer, Pos position) {
-        applySizeChanges();
-        super.draw(renderer, position);
-    }
 
     /**
      * Checks if child sizes or positions are dirty and optionally recomputes them

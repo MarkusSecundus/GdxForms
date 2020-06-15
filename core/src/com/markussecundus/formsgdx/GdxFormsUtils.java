@@ -1,20 +1,25 @@
 package com.markussecundus.formsgdx;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Disposable;
-import com.markussecundus.forms.gfx.BinaryGraphicalComposite;
-import com.markussecundus.forms.gfx.GraphicalPrimitive;
 import com.markussecundus.forms.utils.vector.Vect2f;
-import com.markussecundus.forms.utils.vector.Vect2i;
 import com.markussecundus.forms.utils.vector.VectUtil;
-import com.markussecundus.formsgdx.graphics.RoundedRectangle;
 
-import java.lang.reflect.Field;
 
+
+
+/**
+ * Statická třída s pomocnými funkcemi a utilitami poskytujícími kompatibilitu
+ * mezi nativními typy LibGDX a a Formulářovou knihovnou.
+ *
+ * @see VectUtil
+ * @see Vector2
+ * @see Vector3
+ * @see Vect2f
+ *
+ * @author MarkusSecundus
+ * */
 public class GdxFormsUtils {
 
     /**

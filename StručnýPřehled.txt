@@ -1,0 +1,244 @@
+Základní stavební kameny:
+    - události...
+        - balíček com.markussecundus.forms.events
+
+        - EventListener<T>... funkcionální interface, bere 1 argument (generický parametr, podle typu události, kterou poslouchá) a provádí nějakou reakci na nastavší událost,
+                             vrací true/false - jestli má smysl, aby se po něm pokračovalo ve vykonávání zbytku Listenerů registrovaných pro danou událost (viz EventDelegate)
+            - EventListenerX<T>... derivát s implicitní návratovou hodnotou true, pro pohodlnější psaní lambd
+
+        - EventDelegate<T>... EventListener, který sám o sobě nic nedělá, ale má List EventListenerů (`getListeners`), do kterého je možné se zaregistrovat / odebrat se z něj / cokoliv dalšího, co se dá dělat s java.collections.List
+                           když nastane poslouchaná událost, prochází Listenery od začátku, dokud nedojde na konec, nebo dokud nějaký z nich nevrátí false
+                           (takto např. můžeme na začátek delegáta dát Listener, který zařídí, že se na událost nebude reagovat, pokud je nová hodnota Property stejná jako původní)
+                           
+              - pro všechny události, které někde v knihovně mohou nastat, existuje zpravidla příslušný EventDelegate, do kterého je možné zaregistrovat své Listenery
+              - vytvoření EventDelegate... buď přes factory EventDelegate.make(), nebo přímo přes konstruktor standardní implementace IEventDelegate (předpona 'I' na znamení, že jde o Implementaci :-P )
+              - pokud chce právě probíhající Listener odebrat z Listu sám sebe, nemůže to udělat napřímo (List by vyhodil ConcurrentModificationException nebo tak něco) - musí vyhodit výjímku EventDelegate.DeleteSelf a Delegát ho smaže
+
+
+    - atributy...
+        - balíček com.markussecundus.forms.wrapper.property
+
+        - obalené do Property<Attr>...
+            - metody get(), set() pro získání / změnu hodnoty, jejich volání iniciuje událost; z Listeneru této události lze hodnotu Property číst a měnit bez rekurzivního vyvolání události (skrz argument.newVal() - viz Property.SetterListenerArgs)
+            - na poslouchání událostí je možné se zaregistrovat v jejich vnořených Properties getterListeners / setterListeners (ty se samozřejmě generují líně, aby nezabraly nekonečno paměti)
+            - varianty: - Property... možné odkudkoliv hodnotu číst i měnit
+                        - ConstProperty... hodnotu lze jen číst, nikdy nebude změněna
+                        - ReadonlyProperty... hodnotu lze číst odkudkoliv, měnit jen skrze specielní zapisovací objekt, poslouchat lze obě události, ale ani z Listeneru hodnotu nelze měnit
+                        - WriteonlyProperty... obdobně jako ReadonlyProperty, akorát obráceně
+
+                - základní implementace... předpona Simple / Generic / Lazy (tvorba např. new SimpleProperty<>(intiVal) , new GenericConstProperty<>(()->val), ... ),
+                 příp. možné přímo děděním z AbstractProperty - např.:
+
+                 private int propValue = ...;
+                 public Property<Integer> prop = new AbstractProperty<>(){
+                     
+                     @Override protected Integer obtain() {return propValue;}
+
+                     @Override protected Integer change(Integer newVal) {return propValue  = newVal;}
+                 }
+
+            - jmenná konvence... Property-atributy se jmenují prostě podle toho, co v programu znamenají, (př. Property<Integer> value() pro hodnotu na slideru) navíc by k ale objekt, kterému property náleží,
+                                 měl pro větší pohodlí uživatele definovat funkce s předponou get/set, které přesměrovávají na .get(), .set(T) metody dotyčné Property - např.:
+
+                                 public Property<Integer> value(){return _value;}
+
+                                 public Integer getValue(){return value().get();}
+                                 public Integer setValue(Integer newVal){return value().set(newVal);}
+
+
+Prvky GUI...
+    - balíček com.markussecundus.forms.elements
+
+    - Element... úplně nejzákladnější, pouze funkce update(delta, frameId) (funkcionální interface)
+
+    - Drawable<Renderer, Position>... Element, který může být vykreslen na obrazovku (funkce draw) a má rozměry
+            - parametrizovaný typem, který používá ke svému vykreslení a vektorovým typem, skrze který se udává jeho pozice
+            - rozměry... maxSize, minSize, prefSize... konfigurovatelné uživatelem, od nich se odvíjí `size` - reálná velikost (funguje intuitivně, pro podrobnosti viz DefaultSizeBehavior)
+                            navíc ještě _sizeConstraint, kterou určuje Layout, do kterého je prvek vložený, aby nepřetékal
+            - funkce draw... přebírá instanci rendereru a pozici, na které Drawable začíná ( == jeho minimální souřadnici, v LibGDX levý spodní roh)
+            - základní báze pro implementaci... BasicAbstractDrawable
+            - také u sebe ještě drží utilitu pro práci s vektorovým typem, který používá (viz VectUtil)
+
+
+    - sdružování více prvků dohromady... UberDrawable
+            - má u sebe List prvků (`drawableChildren`), do kterého lze přidávat, odebírat z něj atd.
+            - každý podprvek v něm má danou relativní pozici - atribut `childPosition`
+
+            - jediná dosud hotová implementace, kterou má smysl používat... BasicLinearLayout<Rend, Pos, Scalar>
+                - prvky seřazené jeden za druhým podle jejich pořadí v `drawableChildren`
+                - psán obecně pro n-rozměrný prostor :-D - atribut `dimension` určuje index dimenze, podle které jsou prvky seřazené (0 ~ podle osy x, 1 ~ podle osy y, ...), možné dimenze jsou samozřejmě dány použitým vektorovým typem
+                - podprvkům nastavuje `_sizeConstraint` ve všech dimenzích kromě aktuální dimenze linearity (v ostatních dimenzích je jasné, že mezí velikosti podprvků je sama velikost layoutu, ale v dimenzi linearity by musel
+                    rozhodovat, který prvek zkrátit méně, který více atd. a nenapadl mě žádný elegantní způsob, jak to elegantně a intuitivně rozřešit) - při přetečení v této dimenzi vyhodí specielní výjimku (
+                        nebo to může ignorovat, nastaví-li se atribut `ignoreTooShort` na true) 
+
+
+Grafické objekty... GraphicalPrimitive
+    - balíček com.markussecundus.forms.gfx
+
+    - není sám o sobě GUI-Elementem
+    - má danou velikost (atribut `dimensions`, přímo editovatelná) a funkci `draw(Renderer, Position)` pro vykreslení na obrazovku
+    - skládání dvou GraphicalPrimitive dohromady - viz BinaryGraphicalComposite
+    - pro použití jako prvek GUI - obalit do .forms.elements.impl.ImageIcon (přímočaře - new ImageIcon(new GraphicalPrimitive(){...} ) ), vnitřní primitivum z něj bude přímo přístupné,
+         ale jeho velikost smí být měněna jen změněním velikosti obalující ImageIcon (automaticky se vygenerují Listenery, aby to fungovalo; při pokusu o změnu velikosti napřímo se vyhodí výjimka)
+
+    - konkrétní implementace závisí na platformě, kde je knihovna používána (LibGDX) - viz balíček com.markussecundus.formsgdx.graphics
+        - zde konkrétně používaný... BasicRenderer
+            - zastřešuje spojenou funkcionalitu ShapeRendereru (nijak zvlášť efektivní, kreslí geometrické tvary) a SpriteBatch (rychlá, kreslí textury)
+            - implementace GraphicalPrimitive píšu tak, aby vyžadovaly jenom to nejzákladnější, co doopravdy potřebují -> některé jako parametr berou přímo ShapeRenderer ->
+                -> nutné je obalit do Wrapperu, který z nich udělá GraphicalPrimitive přijímající BasicRenderer - funkce `BasicRenderer.conv`
+
+
+Vektorové typy...
+    - balíček com.markussecundus.forms.utils.vector
+
+    - Nechtěl jsem vynucovat, aby všechny musely implementovat nějaký společný interface, protože platformy,
+      kam může knihovna jednou být portována, už mohou mít nějaké vlastní vektorové typy, pro které by bylo 
+      samozřejmě nemožné takový interface formálně implementovat. Balit pak takové typy do wrapperů nebo je 
+      muset úplně ignorovat by mohlo být pro realtime program zbytečně neefektivní a obecně nehezké.
+
+    - Místo toho stačí pro daný, libovolný typ vytvořit implementaci rozhraní VectUtil -
+       - ta se pak předá libovolnému generickému prvku GUI, který s typem má pracovat,
+      a ten k tomu použije metody poskytnuté tímto pomocným objektem.
+    
+    - Základní vektorové typy jsou Vect2f a Vect2i - floatový / intový, 2D, immutable
+        - konstruktor privátní, vytvářejí se skrze statickou metodu make (př. Vect2f.make(1f,2f)), abych je třeba jednou mohl poolovat,
+            jinak se s nimi pracuje dost podobně jako s jakýmykoliv jinými vektory v Javě
+        - příslušnou implementaci VectUtil lze získat z jejich statické funkce getVectUtil()
+    
+    Nativní LibGDX typ Vector2 jsem nakonec nikde nepoužil, protože je mutable a to úplně nepasuje dohromady s Properties,
+        jeho VectUtil je ale kdyžtak k nalezení ve .formsgdx.GdxFormsUtils.Vector2Util
+
+
+Uživatelský vstup...
+    - závisí na platformě -> součást implementačního balíčku .formsgdx.input
+                          -> není napsán genericky
+
+    - rozhraní InputConsumer ...  - základní události pro vstup z klávesnice a z myši / obrazovky
+                                  - variace na pro LibGDX nativní InputProcessor - není přímo kompatibilní, ale dají se velmi přímočaře vzájemně převádět (viz statické třídy uvnitř InputConsumer)
+                                  - poskytuje události, ale ne Delegáty, kam by bylo možné se zaregistrovat na jejich odposlech -> ty má až rozhraní ListeneredTouchConsumer, ListeneredKeyConsumer, ...
+
+    - problém: Vstup potřebujeme přijímat skrze prvky uživatelského rozhraní, které už nejspíše dědí z nějaké abstraktní generické nadtřídy pro prvky uživatelského rozhraní - logiku 
+                pro zpracování vstupu už nemohou zdědit z obecné třídy dedikované čistě pro zpracování vstupu. Přesunout příslušnou logiku do pomocné třídy, jejíž instanci by v sobě obsahovaly (jako u DefaultSizeBehavior)
+                by bylo otravné muset psát každou chvíli.
+
+            - řešení: interface IListeneredTouchConsumer, IListeneredUniversalConsumer atd. ... "Implementace ListeneredTouchConsumeru", ...
+                                - "někde" v sobě pro každou instanci, která je implementuje, přechovávají všechny potřebné Delegáty a ve svých defaultních metodách k nim poskytují přístup
+                                    -> pro získání kompletní funkcionality zpracování vstupu stačí do hlavičky třídy přidat `implements IListeneredUniversalConsumer`
+                                - defaultně také rovnou přidá několik listenerů k zajištění intuitivního chování vstupních funkcí - možné konfigurovat přepsáním děsivě pojmenovaných funkcí na rozhraní definovaných
+                                    - specielní varianta: IListeneredTouchConsumer.ForLayout ... pokud ji implementuje layout, přidá mu navíc listenery pro distribuci vstupní události mezi jeho podprvky
+                                        - obdobně IListeneredUniversalConsumer.ForLayout (ale i ten posílá potomkům také jenom vstup z myši)
+    
+    - třída InputManager ... účel: převzít vstupní událost ze systému a přidělit ji prvkům, které jsou u něj pro ni zaregistrované
+            - varianta InputManager.AsInputProcessor ... implementuje i rozhranní InputProcessor ->
+                                                         -> v LibGDX ji lze zaregistrovat na příjem vstupu:
+                                                            "
+                                                            var manager = new InputManager.AsInputProcessor();
+                                                            Gdx.input.setInputProcessor(manager);
+                                                            "
+
+
+Tvorba formuláře:
+    - předpřipravená třída BasicFormApplication...
+            - dědí z LibGDXího ApplicationAdapter -> spouští se úplně stejně, jako jakákoliv jiná LibGDX aplikace
+            - předpřipravená metoda createForm() - proběhnuta při vytvoření formuláře
+                                               - vrací kořenový prvek formuláře ( -ten bude každý snímek vykreslován na pozici (0,0)^T )
+
+
+Ukázka:
+  - dvoubarevný čudlík s obrubou, který reaguje na vstup a při stisknutí změní barvu:
+            
+
+        
+	// zdědíme základní chování z ImageIcon; chceme se renderovat přes BasicRenderer a používat Vect2f jako vektor (3. parametr pak je skalár náležící vektorovému typu);
+	// RoundedRectangle.SObrubou se renderuje přes ShapeRenderer - je třeba ho zkonvertovat;
+	// díky tomu, že si tu přesně pamatujeme, co za typ uvnitř používáme, budeme se moct následně odkazovat
+	// na jeho vnitřní prvky, což se hodí (pokud to nepotřebujeme a chceme si ušetřit psaní, je tu typ ImageIcon.Plain)
+
+	class Cudlik extends ImageIcon<BasicRenderer, Vect2f, Float, BasicRenderer.ShapeToBasicDrw<Vect2f, Float,RoundedRectangle.SObrubou> >
+				 implements IListeneredUniversalConsumer{  	                    //k funkcionalitě ImageIcon přidáme zpracování uživatelského vstupu
+
+		static final float ROUNDNESS = 0.5f;	                            	//zakulacenost hran čudlíku, abychom pro ni měli aspoň nějakou hodnotu a nemuseli ji pokaždé předávat
+		static final float BORDER_RATIO = 0.3f;	                            	//podle toho určíme tloušťku stěn čudlíku
+
+		//bere rozměry pro čudlík a jeho barvy
+		public Cudlik(Vect2f dims, Color bcgCol, Color frgCol, Color middleCol) {
+
+			//zkonstruujeme ImageIcon - vytvoříme a předáme jí její vnitřní grafické primitivum - Obdélník s obrubou
+
+			super(BasicRenderer.conv(new RoundedRectangle.SObrubou(dims, ROUNDNESS, dims.scl(BORDER_RATIO), frgCol, bcgCol)));
+
+
+			//při kliknutí na ikonu změníme barvu jejího vnitřku na middleCol
+
+			this.getOnClickedListener().add(e->img.base.getInner().setColor(middleCol));
+
+
+			//při odkliknutí vrátíme barvu do původního stavu
+
+			this.getOnUnclickedListener().add(e->img.base.getInner().setColor(frgCol));
+		}
+	}
+
+
+  - Layout, do kterého tyto prvky můžeme přidat 
+
+
+	//zdědíme funkcionalitu od BasicLinearLayout
+	class LinearLayout extends BasicLinearLayout<BasicRenderer, Vect2f, Float>
+			implements IListeneredUniversalConsumer.ForLayout{	//přidáme zpracování vstupu - tato varianta přidá i jeho distribuci mezi podprvky
+
+		//Zkonstruujeme vnitřní layout, víc netřeba
+		public LinearLayout(Vect2f prefSize, VectUtil<Vect2f, Float> posUtil) {
+			super(prefSize, posUtil);
+		}
+	}
+
+ 
+  - Ukázkový formulář:
+
+
+    class Formular extends BasicFormApplication{
+
+            //jediná metoda vyžadující přepsání, spustí se na začátku programu a musí vrátit kořenový prvek vytvořeného formuláře
+
+		@Override public Drawable<BasicRenderer, Vect2f> createForm() {
+
+			//vytvoříme layout přesně o velikosti obrazovky
+			LinearLayout root = new LinearLayout(Vect2f.make(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()), Vect2f.getUtility());
+
+			root.setDimension(1); 								//chceme ho mít zarovnaný podle osy y
+			root.setAlignment(1, 0.5f);	                        //zarovnaný na prostředek
+
+			//vytvoříme nějaké dva čudlíky
+			Cudlik cudl1 = new Cudlik(Vect2f.make(100, 100), Color.BROWN, Color.WHITE, Color.PINK);
+			Cudlik cudl2 = new Cudlik(Vect2f.make(120, 80), Color.CHARTREUSE, Color.FOREST, Color.GOLD);
+
+			// kliknutím na cudl2 se zvětší cudl1
+			cudl2.getOnClickedListener().add(e->cudl1.setPrefSize(cudl1.getPrefSize().add(20,30)));
+
+			//vytvoříme další layout, který pak do kořenového vložíme
+			LinearLayout horizontal = new LinearLayout(Vect2f.make(500, 200), Vect2f.getUtility());
+
+			horizontal.setDimension(0);             //zarovnaný podle osy x - není úplně potřeba, taková je implicitní hodnota
+			horizontal.setInnerPadding(50f);		//nastavíme vnitřní odsazení v layoutu
+
+			//vytvoříme další čudlíky
+			Cudlik cudl3 = new Cudlik(Vect2f.make(250, 200), Color.CHARTREUSE, Color.BLUE, Color.RED);
+			Cudlik cudl4 = new Cudlik(Vect2f.make(200, 150), Color.SCARLET, Color.CYAN, Color.CORAL);
+
+
+			//přidáme prvky do vnořeného layoutu
+			horizontal.getChildren().add(cudl3);
+			horizontal.getChildren().add(cudl4);
+
+			//všechno přidáme do kořenového layoutu
+			root.getChildren().add(cudl1);
+			root.getChildren().add(cudl2);
+			root.getChildren().add(horizontal);
+
+			//vrátíme kořenový layout
+			return root;
+		}
+	}
+
+  
