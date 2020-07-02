@@ -55,7 +55,7 @@ public abstract class AbstractProperty<T> extends Wrapper.AbstractSimpleWrapper<
     @Override public T get() {
         T ret = obtain();
         if(getterListeners!=null)
-            getterListeners.get().exec( new GetterListenerArgs<>(this, obtainListenerlessWrapper()));
+            getterListeners.get().exec( GetterListenerArgs.make(this, obtainListenerlessWrapper()));
         return obtain();
     }
 
@@ -64,7 +64,7 @@ public abstract class AbstractProperty<T> extends Wrapper.AbstractSimpleWrapper<
         T old = this.obtain();
         this.change(t);
         if(setterListeners!=null)
-            setterListeners.get().exec(new SetterListenerArgs<>(this, old, obtainListenerlessWrapper()));
+            setterListeners.get().exec( SetterListenerArgs.make(this, old, obtainListenerlessWrapper()));
         return obtain();
     }
 
@@ -73,7 +73,7 @@ public abstract class AbstractProperty<T> extends Wrapper.AbstractSimpleWrapper<
         T old = this.obtain();
         this.change(obtain());
         if(setterListeners!=null)
-            setterListeners.get().exec(new SetterListenerArgs<>(this, old, obtainListenerlessWrapper()));
+            setterListeners.get().exec( SetterListenerArgs.make(this, old, obtainListenerlessWrapper()));
         return obtain();
     }
 

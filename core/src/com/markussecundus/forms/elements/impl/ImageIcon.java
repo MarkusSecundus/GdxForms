@@ -43,7 +43,7 @@ public class ImageIcon<Rend, Pos, Scalar extends Comparable<Scalar>, Img extends
         dimsGuardElem = e->{
             editFlag.set(true);
             try {
-                this.img.setDimensions(e.newVal.get());
+                this.img.setDimensions(e.newVal().get());
             }finally{editFlag.set(false);}
             return true;
         };

@@ -97,8 +97,8 @@ public class DefaultSizeBehavior<Pos, Scalar extends Comparable<Scalar>> {
 
             for(int t=0;t<max.length;++t){
                 if(max[t].compareTo(min[t]) < 0) {
-                    if(e.caller==maxSize || e.caller==sizeConstraint) min[t] = max[t];
-                    else if(e.caller==minSize) max[t] = min[t];
+                    if(e.caller()==maxSize || e.caller()==sizeConstraint) min[t] = max[t];
+                    else if(e.caller()==minSize) max[t] = min[t];
                     else throw new IllegalArgumentException(String.format("Error in %d. dimension: max is lower than min (%s < %s)", t + 1, max[t], min[t]));
                 }
                 if(pref[t].compareTo(min[t]) < 0) pref[t] = min[t];

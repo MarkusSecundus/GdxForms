@@ -3,7 +3,6 @@ package com.markussecundus.forms.wrappers.property;
 import com.markussecundus.forms.events.EventDelegate;
 import com.markussecundus.forms.events.EventListener;
 import com.markussecundus.forms.utils.FormsUtil;
-import com.markussecundus.forms.wrappers.ReadonlyWrapper;
 import com.markussecundus.forms.wrappers.Wrapper;
 
 
@@ -26,99 +25,55 @@ import com.markussecundus.forms.wrappers.Wrapper;
  *
  * @author MarkusSecundus
  * */
-public interface Property<T> extends Wrapper<T> {
+public interface Property<T> extends Wrapper<T>, ReadonlyProperty<T>, WriteonlyProperty<T> {
 
-    /**
-     * Delegát, jenž se provede při každém vyžádání vnitřní hodnoty voláním metody <code>get</code>.
-     * */
-    public ConstProperty<EventDelegate<GetterListenerArgs<T>>> getterListeners();
+    public ConstProperty<? extends EventDelegate<? extends GetterListenerArgs<T>>> getterListeners();
 
-
-    /**
-     * Delegát, jenž se provede při každém přepsání vnitřní hodnoty pomocí metody <code>set</code>.
-     * */
-    public ConstProperty<EventDelegate<SetterListenerArgs<T>>> setterListeners();
+    public ConstProperty<? extends EventDelegate<? extends SetterListenerArgs<T>>> setterListeners();
 
 
-    /**
-     * Pohodlnější zkratka pro <code>getterListeners().get()</code>.
-     * */
-    public default EventDelegate<GetterListenerArgs<T>> getGetterListeners(){
+    public default EventDelegate<? extends GetterListenerArgs<T>> getGetterListeners(){
         return getterListeners().get();
     }
-    /**
-     * Pohodlnější zkratka pro <code>setterListeners().get()</code>.
-     * */
-    public default EventDelegate<SetterListenerArgs<T>> getSetterListeners(){
+    public default EventDelegate<? extends SetterListenerArgs<T>> getSetterListeners(){
         return setterListeners().get();
     }
 
-    /**
-     * Proběhne <code>setterListener</code> aniž by musela být modifikována vnitřní hodnota.
-     * */
     public T pretendSet();
 
 
-    /**
-     * Datová třída pro argumenty, které přebírá getterový listener.
-     *
-     * @see Property
-     *
-     * @author MarkusSecundus
-     * */
-    public static class GetterListenerArgs<T>{
-        /**
-         * {@link Property}, jejíž hodnota je čtena.
-         * */
-        public final Property<T> caller;
-        /**
-         * {@link Wrapper} přes který lze přistupovat k aktuální vnitřní hodnotě a měnit ji bez aktivace listenerů-
-         * */
-        public final Wrapper<T> currentVal;
+    public static interface GetterListenerArgs<T> extends ReadonlyProperty.GetterListenerArgs<T>, WriteonlyProperty.GetterListenerArgs<T>{
+        public Property<T> caller();
+        public Wrapper<T> currentVal();
 
-        /**
-         * Zkonstruuje instanci z daných argumentů.
-         * */
-        public GetterListenerArgs(Property<T> caller, Wrapper<T> currentVal){this.caller=caller;this.currentVal=currentVal;}
+        public static<T> GetterListenerArgs<T> make(Property<T> caller, Wrapper<T> currentVal){
+            return new GetterListenerArgs<T>() {
+                public Property<T> caller() { return caller; }
+                public Wrapper<T> currentVal() { return currentVal; }
+            };
+        }
     }
 
 
-    /**
-     * Datová třída pro argumenty, které přebírá setterový listener.
-     *
-     * @see Property
-     *
-     * @author MarkusSecundus
-     * */
-    public static class SetterListenerArgs<T>{
-        //public:
-        /**
-         * {@link Property}, jejíž hodnota je modifikována.
-         * */
-        public final Property<T> caller;
+    public static interface SetterListenerArgs<T> extends ReadonlyProperty.SetterListenerArgs<T>, WriteonlyProperty.SetterListenerArgs<T>{
+        public Property<T> caller();
+        public T oldVal();
 
-        /**
-         * (pozn.: implementováno jako funkce, aby v budoucnu šlo jednodušeji implementovat poolování Args-objektů (Property a Wrapper jsou pro všechny Args dané Property zpravidla stejné, akorát stará hodnota se mění))
-         *
-         * @return Původní vnitřní hodnota, která byla nahrazena novou hodnotou.
-         * */
-        public T oldVal(){return oldVal;}
-
-        /**
-         * {@link Wrapper} přes který lze přistupovat k aktuální vnitřní hodnotě a měnit ji bez aktivace listenerů
-         * */
-        public final Wrapper<T> newVal;
+        public Wrapper<T> newVal();
 
 
-        /**
-         * Zkonstruuje instanci z daných argumentů
-         * */
-        public SetterListenerArgs(Property<T> caller, T oldVal, Wrapper<T> newVal){this.caller=caller;this.newVal = newVal;this.oldVal=oldVal;}
+        public static<T> SetterListenerArgs<T> make(Property<T> caller, T oldVal, Wrapper<T> newVal){
+            return new SetterListenerArgs<T>() {
+                public Property<T> caller() { return caller; }
+                public T oldVal() { return oldVal; }
+                public Wrapper<T> newVal() { return newVal; }
+            };
+        }
 
-        //private:
-        private final T oldVal;
     }
 
-    public static final EventListener<SetterListenerArgs<?>> SKIP_IF_VALUE_DIDNT_CHANGE = o-> !FormsUtil.equals(o.oldVal(), o.newVal.get());
+
+
+    public static final EventListener<SetterListenerArgs<?>> SKIP_IF_VALUE_DIDNT_CHANGE = o-> !FormsUtil.equals(o.oldVal(), o.newVal().get());
 
 }

@@ -130,7 +130,7 @@ public class RoundedRectangle implements GraphicalPrimitive<ShapeRenderer, Vect2
         public SObrubou(Vect2f dims, float roundness, Vect2f borderSize, Color innerCol, Color outerCol){
             super(borderSize, new RoundedRectangle(dims, roundness, outerCol), new RoundedRectangle(dims, roundness, innerCol));
             obj1.roundness().getSetterListeners()._getPostUtilListeners().add(e->{
-                obj2.setRoundness(e.newVal.get());
+                obj2.setRoundness(e.newVal().get());
                 return true;
             });
         }

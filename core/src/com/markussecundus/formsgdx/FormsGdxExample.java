@@ -5,10 +5,19 @@ import com.badlogic.gdx.graphics.Color;
 import com.markussecundus.forms.elements.Drawable;
 import com.markussecundus.forms.elements.impl.ImageIcon;
 import com.markussecundus.forms.elements.impl.layouts.BasicLinearLayout;
+import com.markussecundus.forms.events.EventDelegate;
 import com.markussecundus.forms.gfx.GraphicalPrimitive;
+import com.markussecundus.forms.utils.IntPair;
 import com.markussecundus.forms.utils.vector.Vect2f;
 import com.markussecundus.forms.utils.vector.VectUtil;
+import com.markussecundus.forms.wrappers.ReadonlyWrapper;
 import com.markussecundus.forms.wrappers.Wrapper;
+import com.markussecundus.forms.wrappers.WriteonlyWrapper;
+import com.markussecundus.forms.wrappers.property.ConstProperty;
+import com.markussecundus.forms.wrappers.property.ReadonlyProperty;
+import com.markussecundus.forms.wrappers.property.WriteonlyProperty;
+import com.markussecundus.forms.wrappers.property.impl.constant.SimpleConstProperty;
+import com.markussecundus.forms.wrappers.property.impl.general.SimpleProperty;
 import com.markussecundus.formsgdx.examples.Slider;
 import com.markussecundus.formsgdx.graphics.RoundedRectangle;
 import com.markussecundus.formsgdx.input.InputManager;
@@ -87,6 +96,10 @@ public class FormsGdxExample extends BasicFormApplication {
 	@Override
 	public Drawable<BasicRenderer, Vect2f> createForm() {
 
+		long ab = IntPair.make(-2_000_000_000,1123);
+		Gdx.app.log("pr", ""+IntPair.getFirst(ab));
+		Gdx.app.log("pr", ""+IntPair.getSecond(ab));
+
 		BackgroundColor = Color.FOREST;
 
 		//vytvoříme kořenový layout
@@ -109,7 +122,7 @@ public class FormsGdxExample extends BasicFormApplication {
 		Slider.Basic slider2 = new Slider.Basic(style, Vect2f.make(12000,80), Vect2f.make(100,100));
 
 		//délka ikony i se bude měnit podle hodnoty na 1. posuvníku
-		slider.value().getSetterListeners().add(e->i.setPrefSize(Vect2f.make(ly.getSize().x*e.newVal.get(), i.getPrefSize().y).withFloor(style.borderThickness.scl(2))));
+		slider.value().getSetterListeners().add(e->i.setPrefSize(Vect2f.make(ly.getSize().x*e.newVal().get(), i.getPrefSize().y).withFloor(style.borderThickness.scl(2))));
 
 
 		//přidáme do layoutu nevykreslitelného potomka, který akorát každý snímek provede svou funkci update - každý snímek povyroste ikona 'i1' o hodnotu 'rychlostRustu'
@@ -117,15 +130,15 @@ public class FormsGdxExample extends BasicFormApplication {
 		ly.getChildren().add((d, num)->i1.setPrefSize(i1.getPrefSize().add(rychlostRustu.get()).withFloor(Vect2f.ZERO).withCeiling(ly.getSize())));
 
 		//hodnota 'rychlostRustu' bude záviset na hodnotách posuvníků
-		slider2.value().getSetterListeners().add(e->rychlostRustu.set(rychlostRustu.get().withX(e.newVal.get()*2f-1f)));
-		slider.value().getSetterListeners().add(e->rychlostRustu.set(rychlostRustu.get().withY(e.newVal.get()*2f-1f)));
+		slider2.value().getSetterListeners().add(e->rychlostRustu.set(rychlostRustu.get().withX(e.newVal().get()*2f-1f)));
+		slider.value().getSetterListeners().add(e->rychlostRustu.set(rychlostRustu.get().withY(e.newVal().get()*2f-1f)));
 
 
 		//vytvoříme další slider
 		Slider.Basic slider3 = new Slider.Basic(style, Vect2f.make(12000,80), Vect2f.make(100,100));
 
 		//hodnota slideru bude určovat zarovnání kořenového layoutu
-		slider3.value().getSetterListeners().add(e->ly.setAlignment(0, e.newVal.get()));
+		slider3.value().getSetterListeners().add(e->ly.setAlignment(0, e.newVal().get()));
 
 
 
@@ -148,11 +161,11 @@ public class FormsGdxExample extends BasicFormApplication {
 
 		//vytvoříme slider a nastavíme, že hodnota na něm udává zarovnání vnitřního layoutu 'll'
 		Slider.Basic sl1 = new Slider.Basic(style, Vect2f.make(300,80), Vect2f.make(50,100));
-		sl1.value().getSetterListeners().add(e->ll.setAlignment(1, e.newVal.get()));
+		sl1.value().getSetterListeners().add(e->ll.setAlignment(1, e.newVal().get()));
 
 		//vytvoříme další slider, od jeho hodnoty se bude odvíjet kulatost jeho čudlíku
 		Slider.Basic sl2 = new Slider.Basic(style, Vect2f.make(300,80), Vect2f.make(100,100));
-		sl2.value().getSetterListeners().add(e->sl2.cudlik.base.roundness().set(e.newVal.get()));
+		sl2.value().getSetterListeners().add(e->sl2.cudlik.base.roundness().set(e.newVal().get()));
 
 		//přidáme prvky do vnitřního layoutu
 		ll2.getDrawableChildren().add(sl1);
@@ -190,5 +203,19 @@ public class FormsGdxExample extends BasicFormApplication {
 		return ly; //vrátíme kořenový layout
 	}
 
+
+	static class Test{
+
+		{
+			SimpleProperty<String> prop = new SimpleProperty<>("");
+			ReadonlyProperty<String> ro = prop;
+			WriteonlyProperty<String> wo = prop;
+
+			prop.getGetterListeners().add(e->e.currentVal().set("eee"));
+			ro.getGetterListeners().add(e->e.caller().get());
+			wo.getGetterListeners().add(e->e.caller().set("eww"));
+		}
+
+	}
 
 }

@@ -60,11 +60,11 @@ public class BinaryGraphicalComposite<Rend, Pos, Scalar extends Comparable<Scala
 
 
         this.obj1to2ratio().getSetterListeners()._getPostUtilListeners().add(e->{
-            this.obj2.setDimensions(e.newVal.get().apply(obj1.getDimensions()));
+            this.obj2.setDimensions(e.newVal().get().apply(obj1.getDimensions()));
             return true;
         });
         this.dimensions().getSetterListeners()._getPostUtilListeners().add(e->{
-            this.obj2.setDimensions(getObj1to2ratio().apply(e.newVal.get()));
+            this.obj2.setDimensions(getObj1to2ratio().apply(e.newVal().get()));
             return true;
         });
         this.obj1to2ratio().pretendSet();
@@ -173,7 +173,7 @@ public class BinaryGraphicalComposite<Rend, Pos, Scalar extends Comparable<Scala
     public EventListener<Property.SetterListenerArgs<Pos>> setCentered(double[] ratios){
         EventListener<Property.SetterListenerArgs<Pos>> list = e->{
             Pos dim1 = POS().cpy(getDimensions());
-            Pos dim2 = e==null?obj2.getDimensions():e.newVal.get();
+            Pos dim2 = e==null?obj2.getDimensions():e.newVal().get();
             dim2 = POS().sub(dim1, dim2);
             dim2 = POS().sclComponents(dim2, ratios);
             setObj2detachment(dim2);

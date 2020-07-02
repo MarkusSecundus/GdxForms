@@ -1,11 +1,17 @@
 package com.markussecundus.forms.utils;
 
+import com.markussecundus.forms.utils.function.BiComparator;
+import com.markussecundus.forms.utils.function.Supplier;
 import com.markussecundus.forms.utils.vector.VectDecomposer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 
 /**
+ *
  * Statická třída s rozličnými pomocnými funkcemi a konstantami,
  * které byly někde v programu potřeba a nenašly si lepší místo jinde.
  *
@@ -16,12 +22,14 @@ import java.util.Arrays;
 public class FormsUtil {
 
     /**
+     *
      * @return větší z obou vzájemně porovnatelných čísel
      * */
     public static<T extends Comparable<T>> T max(T a, T b){
         return a.compareTo(b)>=0?a:b;
     }
     /**
+     *
      * @return menší z obou vzájemně porovnatelných čísel
      * */
     public static<T extends Comparable<T>> T min(T a, T b){
@@ -30,6 +38,7 @@ public class FormsUtil {
 
 
     /**
+     *
      * @return větší z posloupnosti vzájemně porovnatelných čísel
      * */
     @SafeVarargs
@@ -43,6 +52,7 @@ public class FormsUtil {
     }
 
     /**
+     *
      * @return menší z posloupnosti vzájemně porovnatelných čísel
      * */
     @SafeVarargs
@@ -136,6 +146,33 @@ public class FormsUtil {
     }
 
 
+    public static<Key, Elems> int binarySearchNearest(List<Elems> l, Key k, BiComparator<Key, Elems> comp){
+        if(l.isEmpty())
+            return -1;
+
+        int begin = 0, end = l.size();
+
+        while(begin< end){
+            int mid = (begin + end) / 2;
+            int res = comp.compareTo(k, l.get(mid));
+            switch (res){
+                case  0: return mid;
+                case -1:
+                    begin = mid + 1;
+                    break;
+                case  1:
+                    end = mid;
+                    break;
+            }
+        }
+        return begin;
+    }
+
+    public static<Elems, Key extends Comparable<Elems>> int binarySearchNearest(List<Elems> l, Key k){
+        return binarySearchNearest(l, k, Comparable::compareTo);
+    }
+
+
     /**
      * Pomocný wrapper, jehož metoda <code>equals</code> bere v úvahu pouze rovnost
      * referencí vnitřního objektu.
@@ -161,7 +198,7 @@ public class FormsUtil {
         /**
          * Přesměrovává na vnitřní objekt
          * */
-        public int hashCode() { return item==null?0:item.hashCode(); }
+        public int hashCode() { return System.identityHashCode(item); }
         public boolean equals(Object o) { return o==item || (o instanceof WrapperForReferenceComparison<?> && ((WrapperForReferenceComparison<?>) o).item == item); }
         public String toString() { return ""+item; }
 

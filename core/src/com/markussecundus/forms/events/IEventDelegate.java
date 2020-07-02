@@ -10,20 +10,23 @@ import java.util.ListIterator;
 
 /**
  * Kanonická implementace {@link EventDelegate}.
- *
+ * <p></p>
  * 'I' jako 'Implementace'
  * (Ano, je to provokace vůči .NET. A stojím si za tím.)
 * */
 public class IEventDelegate<Args> implements EventDelegate<Args> {
 //public:
     /**
+     *
      * {@inheritDoc}
      * */
     @Override public List<EventListener<? super Args>> getListeners(){return listeners;}
 
 
     /**
+     *
      * {@inheritDoc}
+     * <p></p>
      * List je generován líně.
      * */
     @Override public List<EventListener<? super Args>> _getUtilListeners() {
@@ -33,7 +36,9 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
     }
 
     /**
+     *
      * {@inheritDoc}
+     * <p></p>
      * List je generován líně.
      * */
     @Override public List<EventListener<? super Args>> _getPostUtilListeners() {
@@ -44,7 +49,9 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
 
 
     /**
+     *
      * {@inheritDoc}
+     * <p></p>
      * {@link com.markussecundus.forms.events.EventDelegate.ReturnValuePolicy} je generována líně.
      * */
     @Override public Property<ReturnValuePolicy> returnValuePolicy(){
@@ -54,6 +61,7 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
     }
 
     /**
+     *
      * {@inheritDoc}
      * */
     @Override public ReturnValuePolicy getReturnValuePolicy() {
@@ -61,6 +69,7 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
     }
 
     /**
+     *
      * {@inheritDoc}
      * */
     @Override public ReturnValuePolicy setReturnValuePolicy(ReturnValuePolicy pol) {
@@ -68,6 +77,7 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
     }
 
     /**
+     *
      * {@inheritDoc}
      * */
     @Override public boolean exec(Args e) {
@@ -80,6 +90,7 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
     }
 
     /**
+     *
      * Pomocná funkce pro iteraci přes listenery.
      * */
     private boolean iterateList(Args e, List<EventListener<? super Args>> listeners){
@@ -100,8 +111,10 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
 
 //protected:
     /**
+     *
      * Vrací novou instanci prázného {@link List}u, který bude sloužit k přechovávání Listenerů
      * pro <code>getListeners</code>.
+     * <p></p>
      * Volá se jen jednou, v konstruktoru.
      * Tuto metodu přepište, chcete-li listenery přechovávat v jiné implementaci {@link List}u,
      * než je defaultní {@link ArrayList}.
@@ -111,11 +124,14 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
     protected List<EventListener<? super Args>> MAKE_LISTENER_LIST(){ return new ArrayList<>();}
 
     /**
+     *
      * Vrací novou instanci prázného {@link List}u, který bude sloužit k přechovávání Listenerů
      * pro <code>_getUtilListeners</code>.
+     * <p></p>
      * Volá se jen jednou, v konstruktoru.
      * Tuto metodu přepište, chcete-li listenery přechovávat v jiné implementaci {@link List}u,
      * než je defaultní.
+     * <p>
      * Defaultně odkazuje na <code>MAKE_LISTENER_LIST</code>
      *
      * @return nová instance prázdného {@link List}u pro <code>_getUtilListeners</code>
@@ -125,9 +141,11 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
     /**
      * Vrací novou instanci prázného {@link List}u, který bude sloužit k přechovávání Listenerů
      * pro <code>_getPostUtilListeners</code>.
+     * <p></p>
      * Volá se jen jednou, v konstruktoru.
      * Tuto metodu přepište, chcete-li listenery přechovávat v jiné implementaci {@link List}u,
      * než je defaultní.
+     * <p>
      * Defaultně odkazuje na <code>MAKE_LISTENER_LIST</code>
      *
      * @return nová instance prázdného {@link List}u pro <code>_getPostUtilListeners</code>

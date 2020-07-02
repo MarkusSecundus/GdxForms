@@ -42,7 +42,7 @@ public abstract class AbstractConstProperty<T> extends ReadonlyWrapper.AbstractS
     @Override public T get() {
         T ret = obtain();
         if(getterListeners!=null)
-            getterListeners.get().exec(new GetterListenerArgs<>(this, obtainListenerlessWrapper()));
+            getterListeners.get().exec(GetterListenerArgs.make(this, obtainListenerlessWrapper()));
         return obtain();
     }
 
@@ -56,7 +56,7 @@ public abstract class AbstractConstProperty<T> extends ReadonlyWrapper.AbstractS
 
 //private:
 
-    private AbstractConstProperty<EventDelegate< GetterListenerArgs<T>>> getterListeners = null;
+    private AbstractConstProperty<EventDelegate<GetterListenerArgs<T>>> getterListeners = null;
 
     private class ListenerlessWrapper extends ReadonlyWrapper.AbstractSimpleWrapper<T>{
         @Override public T get() {

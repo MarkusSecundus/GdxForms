@@ -23,7 +23,7 @@ public interface EventDelegate<Args> extends EventListener<Args> {
      *
      * @return Nová instance kanonické implementace {@link EventDelegate}
      * */
-    public static <T> EventDelegate<T> make(){return new IEventDelegate<>();}
+    public static <T> EventDelegate<T> make(){return new NIEventDelegate<>();}
 
 
     /**

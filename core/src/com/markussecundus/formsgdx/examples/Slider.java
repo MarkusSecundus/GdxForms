@@ -60,7 +60,7 @@ public abstract class Slider< Telo extends GraphicalPrimitive<? super BasicRende
 
         //listenerem svážeme komponenty s DefaultSizeBahavior, které jsme pro ně vytvořili
         this.size().getSetterListeners()._getUtilListeners().add(e->{
-            Vect2f size = e.newVal.get(); //právě nastavená velikost Slideru
+            Vect2f size = e.newVal().get(); //právě nastavená velikost Slideru
 
             telo_behavior.maxSize.set(size);  //omezíme velikost posuvníkové části celkovou aktuální velikostí Slideru
             cudlik_behavior.maxSize.set(size); //obdobně pro čudlík
@@ -77,7 +77,7 @@ public abstract class Slider< Telo extends GraphicalPrimitive<? super BasicRende
         this.value  = new SimpleProperty<>(0f);                 //hodnota posuvníku je iniciálně 0
 
         this.value.getSetterListeners()._getUtilListeners().add(e->{            //zaručíme, že hodnota posuvníku bude v intervalu 0f..1f, případné přetečení se oseká
-            e.newVal.set(FormsUtil.intoBounds(0f,e.newVal.get(), 1f));
+            e.newVal().set(FormsUtil.intoBounds(0f,e.newVal().get(), 1f));
             return true;
         });
 

@@ -21,74 +21,42 @@ import com.markussecundus.forms.wrappers.WriteonlyWrapper;
  * */
 public interface WriteonlyProperty<T> extends WriteonlyWrapper<T> {
 
-    /**
-     * Delegát, jenž se provede při každém vyžádání vnitřní hodnoty
-     * */
-    public ConstProperty<EventDelegate<GetterListenerArgs<T>>> getterListeners();
-    /**
-     * Delegát, jenž se provede při každém přepsání vnitřní hodnoty pomocí metody <code>set</code>.
-     * */
-    public ConstProperty<EventDelegate<SetterListenerArgs<T>>> setterListeners();
+
+    public ConstProperty<? extends EventDelegate<? extends GetterListenerArgs<T>>> getterListeners();
+    public ConstProperty<? extends EventDelegate<? extends SetterListenerArgs<T>>> setterListeners();
 
 
-    /**
-     * Pohodlnější zkratka pro <code>getterListeners().get()</code>.
-     * */
-    public default EventDelegate<GetterListenerArgs<T>> getGetterListeners(){
+    public default EventDelegate<? extends GetterListenerArgs<T>> getGetterListeners(){
         return getterListeners().get();
     }
-    /**
-     * Pohodlnější zkratka pro <code>setterListeners().get()</code>.
-     * */
-    public default EventDelegate<SetterListenerArgs<T>> getSetterListeners(){
+    public default EventDelegate<? extends SetterListenerArgs<T>> getSetterListeners(){
         return setterListeners().get();
     }
 
 
-    /**
-     * Datová třída pro argumenty, které přebírá getterový listener.
-     *
-     * @see WriteonlyProperty
-     *
-     * @author MarkusSecundus
-     * */
-    public static class GetterListenerArgs<T>{
-        /**
-         * {@link WriteonlyProperty}, jejíž hodnota je čtena.
-         * */
-        public final WriteonlyProperty<T> caller;
-        /**
-         * {@link WriteonlyWrapper} přes který lze přistupovat k aktuální vnitřní hodnotě a modifikovat ji bez aktivace listenerů
-         * */
-        public final WriteonlyWrapper<T> currentVal;
+    public static interface GetterListenerArgs<T>{
+        public WriteonlyProperty<T> caller();
+        public WriteonlyWrapper<T> currentVal();
 
-        /**
-         * Zkonstruuje instanci z daných argumentů.
-         * */
-        public GetterListenerArgs(WriteonlyProperty<T> caller, WriteonlyWrapper<T> currentVal){this.caller=caller;this.currentVal=currentVal;}
+        public static<T> GetterListenerArgs<T> make(WriteonlyProperty<T> caller, WriteonlyWrapper<T> currentVal){
+            return new GetterListenerArgs<T>() {
+                public WriteonlyProperty<T> caller() { return caller; }
+                public WriteonlyWrapper<T> currentVal() { return currentVal; }
+            };
+        }
     }
 
-    /**
-     * Datová třída pro argumenty, které přebírá setterový listener.
-     *
-     * @see WriteonlyProperty
-     *
-     * @author MarkusSecundus
-     * */
-    public static class SetterListenerArgs<T>{
-        /**
-         * {@link WriteonlyProperty}, jejíž hodnota je modifikována.
-         * */
-        public final WriteonlyProperty<T> caller;
-        /**
-         * {@link WriteonlyWrapper} přes který lze přistupovat k aktuální vnitřní hodnotě a modifikovat ji bez aktivace listenerů
-         * */
-        public final WriteonlyWrapper<T> newVal;
+    public static interface SetterListenerArgs<T>{
+        public WriteonlyProperty<T> caller();
+        public WriteonlyWrapper<T> newVal();
 
-        /**
-         * Zkonstruuje instanci z daných argumentů.
-         * */
-        public SetterListenerArgs(WriteonlyProperty<T> caller, WriteonlyWrapper<T> newVal){this.caller=caller;this.newVal=newVal;}
+
+        public static<T> SetterListenerArgs<T> make(WriteonlyProperty<T> caller, WriteonlyWrapper<T> newVal){
+            return new SetterListenerArgs<T>() {
+                public WriteonlyProperty<T> caller() { return caller; }
+                public WriteonlyWrapper<T> newVal() { return newVal; }
+            };
+        }
     }
 
 

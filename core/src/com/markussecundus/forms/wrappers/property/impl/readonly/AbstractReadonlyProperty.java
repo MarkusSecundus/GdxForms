@@ -62,7 +62,7 @@ public abstract class AbstractReadonlyProperty<T> extends ReadonlyWrapper.Abstra
     @Override public final T get() {
         T ret = obtain();
         if( getterListeners!=null)
-            getterListeners.get().exec( new GetterListenerArgs<>(this, obtainListenerlessWrapper()));
+            getterListeners.get().exec( GetterListenerArgs.make(this, obtainListenerlessWrapper()));
         return obtain();
     }
 
@@ -75,7 +75,7 @@ public abstract class AbstractReadonlyProperty<T> extends ReadonlyWrapper.Abstra
         T old = this.obtain();
         this.change(t);
         if(setterListeners!=null)
-            setterListeners.get().exec( new SetterListenerArgs<>(this, old, obtainListenerlessWrapper()));
+            setterListeners.get().exec( SetterListenerArgs.make(this, old, obtainListenerlessWrapper()));
         return obtain();
     }
 

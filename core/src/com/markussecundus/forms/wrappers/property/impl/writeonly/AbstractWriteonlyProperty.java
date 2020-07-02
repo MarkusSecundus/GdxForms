@@ -61,7 +61,7 @@ public abstract class AbstractWriteonlyProperty<T> implements WriteonlyProperty<
     @Override public T set(T t) {
         T ret = change(t);
         if(setterListeners!=null)
-            setterListeners.get().exec(new SetterListenerArgs<>(this, obtainListenerlessWrapper()));
+            setterListeners.get().exec( SetterListenerArgs.make(this, obtainListenerlessWrapper()));
         return ret;
     }
 
@@ -73,7 +73,7 @@ public abstract class AbstractWriteonlyProperty<T> implements WriteonlyProperty<
     private T get(){
         T ret = obtain();
         if(getterListeners!=null)
-            getterListeners.get().exec(new GetterListenerArgs<>(this, obtainListenerlessWrapper()));
+            getterListeners.get().exec( GetterListenerArgs.make(this, obtainListenerlessWrapper()));
         return ret;
     }
 
