@@ -316,7 +316,7 @@ public class Vect2f implements Cloneable, Serializable {
      *
      * @author MarkusSecundus
      * */
-    public static class Util extends VectUtil.BasicImplementations.VectorUtil_FloatAsScalar<Vect2f> {
+    public static class Util implements VectUtil.BasicImplementations.VectorUtil_FloatAsScalar<Vect2f> {
         protected Util(){}
 
         /**

@@ -8,6 +8,7 @@ import com.markussecundus.forms.elements.impl.utils.DefaultSizeBehavior;
 import com.markussecundus.forms.elements.impl.utils.ElementLists;
 import com.markussecundus.forms.elements.impl.utils.ElementsTagMap;
 import com.markussecundus.forms.events.EventDelegate;
+import com.markussecundus.forms.events.ListenerPriorities;
 import com.markussecundus.forms.utils.Pair;
 import com.markussecundus.forms.utils.vector.VectUtil;
 import com.markussecundus.forms.wrappers.WriteonlyWrapper;
@@ -130,7 +131,7 @@ public abstract class BasicAbstractLayout<Rend, Pos, Scalar extends Comparable<S
      * */
     protected final ElementLists.Delegated<Rend, Pos> childrenContainer = new ElementLists.Delegated<>();
     {
-        childrenContainer.onElementRemoved._getUtilListeners().add(
+        childrenContainer.onElementRemoved.getListeners(ListenerPriorities.ARG_GUARD).add(
                 o -> (o instanceof Element));
         childrenContainer.onElementRemoved._getUtilListeners().add(
                 o -> {

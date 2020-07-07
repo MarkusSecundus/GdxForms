@@ -1,9 +1,12 @@
 package com.markussecundus.forms.utils;
 
 import com.markussecundus.forms.utils.function.BiComparator;
+import com.markussecundus.forms.utils.function.BiFunction;
+import com.markussecundus.forms.utils.function.Function;
 import com.markussecundus.forms.utils.function.Supplier;
 import com.markussecundus.forms.utils.vector.VectDecomposer;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -79,6 +82,34 @@ public class FormsUtil {
         return Math.min(Math.max(min, val),max);
     }
 
+
+    @SuppressWarnings("unchecked")
+    public static<T> T[] makeArray(Class<T> type, int len){
+        return (T[]) Array.newInstance(type, len);
+    }
+
+
+    public static<T> T[] transformInPlaceWith(T[] ret, T[] secondary, BiFunction<T,T,T> fnc){
+        for(int t = Math.min(ret.length, secondary.length)-1;t>=0;--t)
+            ret[t] = fnc.apply(ret[t], secondary[t]);
+        return ret;
+    }
+
+
+    public static<T> T[] transformInPlace(T[] ret, Function<T,T> fnc){
+        for(int t=ret.length-1;t>=0;--t)
+            ret[t] = fnc.apply(ret[t]);
+        return ret;
+    }
+
+
+    public static<T,U> U foldLeft(T[] arr, U beginVal, BiFunction<T, U, U> fnc){
+        for(T t: arr)
+            beginVal = fnc.apply(t, beginVal);
+        return beginVal;
+    }
+
+
     /**
      * Naplní dané pole danou hodnotou.
      *
@@ -146,6 +177,8 @@ public class FormsUtil {
     }
 
 
+
+
     public static<Key, Elems> int binarySearchNearest(List<Elems> l, Key k, BiComparator<Key, Elems> comp){
         if(l.isEmpty())
             return -1;
@@ -171,6 +204,8 @@ public class FormsUtil {
     public static<Elems, Key extends Comparable<Elems>> int binarySearchNearest(List<Elems> l, Key k){
         return binarySearchNearest(l, k, Comparable::compareTo);
     }
+
+
 
 
     /**
@@ -200,6 +235,7 @@ public class FormsUtil {
          * */
         public int hashCode() { return System.identityHashCode(item); }
         public boolean equals(Object o) { return o==item || (o instanceof WrapperForReferenceComparison<?> && ((WrapperForReferenceComparison<?>) o).item == item); }
+
         public String toString() { return ""+item; }
 
         /**
@@ -221,6 +257,7 @@ public class FormsUtil {
     }
 
 
+
     /**
      * Náhražka za <code>Objects.equals</code>, jež z nějakého důvodu není dostupné
      * na starších Androidích API.
@@ -230,6 +267,24 @@ public class FormsUtil {
     public static boolean equals(Object a, Object b){
         return a==b || (a!=null && a.equals(b));
     }
+
+    /**
+     * Náhražka za <code>Objects.hashCode</code>, jež z nějakého důvodu není dostupné
+     * na starších Androidích API.
+     *
+     * @return přesně to, co by ve stejné situaci vrátilo <code>Objects.hashCode</code>
+     * */
+    public static int hashCode(Object o){
+        return o != null ? o.hashCode() : 0;
+    }
+
+
+    public static int hashCode(Object a, Object b){
+        int ha = hashCode(a);
+        return (1+ha)*hashCode(b) + ha;
+    }
+
+
 
     /**
      * Generická defaultní chybová zpráva pro výjimku <code>VectDecomposer.InconsistentNumberOfDimensionsException</code>.

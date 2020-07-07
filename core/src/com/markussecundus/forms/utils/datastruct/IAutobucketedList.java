@@ -4,10 +4,22 @@ import com.badlogic.gdx.Gdx;
 import com.markussecundus.forms.utils.FormsUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 public class IAutobucketedList<T,K> implements AutobucketedList<T,K> {
+
+
+    private final List<T> base;
+
+    private final Comparator<K> orderer;
+
+    private final List<BucketInfo<K>> bucketList = new ArrayList<>();
+
+
+
 
     public IAutobucketedList(List<T> base, Comparator<K> ordering){
         if(!base.isEmpty())
@@ -27,40 +39,64 @@ public class IAutobucketedList<T,K> implements AutobucketedList<T,K> {
         return base;
     }
 
+
+    protected int findBucketForIndex(int t){
+        for(int i = 0; i < bucketList.size(); ++i)
+            if(bucketList.get(i).endIndex > t)
+                return i;
+
+        return -1;
+    }
+
+
     @Override
     public T remove(int t) {
 
-        int stara_pozice_v_listu = 0;
-        for(int i = 0;i < bucketKeys.size();++i){
-            int pozice_v_listu = bucketKeys.get(i).index;
+        int kyblik = findBucketForIndex(t);
+        if(kyblik < 0)
+            return null;
 
-            if(pozice_v_listu> t)
-                return getBucket(i).remove( t - stara_pozice_v_listu);
+        shiftIndices(kyblik, -1);
 
-            stara_pozice_v_listu = pozice_v_listu;
+        return base.remove(t);
+    }
+
+    @Override
+    public boolean remove(Object t){
+        int i = base.indexOf(t);
+        if(i>=0){
+            remove(i);
+            return true;
         }
-        return null;
+        return false;
+    }
+
+
+    @Override
+    public void clear(){
+        base.clear();
+        bucketList.clear();
     }
 
     @Override
     public List<T> getBucket(K bucket) {
 ;
-        int i = FormsUtil.binarySearchNearest(bucketKeys, bucket, (a,b)-> orderer.compare(a,b.key));
+        int i = FormsUtil.binarySearchNearest(bucketList, bucket, (a, b)-> orderer.compare(a,b.bucketKey));
 
         if(i<0){
-            bucketKeys.add(0, new KeyIndexPair<>(bucket, 0));
+            bucketList.add(0, new BucketInfo<>(bucket, 0));
             i = 0;
-        }else if(i>=bucketKeys.size()){
-            i = bucketKeys.size();
-            bucketKeys.add(new KeyIndexPair<>(bucket, base.size()));
+        }else if(i>= bucketList.size()){
+            i = bucketList.size();
+            bucketList.add(new BucketInfo<>(bucket, base.size()));
         }else{
-            int cmp = orderer.compare(bucketKeys.get(i).key, bucket);
+            int cmp = orderer.compare(bucketList.get(i).bucketKey, bucket);
             switch (cmp){
                 case -1:
-                    bucketKeys.add(i, new KeyIndexPair<>(bucket, i>0?bucketKeys.get(i-1).index:0));
+                    bucketList.add(i, new BucketInfo<>(bucket, i>0? bucketList.get(i-1).endIndex :0));
                     break;
                 case 1:
-                    bucketKeys.add(i + 1, new KeyIndexPair<>(bucket, bucketKeys.get(i).index));
+                    bucketList.add(i + 1, new BucketInfo<>(bucket, bucketList.get(i).endIndex));
                     ++i;
                     break;
             }
@@ -71,23 +107,23 @@ public class IAutobucketedList<T,K> implements AutobucketedList<T,K> {
 
     protected List<T> getBucket(int bucketIndex){
 
-        final int beg = bucketIndex>0? bucketKeys.get(bucketIndex-1).index : 0;
-        final int endd = bucketKeys.get(bucketIndex).index;
+        final int beg = bucketIndex>0? bucketList.get(bucketIndex-1).endIndex : 0;
+        final int endd = bucketList.get(bucketIndex).endIndex;
         try {
             return new ObservedList.Blank<T>(base.subList(beg, endd)) {
                 @Override
                 protected void onAdded(T t, int index) {
-                    modifyIndices(1);
+                    shiftIndices(bucketIndex,1);
                 }
 
                 @Override
                 protected void onDelete(Object t) {
-                    modifyIndices(-1);
+                    shiftIndices(bucketIndex, -1);
                 }
 
-                private void modifyIndices(int sum) {
-                    for (int i = bucketIndex; i < bucketKeys.size(); ++i)
-                        bucketKeys.get(i).index += sum;
+                @Override
+                protected void onClear() {
+                    shiftIndices(bucketIndex, - base.size());
                 }
             };
         }catch (Exception e){
@@ -96,24 +132,27 @@ public class IAutobucketedList<T,K> implements AutobucketedList<T,K> {
         }
     }
 
+    protected void shiftIndices(int beginBucketIndex, int shiftAmmount){
+        for (int i = beginBucketIndex; i < bucketList.size(); ++i)
+            bucketList.get(i).endIndex += shiftAmmount;
+    }
 
-    protected static<T> List<T> DEF_LIST_GENERATOR(){return new ArrayList<>();}
 
 
-    private final List<T> base;
+    private final static class BucketInfo<K>{
 
-    private final Comparator<K> orderer;
-
-    private final List<KeyIndexPair<K>> bucketKeys = new ArrayList<>();
-
-    private final static class KeyIndexPair<K>{
-
-        public KeyIndexPair(K key, int index) {
-            this.key = key;
-            this.index = index;
+        public BucketInfo(K bucketKey, int index) {
+            this.bucketKey = bucketKey;
+            this.endIndex = index;
         }
 
-        public final K key;
-        public int index;
+        public final K bucketKey;
+        public int endIndex;
     }
+
+
+
+
+
+    protected static<T> List<T> DEF_LIST_GENERATOR(){return new ArrayList<>();}
 }

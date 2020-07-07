@@ -5,18 +5,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.markussecundus.forms.elements.Drawable;
 import com.markussecundus.forms.elements.impl.ImageIcon;
 import com.markussecundus.forms.elements.impl.layouts.BasicLinearLayout;
-import com.markussecundus.forms.events.EventDelegate;
 import com.markussecundus.forms.gfx.GraphicalPrimitive;
-import com.markussecundus.forms.utils.IntPair;
 import com.markussecundus.forms.utils.vector.Vect2f;
-import com.markussecundus.forms.utils.vector.VectUtil;
-import com.markussecundus.forms.wrappers.ReadonlyWrapper;
 import com.markussecundus.forms.wrappers.Wrapper;
-import com.markussecundus.forms.wrappers.WriteonlyWrapper;
-import com.markussecundus.forms.wrappers.property.ConstProperty;
 import com.markussecundus.forms.wrappers.property.ReadonlyProperty;
 import com.markussecundus.forms.wrappers.property.WriteonlyProperty;
-import com.markussecundus.forms.wrappers.property.impl.constant.SimpleConstProperty;
 import com.markussecundus.forms.wrappers.property.impl.general.SimpleProperty;
 import com.markussecundus.formsgdx.examples.Slider;
 import com.markussecundus.formsgdx.graphics.RoundedRectangle;
@@ -96,17 +89,13 @@ public class FormsGdxExample extends BasicFormApplication {
 	@Override
 	public Drawable<BasicRenderer, Vect2f> createForm() {
 
-		long ab = IntPair.make(-2_000_000_000,1123);
-		Gdx.app.log("pr", ""+IntPair.getFirst(ab));
-		Gdx.app.log("pr", ""+IntPair.getSecond(ab));
-
 		BackgroundColor = Color.FOREST;
 
 		//vytvoříme kořenový layout
 		Ly ly = Ly.make(Vect2f.make(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 		ly.ignoreTooShort.set(true);	//je nám jedno, když z něj prvky vytečou
 		ly.setDimension(1);	//prvky v něm budou uspořádané podle osy y
-		ly.setAlignment(1, 0.5f); //v souřadnici y budou zarovnané na střed
+		ly.setAlignment(1, 0f); //v souřadnici y budou zarovnané na střed
 		ly.setAlignment(0, 0.25f); //v souřadnici x budou jeho prvky zarovnané na 1/4 délky zleva
 
 		//vytvoříme nějaké obrázkové ikony - 'RoundedRectangle' bere jako renderer 'SpriteBatch' - je třeba je obalit do převodníku

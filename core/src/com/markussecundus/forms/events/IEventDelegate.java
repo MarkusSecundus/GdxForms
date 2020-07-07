@@ -1,58 +1,57 @@
 package com.markussecundus.forms.events;
 
+import com.markussecundus.forms.utils.datastruct.AutobucketedList;
 import com.markussecundus.forms.wrappers.property.Property;
 import com.markussecundus.forms.wrappers.property.impl.general.AbstractProperty;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 
 /**
- * Kanonická implementace {@link EventDelegate}.
+ * Nová kanonická implementace {@link EventDelegate}.
  * <p></p>
  * 'I' jako 'Implementace'
  * (Ano, je to provokace vůči .NET. A stojím si za tím.)
 * */
 public class IEventDelegate<Args> implements EventDelegate<Args> {
 //public:
-    /**
-     *
-     * {@inheritDoc}
-     * */
-    @Override public List<EventListener<? super Args>> getListeners(){return listeners;}
 
 
     /**
      *
      * {@inheritDoc}
-     * <p></p>
-     * List je generován líně.
      * */
-    @Override public List<EventListener<? super Args>> _getUtilListeners() {
-        if(util_listeners ==null)
-            util_listeners = MAKE_UTIL_LISTENER_LIST();
-        return util_listeners;
-    }
-
-    /**
-     *
-     * {@inheritDoc}
-     * <p></p>
-     * List je generován líně.
-     * */
-    @Override public List<EventListener<? super Args>> _getPostUtilListeners() {
-        if(post_util_listeners==null)
-            post_util_listeners = MAKE_POST_UTIL_LISTENER_LIST();
-        return post_util_listeners;
+    @Override public boolean exec(Args e) {
+        return getReturnValuePolicy().convRetVal(iterateList(e));
     }
 
 
+    public List<EventListener<? super Args>> getListeners(Integer priority){
+        return listeners.getBucket(priority);
+    }
+
+
+
+
+    @Override
+    public boolean removeListener(EventListener<?> list) {
+        return listeners.remove(list);
+    }
+
+    @Override
+    public void clear() {
+        listeners.clear();
+    }
+
+
+
+
     /**
      *
      * {@inheritDoc}
      * <p></p>
-     * {@link com.markussecundus.forms.events.EventDelegate.ReturnValuePolicy} je generována líně.
+     * {@link ReturnValuePolicy} je generována líně.
      * */
     @Override public Property<ReturnValuePolicy> returnValuePolicy(){
         if(returnValuePolicyProperty == null)
@@ -76,36 +75,10 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
         return returnValuePolicyProperty==null? returnValuePolicy = pol : EventDelegate.super.setReturnValuePolicy(pol);
     }
 
-    /**
-     *
-     * {@inheritDoc}
-     * */
-    @Override public boolean exec(Args e) {
-        if((util_listeners ==null || iterateList(e, _getUtilListeners()))
-           && iterateList(e, getListeners())
-           && (post_util_listeners == null || iterateList(e, _getPostUtilListeners())))
-                return getReturnValuePolicy().convRetVal(true);
-        else
-            return getReturnValuePolicy().convRetVal(false);
-    }
 
-    /**
-     *
-     * Pomocná funkce pro iteraci přes listenery.
-     * */
-    private boolean iterateList(Args e, List<EventListener<? super Args>> listeners){
-        for(ListIterator<EventListener<? super Args>> it = listeners.listIterator();it.hasNext();){
-            try{
-                if(!it.next().exec(e))
-                    return false;
-            }catch(EventDelegate.DeleteSelf delete_request){
-                it.remove();
-                if(!delete_request.retVal())
-                    return false;
-            }
-        }
-        return true;
-    }
+
+
+
 
 
 
@@ -121,41 +94,11 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
      *
      * @return nová instance prázdného {@link List}u pro <code>getListeners</code>
      * */
-    protected List<EventListener<? super Args>> MAKE_LISTENER_LIST(){ return new ArrayList<>();}
-
-    /**
-     *
-     * Vrací novou instanci prázného {@link List}u, který bude sloužit k přechovávání Listenerů
-     * pro <code>_getUtilListeners</code>.
-     * <p></p>
-     * Volá se jen jednou, v konstruktoru.
-     * Tuto metodu přepište, chcete-li listenery přechovávat v jiné implementaci {@link List}u,
-     * než je defaultní.
-     * <p>
-     * Defaultně odkazuje na <code>MAKE_LISTENER_LIST</code>
-     *
-     * @return nová instance prázdného {@link List}u pro <code>_getUtilListeners</code>
-     * */
-    protected List<EventListener<? super Args>> MAKE_UTIL_LISTENER_LIST(){ return MAKE_LISTENER_LIST();}
-
-    /**
-     * Vrací novou instanci prázného {@link List}u, který bude sloužit k přechovávání Listenerů
-     * pro <code>_getPostUtilListeners</code>.
-     * <p></p>
-     * Volá se jen jednou, v konstruktoru.
-     * Tuto metodu přepište, chcete-li listenery přechovávat v jiné implementaci {@link List}u,
-     * než je defaultní.
-     * <p>
-     * Defaultně odkazuje na <code>MAKE_LISTENER_LIST</code>
-     *
-     * @return nová instance prázdného {@link List}u pro <code>_getPostUtilListeners</code>
-     * */
-    protected List<EventListener<? super Args>> MAKE_POST_UTIL_LISTENER_LIST(){ return MAKE_UTIL_LISTENER_LIST();}
+    protected AutobucketedList<EventListener<? super Args>, Integer> MAKE_LISTENER_LIST(){ return AutobucketedList.make();}
 
 //private:
 
-    private final List<EventListener<? super Args>> listeners = MAKE_LISTENER_LIST();
-    private List<EventListener<? super Args>> util_listeners = null, post_util_listeners = null;
+    private final AutobucketedList<EventListener<? super Args>, Integer> listeners = MAKE_LISTENER_LIST();
 
     private ReturnValuePolicy returnValuePolicy = DEFAULT_RET_VAL_POLICY;
 
@@ -166,7 +109,45 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
             return returnValuePolicy;
         }
         @Override protected ReturnValuePolicy change(ReturnValuePolicy val) {
-            return IEventDelegate.this.returnValuePolicy = (returnValuePolicy==null?DEFAULT_RET_VAL_POLICY:returnValuePolicy);
+            return returnValuePolicy = (val==null ? DEFAULT_RET_VAL_POLICY : val);
         }
     }
+
+
+    private boolean iterateList(Args e){
+        List<? extends EventListener<? super Args>> list = listeners.getBase();
+
+        while(true) {
+            for (int t = 0; t < list.size() - 1; ) {
+                EventListener<? super Args> aktualniListener = list.get(t);
+
+                if(!invokeListener(e, aktualniListener))
+                    return false;
+
+                if (list.get(t) == aktualniListener)
+                    ++t;
+                else {
+                    int i = list.indexOf(aktualniListener);
+                    if (i >= 0)
+                        t = i + 1;
+                }
+            }
+
+            if(list.size()<=0)
+                return true;
+
+            EventListener<? super Args> posledniListener = list.get(list.size()-1);
+            if(posledniListener != this)
+                return invokeListener(e, posledniListener);
+        }
+    }
+
+    private boolean invokeListener(Args e, EventListener<? super Args> list){
+        try {
+            return list.exec(e);
+        } catch (EventDelegate.ApplyOnParentDelegate apply_request) {
+            return apply_request.exec(this, list);
+        }
+    }
+
 }

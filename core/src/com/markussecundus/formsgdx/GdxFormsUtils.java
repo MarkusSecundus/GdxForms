@@ -48,7 +48,7 @@ public class GdxFormsUtils {
      *
      * @author MarkusSecundus
      * */
-    public abstract static class GdxVectorUtil<Vect extends Vector<Vect>> extends VectUtil.BasicImplementations.VectorUtil_FloatAsScalar<Vect> {
+    public abstract static class GdxVectorUtil<Vect extends Vector<Vect>> implements VectUtil.BasicImplementations.VectorUtil_FloatAsScalar<Vect> {
         /**{@inheritDoc}*/
         @Override
         public Vect add(Vect a, Vect b) { return a.add(b); }

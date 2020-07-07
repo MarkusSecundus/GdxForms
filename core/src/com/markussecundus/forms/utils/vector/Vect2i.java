@@ -237,7 +237,7 @@ public class Vect2i implements Cloneable, Serializable {
      *
      * @author MarkusSecundus
      * */
-    public static class Util extends VectUtil.BasicImplementations.VectorUtil_IntegerAsScalar<Vect2i> {
+    public static class Util implements VectUtil.BasicImplementations.VectorUtil_IntegerAsScalar<Vect2i> {
         private Util(){}
 
         /**

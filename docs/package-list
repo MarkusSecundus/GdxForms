@@ -3,6 +3,7 @@ com.markussecundus.forms.elements.impl
 com.markussecundus.forms.elements.impl.layouts
 com.markussecundus.forms.elements.impl.utils
 com.markussecundus.forms.events
+com.markussecundus.forms.events.deprecated
 com.markussecundus.forms.gfx
 com.markussecundus.forms.utils
 com.markussecundus.forms.utils.datastruct

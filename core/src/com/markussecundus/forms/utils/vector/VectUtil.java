@@ -1,6 +1,8 @@
 package com.markussecundus.forms.utils.vector;
 
 import com.markussecundus.forms.utils.FormsUtil;
+import com.markussecundus.forms.utils.function.BiFunction;
+import com.markussecundus.forms.utils.function.Function;
 
 
 /**
@@ -139,7 +141,9 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
      *  pro libovolné <code>Vect a,b,c,d</code>;
      *  Měla by být rychlejší než funkce <code>dst</code>.
      * */
-    public Scalar dst2(Vect a, Vect b);
+    default Scalar dst2(Vect a, Vect b){
+        return len2(sub(b,a));
+    }
 
     /**
      * @return skutečná vzdálenost vektorů v příslušném metrickém systému
@@ -272,6 +276,7 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
      * */
     public Class<Vect>  getVectClass();
 
+
     /**
      * Testuje, zda je počet prvků v poli shodný s <code>DIMENSION_COUT()</code>. Pokud ne, vyhodí {@link com.markussecundus.forms.utils.vector.VectDecomposer.InconsistentNumberOfDimensionsException}
      *
@@ -304,6 +309,48 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
      * @author MarkusSecundus
      * */
     public static final class BasicImplementations{
+        private BasicImplementations(){}
+
+
+
+        private static final class Helper {
+            private static <Vect, Scalar extends Comparable<Scalar>> Vect transformWith(VectUtil<Vect, Scalar> self, Vect ret, Vect secondary, BiFunction<Scalar, Scalar, Scalar> fnc) {
+                return self.compose(FormsUtil.transformInPlaceWith(self.decompose(ret), self.decompose(secondary), fnc));
+            }
+
+            private static <Vect, Scalar extends Comparable<Scalar>> Vect transform(VectUtil<Vect, Scalar> self, Vect ret, Function<Scalar, Scalar> fnc) {
+                return self.compose(FormsUtil.transformInPlace(self.decompose(ret), fnc));
+            }
+
+            private static <Vect, Scalar extends Comparable<Scalar>> Vect filledWith(VectUtil<Vect, Scalar> self, Scalar val) {
+                return self.compose(FormsUtil.fillArray(FormsUtil.makeArray(self.getScalarClass(), self.DIMENSION_COUNT()), val));
+            }
+        }
+
+        public static interface VectorUtil_ByComponents<Vect, Scalar extends Comparable<Scalar>> extends VectUtil<Vect, Scalar>{
+
+            @Override default Vect sub(Vect a, Vect b){ return Helper.transformWith(this, a, b, this::subScalar); }
+
+            @Override default Vect add(Vect a, Vect b){ return Helper.transformWith(this, a,b, this::addScalar); }
+
+            @Override default Vect scl(Vect a, Scalar b){ return Helper.transform(this, a, x->sclScalar(x,b)); }
+            @Override default Vect scl(Vect a, double b){ return Helper.transform(this, a, x->sclScalar(x,b)); }
+
+            @Override default Vect div(Vect a, Scalar b){ return Helper.transform(this, a, x->divScalar(x,b)); }
+            @Override default Vect div(Vect a, double b){ return Helper.transform(this, a, x->divScalar(x,b)); }
+
+
+            @Override default Vect ZERO(){ return Helper.filledWith(this, ZERO_SCALAR()); }
+
+            @Override default Vect MAX_VAL(){ return Helper.filledWith(this, MAX_VAL_SCALAR()); }
+
+            @Override default Scalar len2(Vect v){
+                return FormsUtil.foldLeft(decompose(v), ZERO_SCALAR(), (a,x)->addScalar(x, sclScalar(a,a)) );
+            }
+
+        }
+
+
 
         /**
          * Parciální implementace sloužící jako základ pro {@link VectUtil}
@@ -315,48 +362,38 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
          *
          * @author MarkusSecundus
          * */
-        public static abstract class VectorUtil_FloatAsScalar<Vect> implements VectUtil<Vect, Float> {
-            /**{@inheritDoc}*/
-            @Override public Float subScalar(Float a, Float b) { return a-b; }
+        public static interface VectorUtil_FloatAsScalar<Vect> extends VectUtil<Vect, Float> {
 
-            /**{@inheritDoc}*/
-            @Override public Float addScalar(Float a, Float b) { return a+b; }
+            @Override public default Float subScalar(Float a, Float b) { return a-b; }
 
-            /**{@inheritDoc}*/
-            @Override public Float sclScalar(Float a, Float b) { return a*b; }
+            @Override public default Float addScalar(Float a, Float b) { return a+b; }
 
-            /**{@inheritDoc}*/
-            @Override public Float divScalar(Float a, Float b) { return a/b; }
+            @Override public default Float sclScalar(Float a, Float b) { return a*b; }
+            @Override public default Float sclScalar(Float a, double scl) { return (float)(a*scl); }
 
-            /**{@inheritDoc}*/
-            @Override public Float sclScalar(Float a, double scl) { return (float)(a*scl); }
+            @Override public default Float divScalar(Float a, Float b) { return a/b; }
+            @Override public default Float divScalar(Float a, double scl) { return (float)(a/scl); }
 
-            /**{@inheritDoc}*/
-            @Override public Float cpyScalar(Float s) { return s; }
 
-            /**{@inheritDoc}*/
-            @Override public Float ZERO_SCALAR() { return 0f; }
+            @Override public default Float cpyScalar(Float s) { return s; }
 
-            /**{@inheritDoc}*/
-            @Override public Float MAX_VAL_SCALAR() { return Float.POSITIVE_INFINITY; }
 
-            /**{@inheritDoc}*/
-            @Override public Float divScalar(Float a, double scl) { return (float)(a/scl); }
+            @Override public default Float ZERO_SCALAR() { return 0f; }
 
-            /**{@inheritDoc}*/
-            @Override public Float absScalar(Float a) { return Math.abs(a); }
+            @Override public default Float MAX_VAL_SCALAR() { return Float.POSITIVE_INFINITY; }
 
-            /**{@inheritDoc}*/
-            @Override public Float negScalar(Float a) { return -a; }
 
-            /**{@inheritDoc}*/
-            @Override public Float avgScalar(Float a, Float b) { return (a+b)*0.5f; }
 
-            /**{@inheritDoc}*/
-            @Override public boolean eqScalar(Float a, Float b) { return Float.floatToIntBits(a)==Float.floatToIntBits(b); }
+            @Override public default Float absScalar(Float a) { return Math.abs(a); }
 
-            /**{@inheritDoc}*/
-            @Override public Class<Float> getScalarClass() { return Float.class; }
+            @Override public default Float negScalar(Float a) { return -a; }
+
+            @Override public default Float avgScalar(Float a, Float b) { return (a+b)*0.5f; }
+
+            @Override public default boolean eqScalar(Float a, Float b) { return Float.floatToIntBits(a)==Float.floatToIntBits(b); }
+
+
+            @Override public default Class<Float> getScalarClass() { return Float.class; }
         }
 
         /**
@@ -367,48 +404,39 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
          *
          * @author MarkusSecundus
          * */
-        public static abstract class VectorUtil_DoubleAsScalar<Vect> implements VectUtil<Vect, Double> {
-            /**{@inheritDoc}*/
-            @Override public Double subScalar(Double a, Double b) { return a-b; }
+        public static interface VectorUtil_DoubleAsScalar<Vect> extends VectUtil<Vect, Double> {
 
-            /**{@inheritDoc}*/
-            @Override public Double addScalar(Double a, Double b) { return a+b; }
+            @Override public default Double subScalar(Double a, Double b) { return a-b; }
 
-            /**{@inheritDoc}*/
-            @Override public Double sclScalar(Double a, Double b) { return a*b; }
+            @Override public default Double addScalar(Double a, Double b) { return a+b; }
 
-            /**{@inheritDoc}*/
-            @Override public Double divScalar(Double a, Double b) { return a/b; }
+            @Override public default Double sclScalar(Double a, Double b) { return a*b; }
+            @Override public default Double sclScalar(Double a, double scl) { return (a*scl); }
 
-            /**{@inheritDoc}*/
-            @Override public Double sclScalar(Double a, double scl) { return (a*scl); }
+            @Override public default Double divScalar(Double a, Double b) { return a/b; }
+            @Override public default Double divScalar(Double a, double scl) { return (a/scl); }
 
-            /**{@inheritDoc}*/
-            @Override public Double cpyScalar(Double s) { return s; }
 
-            /**{@inheritDoc}*/
-            @Override public Double ZERO_SCALAR() { return 0d; }
+            @Override public default Double cpyScalar(Double s) { return s; }
 
-            /**{@inheritDoc}*/
-            @Override public Double MAX_VAL_SCALAR() { return Double.POSITIVE_INFINITY; }
 
-            /**{@inheritDoc}*/
-            @Override public Double divScalar(Double a, double scl) { return (a/scl); }
+            @Override public default Double ZERO_SCALAR() { return 0d; }
 
-            /**{@inheritDoc}*/
-            @Override public Double absScalar(Double a) { return Math.abs(a); }
+            @Override public default Double MAX_VAL_SCALAR() { return Double.POSITIVE_INFINITY; }
 
-            /**{@inheritDoc}*/
-            @Override public Double negScalar(Double a) { return -a; }
 
-            /**{@inheritDoc}*/
-            @Override public Double avgScalar(Double a, Double b) { return (a+b)*0.5f; }
 
-            /**{@inheritDoc}*/
-            @Override public boolean eqScalar(Double a, Double b) { return Double.doubleToLongBits(a)==Double.doubleToLongBits(b); }
 
-            /**{@inheritDoc}*/
-            @Override public Class<Double> getScalarClass() { return Double.class; }
+            @Override public default Double absScalar(Double a) { return Math.abs(a); }
+
+            @Override public default Double negScalar(Double a) { return -a; }
+
+            @Override public default Double avgScalar(Double a, Double b) { return (a+b)*0.5f; }
+
+            @Override public default boolean eqScalar(Double a, Double b) { return Double.doubleToLongBits(a)==Double.doubleToLongBits(b); }
+
+
+            @Override public default Class<Double> getScalarClass() { return Double.class; }
         }
 
         /**
@@ -421,48 +449,38 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
          *
          * @author MarkusSecundus
          * */
-        public static abstract class VectorUtil_IntegerAsScalar<Vect> implements VectUtil<Vect, Integer> {
-            /**{@inheritDoc}*/
-            @Override public Integer subScalar(Integer a, Integer b) { return a-b; }
+        public static interface VectorUtil_IntegerAsScalar<Vect> extends VectUtil<Vect, Integer> {
 
-            /**{@inheritDoc}*/
-            @Override public Integer addScalar(Integer a, Integer b) { return a+b; }
+            @Override public default Integer subScalar(Integer a, Integer b) { return a-b; }
 
-            /**{@inheritDoc}*/
-            @Override public Integer sclScalar(Integer a, Integer b) { return a*b; }
+            @Override public default Integer addScalar(Integer a, Integer b) { return a+b; }
 
-            /**{@inheritDoc}*/
-            @Override public Integer divScalar(Integer a, Integer b) { return a/b; }
+            @Override public default Integer sclScalar(Integer a, Integer b) { return a*b; }
+            @Override public default Integer sclScalar(Integer a, double scl) { return (int)(a*scl); }
 
-            /**{@inheritDoc}*/
-            @Override public Integer sclScalar(Integer a, double scl) { return (int)(a*scl); }
+            @Override public default Integer divScalar(Integer a, Integer b) { return a/b; }
+            @Override public default Integer divScalar(Integer a, double scl) { return (int)(a/scl); }
 
-            /**{@inheritDoc}*/
-            @Override public Integer divScalar(Integer a, double scl) { return (int)(a/scl); }
 
-            /**{@inheritDoc}*/
-            @Override public Integer cpyScalar(Integer s) { return s; }
+            @Override public default Integer cpyScalar(Integer s) { return s; }
 
-            /**{@inheritDoc}*/
-            @Override public Integer ZERO_SCALAR() { return 0; }
 
-            /**{@inheritDoc}*/
-            @Override public Integer MAX_VAL_SCALAR() { return Integer.MAX_VALUE; }
+            @Override public default Integer ZERO_SCALAR() { return 0; }
 
-            /**{@inheritDoc}*/
-            @Override public Integer absScalar(Integer a) { return Math.abs(a); }
+            @Override public default Integer MAX_VAL_SCALAR() { return Integer.MAX_VALUE; }
 
-            /**{@inheritDoc}*/
-            @Override public Integer negScalar(Integer a) { return -a; }
 
-            /**{@inheritDoc}*/
-            @Override public Integer avgScalar(Integer a, Integer b) { return (a+b)/2; }
 
-            /**{@inheritDoc}*/
-            @Override public boolean eqScalar(Integer a, Integer b) { return FormsUtil.equals(a,b); }
+            @Override public default Integer absScalar(Integer a) { return Math.abs(a); }
 
-            /**{@inheritDoc}*/
-            @Override public Class<Integer> getScalarClass() { return Integer.class; }
+            @Override public default Integer negScalar(Integer a) { return -a; }
+
+            @Override public default Integer avgScalar(Integer a, Integer b) { return (a+b)/2; }
+
+            @Override public default boolean eqScalar(Integer a, Integer b) { return FormsUtil.equals(a,b); }
+
+
+            @Override public default Class<Integer> getScalarClass() { return Integer.class; }
         }
 
         /**
@@ -473,48 +491,36 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
          *
          * @author MarkusSecundus
          * */
-        public static abstract class VectorUtil_LongAsScalar<Vect> implements VectUtil<Vect, Long> {
-            /**{@inheritDoc}*/
-            @Override public Long subScalar(Long a, Long b) { return a-b; }
+        public static interface VectorUtil_LongAsScalar<Vect> extends VectUtil<Vect, Long> {
 
-            /**{@inheritDoc}*/
-            @Override public Long addScalar(Long a, Long b) { return a+b; }
+            @Override public default Long subScalar(Long a, Long b) { return a-b; }
 
-            /**{@inheritDoc}*/
-            @Override public Long sclScalar(Long a, Long b) { return a*b; }
+            @Override public default Long addScalar(Long a, Long b) { return a+b; }
 
-            /**{@inheritDoc}*/
-            @Override public Long divScalar(Long a, Long b) { return a/b; }
+            @Override public default Long sclScalar(Long a, Long b) { return a*b; }
+            @Override public default Long sclScalar(Long a, double scl) { return (long)(a*scl); }
 
-            /**{@inheritDoc}*/
-            @Override public Long sclScalar(Long a, double scl) { return (long)(a*scl); }
+            @Override public default Long divScalar(Long a, Long b) { return a/b; }
+            @Override public default Long divScalar(Long a, double scl) { return (long)(a/scl); }
 
-            /**{@inheritDoc}*/
-            @Override public Long divScalar(Long a, double scl) { return (long)(a/scl); }
+            @Override public default Long cpyScalar(Long s) { return s; }
 
-            /**{@inheritDoc}*/
-            @Override public Long cpyScalar(Long s) { return s; }
 
-            /**{@inheritDoc}*/
-            @Override public Long ZERO_SCALAR() { return 0L; }
+            @Override public default Long ZERO_SCALAR() { return 0L; }
 
-            /**{@inheritDoc}*/
-            @Override public Long MAX_VAL_SCALAR() { return Long.MAX_VALUE; }
+            @Override public default Long MAX_VAL_SCALAR() { return Long.MAX_VALUE; }
 
-            /**{@inheritDoc}*/
-            @Override public Long absScalar(Long a) { return Math.abs(a); }
 
-            /**{@inheritDoc}*/
-            @Override public Long negScalar(Long a) { return -a; }
+            @Override public default Long absScalar(Long a) { return Math.abs(a); }
 
-            /**{@inheritDoc}*/
-            @Override public Long avgScalar(Long a, Long b) { return (a+b)/2; }
+            @Override public default Long negScalar(Long a) { return -a; }
 
-            /**{@inheritDoc}*/
-            @Override public boolean eqScalar(Long a, Long b) { return FormsUtil.equals(a,b); }
+            @Override public default Long avgScalar(Long a, Long b) { return (a+b)/2; }
 
-            /**{@inheritDoc}*/
-            @Override public Class<Long> getScalarClass() { return Long.class; }
+            @Override public default boolean eqScalar(Long a, Long b) { return FormsUtil.equals(a,b); }
+
+
+            @Override public default Class<Long> getScalarClass() { return Long.class; }
         }
     }
 }

@@ -3,6 +3,8 @@ package com.markussecundus.forms.utils;
 
 import com.markussecundus.forms.wrappers.ReadonlyWrapper;
 
+import java.util.Objects;
+
 /**
  * Uspořádaná dvojice hodnot.
  *
@@ -33,7 +35,27 @@ public interface Pair<A, B> {
      * @param <A> datový typ první hodnoty
      * @param <B> datový typ druhé hodnoty
      * */
-    public static<A,B> Pair<A,B> make(A a, B b){return new Impl<>(a,b);}
+    public static<A,B> Pair<A,B> make(A a, B b){
+        return new Abstract<A,B>(){
+            public A first() { return a; }
+            public B second() { return b; }
+        };
+    }
+
+
+    public static<A,B> Pair<A,B> makeKeyValuePair(A a, B b){
+        return new Abstract.AbstractFirstWeighted<A,B>(){
+            public A first() { return a; }
+            public B second() { return b; }
+        };
+    }
+    public static<A,B> Pair<A,B> makeValueKeyPair(A a, B b){
+        return new Abstract.AbstractSecondWeighted<A,B>(){
+            public A first() { return a; }
+            public B second() { return b; }
+        };
+    }
+
 
 
     /**
@@ -45,33 +67,52 @@ public interface Pair<A, B> {
      * @param <B> datový typ druhé hodnoty
      * */
     public static<A,B> Pair<A,B> proxy(ReadonlyWrapper<A> a, ReadonlyWrapper<B> b){
-        return new Pair<A, B>() {
+        return new Abstract<A, B>() {
             public A first() { return a.get(); }
             public B second() { return b.get(); }
         };
     }
 
 
-    /**
-     * Kanonická implementace {@link Pair}.
-     *
-     * {@inheritDoc}
-     *
-     * @param <A> datový typ první hodnoty
-     * @param <B> datový typ druhé hodnoty
-     *
-     * @see Pair
-     *
-     * @author MarkusSecundus
-     * */
-    public static class Impl<A,B> implements Pair<A,B>{
-        public final A first;
-        public final B second;
-        public Impl(A first, B second){this.first=first;this.second = second;}
 
-        public A first(){return first;}
-        public B second(){return second;}
+
+    public static abstract class Abstract<A,B> implements Pair<A,B>{
+        @Override
+        public int hashCode() {
+            return FormsUtil.hashCode(first(), second());
+        }
+        @Override
+        public boolean equals(Object o) {
+            if(!(o instanceof Pair<?,?>))
+                return false;
+            Pair<?,?> p = ((Pair<?,?>)o);
+            return FormsUtil.equals(first(), p.first()) && FormsUtil.equals(second(), p.second());
+        }
+        @Override
+        public String toString() {
+            return String.format("{%s, %s}", first(), second());
+        }
+
+
+
+        private static abstract class AbstractWeighted<A,B> extends Abstract<A,B>{
+            protected abstract Object importantPart();
+
+            public int hashCode() { return FormsUtil.hashCode(importantPart()); }
+            public boolean equals(Object o) { return o.equals(importantPart()); }
+        }
+
+
+        public static abstract class AbstractFirstWeighted<A,B> extends Abstract.AbstractWeighted<A,B>{
+            protected Object importantPart() { return first(); }
+        }
+        public static abstract class AbstractSecondWeighted<A,B> extends Abstract.AbstractWeighted<A,B>{
+            protected Object importantPart() { return second(); }
+        }
     }
+
+
+
 
     /**
      * Lehkotonážní implementace {@link Pair}, která vždy všude vrací <code>null</code>.
@@ -83,8 +124,10 @@ public interface Pair<A, B> {
      *
      * @author MarkusSecundus
      * */
-    public static class Dummy<A,B> implements Pair<A,B>{
-        public A first() { return null; }
-        public B second() { return null; }
+    public static<A,B>  Pair<A,B> dummy(){
+        return new Abstract<A, B>() {
+            public A first() { return null; }
+            public B second() { return null; }
+        };
     }
 }

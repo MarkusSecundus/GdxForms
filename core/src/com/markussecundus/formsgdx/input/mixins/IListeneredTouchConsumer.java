@@ -4,6 +4,7 @@ import com.markussecundus.forms.elements.Drawable;
 import com.markussecundus.forms.elements.UberDrawable;
 import com.markussecundus.forms.events.EventDelegate;
 import com.markussecundus.forms.events.EventListener;
+import com.markussecundus.forms.events.ListenerPriorities;
 import com.markussecundus.forms.gfx.GraphicalPrimitive;
 import com.markussecundus.forms.utils.Pair;
 import com.markussecundus.forms.utils.FormsUtil;
@@ -220,12 +221,12 @@ public interface IListeneredTouchConsumer extends InputConsumer, ListeneredTouch
          * Hodnota, kterou může funkce získaná z metody <code>__ListeneredTouchConsumer_option__touchInputBoundsGetter</code>
          * vrátit, aby posuzovaná vstupní událost byla v každém případě přeskočena.
          * */
-        public static final Pair<Vect2i, Vect2i> SKIPPER_NO_HIT = new Pair.Dummy<>();
+        public static final Pair<Vect2i, Vect2i> SKIPPER_NO_HIT = Pair.dummy();
         /**
          * Hodnota, kterou může funkce získaná z metody <code>__ListeneredTouchConsumer_option__touchInputBoundsGetter</code>
          * vrátit, aby posuzovaná vstupní událost byla v každém případě přijata.
          * */
-        public static final Pair<Vect2i, Vect2i> SKIPPER_ALWAYS_HIT = new Pair.Dummy<>();
+        public static final Pair<Vect2i, Vect2i> SKIPPER_ALWAYS_HIT = Pair.dummy();
 
         /**
          * Implementace a datový kontejner vnitřní mixinové komponenty, na kterou je rozhraní přesměrováváno.
@@ -340,7 +341,7 @@ public interface IListeneredTouchConsumer extends InputConsumer, ListeneredTouch
                     Vect2i min = bounds.first(), max = bounds.second();
                     return e.x>=min.x && e.y>=min.y && e.x<max.x && e.y<max.y;
                 };
-                del._getUtilListeners().add(0, skipper);
+                del.getListeners(ListenerPriorities.ARG_GUARD).add(0, skipper);
                 touchSkippers.put(del, skipper);
             }
 
