@@ -25,7 +25,7 @@ import com.markussecundus.forms.wrappers.Wrapper;
  *
  * @author MarkusSecundus
  * */
-public interface Property<T> extends Wrapper<T>, ReadonlyProperty<T>, WriteonlyProperty<T> {
+public interface Property<T> extends Wrapper<T>, ReadonlyProperty<T>, WriteonlyProperty<T>, ConstProperty<T> {
 
     public ConstProperty<? extends EventDelegate<? extends GetterListenerArgs<T>>> getterListeners();
 

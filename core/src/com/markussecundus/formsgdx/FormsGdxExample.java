@@ -84,8 +84,6 @@ public class FormsGdxExample extends BasicFormApplication {
 	}
 
 
-
-
 	@Override
 	public Drawable<BasicRenderer, Vect2f> createForm() {
 

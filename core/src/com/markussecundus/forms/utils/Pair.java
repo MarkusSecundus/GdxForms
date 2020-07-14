@@ -3,8 +3,6 @@ package com.markussecundus.forms.utils;
 
 import com.markussecundus.forms.wrappers.ReadonlyWrapper;
 
-import java.util.Objects;
-
 /**
  * Uspořádaná dvojice hodnot.
  *
@@ -43,16 +41,35 @@ public interface Pair<A, B> {
     }
 
 
-    public static<A,B> Pair<A,B> makeKeyValuePair(A a, B b){
-        return new Abstract.AbstractFirstWeighted<A,B>(){
-            public A first() { return a; }
-            public B second() { return b; }
+    /**
+     * Vytvoří pár daných dvou hodnot, kde pouze 1. prvek
+     * hraje roli pro metody <code>equlas</code> a <code>hashCode</code>.
+     *
+     * @param keyElem první hodnota - klíč
+     * @param secondElem druhá hodnota
+     * @param <K> datový typ první hodnoty
+     * @param <T> datový typ druhé hodnoty
+     * */
+    public static<K, T> Pair<K, T> makeKeyValuePair(K keyElem, T secondElem){
+        return new Abstract.AbstractFirstWeighted<K, T>(){
+            public K first() { return keyElem; }
+            public T second() { return secondElem; }
         };
     }
-    public static<A,B> Pair<A,B> makeValueKeyPair(A a, B b){
-        return new Abstract.AbstractSecondWeighted<A,B>(){
-            public A first() { return a; }
-            public B second() { return b; }
+
+    /**
+     * Vytvoří pár daných dvou hodnot, kde pouze 2. prvek
+     * hraje roli pro metody <code>equlas</code> a <code>hashCode</code>.
+     *
+     * @param firstElem první hodnota
+     * @param keyElem druhá hodnota - klíč
+     * @param <T> datový typ první hodnoty
+     * @param <K> datový typ druhé hodnoty
+     * */
+    public static<T, K> Pair<T, K> makeValueKeyPair(T firstElem, K keyElem){
+        return new Abstract.AbstractSecondWeighted<T, K>(){
+            public T first() { return firstElem; }
+            public K second() { return keyElem; }
         };
     }
 
@@ -75,12 +92,12 @@ public interface Pair<A, B> {
 
 
 
-
     public static abstract class Abstract<A,B> implements Pair<A,B>{
         @Override
         public int hashCode() {
             return FormsUtil.hashCode(first(), second());
         }
+
         @Override
         public boolean equals(Object o) {
             if(!(o instanceof Pair<?,?>))
@@ -88,6 +105,7 @@ public interface Pair<A, B> {
             Pair<?,?> p = ((Pair<?,?>)o);
             return FormsUtil.equals(first(), p.first()) && FormsUtil.equals(second(), p.second());
         }
+
         @Override
         public String toString() {
             return String.format("{%s, %s}", first(), second());
@@ -121,8 +139,6 @@ public interface Pair<A, B> {
      * instance {@link Pair} a kde není vhodné předávat <code>null</code>.
      *
      * @see Pair
-     *
-     * @author MarkusSecundus
      * */
     public static<A,B>  Pair<A,B> dummy(){
         return new Abstract<A, B>() {

@@ -3,13 +3,11 @@ package com.markussecundus.forms.utils;
 import com.markussecundus.forms.utils.function.BiComparator;
 import com.markussecundus.forms.utils.function.BiFunction;
 import com.markussecundus.forms.utils.function.Function;
-import com.markussecundus.forms.utils.function.Supplier;
 import com.markussecundus.forms.utils.vector.VectDecomposer;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 
@@ -204,6 +202,8 @@ public class FormsUtil {
     public static<Elems, Key extends Comparable<Elems>> int binarySearchNearest(List<Elems> l, Key k){
         return binarySearchNearest(l, k, Comparable::compareTo);
     }
+
+
 
 
 
