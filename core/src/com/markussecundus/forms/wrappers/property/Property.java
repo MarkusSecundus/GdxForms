@@ -3,6 +3,7 @@ package com.markussecundus.forms.wrappers.property;
 import com.markussecundus.forms.events.EventDelegate;
 import com.markussecundus.forms.events.EventListener;
 import com.markussecundus.forms.utils.FormsUtil;
+import com.markussecundus.forms.utils.function.Consumer;
 import com.markussecundus.forms.wrappers.Wrapper;
 
 

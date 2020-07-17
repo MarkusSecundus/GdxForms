@@ -1,5 +1,7 @@
 package com.markussecundus.forms.utils.vector;
 
+import com.markussecundus.forms.utils.datastruct.readonly.ReadonlyList_int;
+
 import java.io.Serializable;
 
 
@@ -12,7 +14,7 @@ import java.io.Serializable;
  *
  * @author MarkusSecundus
  * */
-public class Vect2i implements Cloneable, Serializable {
+public class Vect2i implements Cloneable, Serializable, ReadonlyList_int {
 
     /**
      * Souřadnice vektoru.
@@ -230,6 +232,17 @@ public class Vect2i implements Cloneable, Serializable {
     public static VectUtil<Vect2i, Integer> getUtility(){return Util.INSTANCE;}
 
 
+    @Override
+    public int getNth(int n) {
+        return n==0 ? x : y;
+    }
+
+    @Override
+    public int size() {
+        return 2;
+    }
+
+
     /**
      * Utilita pro typ {@link Vect2i}.
      *
@@ -287,7 +300,7 @@ public class Vect2i implements Cloneable, Serializable {
         public int DIMENSION_COUNT(){return 2;}
 
         /**{@inheritDoc}*/
-        public Integer getNth(Vect2i v, int n) { return n==0? v.x: v.y; }
+        public Integer getNth(Vect2i v, int n) { return v.getNth(n); }
         /**{@inheritDoc}*/
         public Vect2i withNth(Vect2i p, int n, Integer s) { return n==0?make(s, p.y):make(p.x, s); }
 
