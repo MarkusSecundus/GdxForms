@@ -1,8 +1,10 @@
 package com.markussecundus.formsgdx.examples;
 
-import com.markussecundus.forms.elements.impl.BasicAbstractDrawable;
+import com.badlogic.gdx.graphics.Color;
+import com.markussecundus.forms.elements.impl.BasicAbstractDrawableElem;
 import com.markussecundus.forms.elements.impl.utils.DefaultSizeBehavior;
 import com.markussecundus.forms.events.EventDelegate;
+import com.markussecundus.forms.events.ListenerPriorities;
 import com.markussecundus.forms.gfx.GraphicalPrimitive;
 import com.markussecundus.forms.utils.FormsUtil;
 import com.markussecundus.forms.utils.Pair;
@@ -30,14 +32,14 @@ import com.markussecundus.formsgdx.rendering.BasicRenderer;
  * @author MarkusSecundus
  * */
 public abstract class Slider< Telo extends GraphicalPrimitive<? super BasicRenderer, Vect2f, Float>, Cudlik extends  GraphicalPrimitive<? super BasicRenderer, Vect2f, Float>>
-        extends BasicAbstractDrawable<BasicRenderer, Vect2f, Float> implements IListeneredUniversalConsumer {
+        extends BasicAbstractDrawableElem<BasicRenderer, Vect2f, Float> implements IListeneredUniversalConsumer {
 
     /**
      * Inicializuje rozměry slideru aktuálními rozměry jeho komponent.
      * */
     public Slider(Telo telo, Cudlik cudlik){
         //slider bude v obou rozměrech minimálně stejně velký jako každá z komponent
-        this(telo.getDimensions().withFloor(cudlik.getDimensions()), telo, cudlik);
+        this(telo.getSize().withFloor(cudlik.getSize()), telo, cudlik);
     }
 
     public Slider(Vect2f prefSize, Telo telo, Cudlik cudlik) {
@@ -53,10 +55,10 @@ public abstract class Slider< Telo extends GraphicalPrimitive<? super BasicRende
         // a při jejím vynuceném zmenšení bude jevit snahu o návrat do původního stavu jakmile může
         //drobná nevýhoda pak je, že změny rozměrů provedené uživatelem přímo na komponentách nebudou mít účinek,
         // ale ošetření této chyby pro stručnost přeskočíme
-        DefaultSizeBehavior<Vect2f, Float> telo_behavior = new DefaultSizeBehavior<>(prefSize, Vect2f.ZERO, telo.getDimensions(), Vect2f.getUtility());
+        DefaultSizeBehavior<Vect2f, Float> telo_behavior = new DefaultSizeBehavior<>(prefSize, Vect2f.ZERO, telo.getSize(), Vect2f.getUtility());
 
         //obdobně
-        DefaultSizeBehavior<Vect2f, Float> cudlik_behavior = new DefaultSizeBehavior<>(prefSize, Vect2f.ZERO, cudlik.getDimensions(), Vect2f.getUtility());
+        DefaultSizeBehavior<Vect2f, Float> cudlik_behavior = new DefaultSizeBehavior<>(prefSize, Vect2f.ZERO, cudlik.getSize(), Vect2f.getUtility());
 
         //listenerem svážeme komponenty s DefaultSizeBahavior, které jsme pro ně vytvořili
         this.size().getSetterListeners()._getUtilListeners().add(e->{
@@ -65,8 +67,8 @@ public abstract class Slider< Telo extends GraphicalPrimitive<? super BasicRende
             telo_behavior.maxSize.set(size);  //omezíme velikost posuvníkové části celkovou aktuální velikostí Slideru
             cudlik_behavior.maxSize.set(size); //obdobně pro čudlík
 
-            telo.setDimensions(telo_behavior.realSize.get());  //nastavíme rozměry, které podle nových hodnot vyplivl DefaultSizeBehavior
-            cudlik.setDimensions(cudlik_behavior.realSize.get()); //obdobně u čudlíku
+            telo.setSize(telo_behavior.realSize.get());  //nastavíme rozměry, které podle nových hodnot vyplivl DefaultSizeBehavior
+            cudlik.setSize(cudlik_behavior.realSize.get()); //obdobně u čudlíku
             return true;
         });
         this.prefSize().pretendSet();   //právě přidaný listener rovnou provedeme
@@ -76,7 +78,7 @@ public abstract class Slider< Telo extends GraphicalPrimitive<? super BasicRende
 
         this.value  = new SimpleProperty<>(0f);                 //hodnota posuvníku je iniciálně 0
 
-        this.value.getSetterListeners()._getUtilListeners().add(e->{            //zaručíme, že hodnota posuvníku bude v intervalu 0f..1f, případné přetečení se oseká
+        this.value.getSetterListeners().getListeners(ListenerPriorities.ARG_GUARD).add(e->{            //zaručíme, že hodnota posuvníku bude v intervalu 0f..1f, případné přetečení se oseká
             e.newVal().set(FormsUtil.intoBounds(0f,e.newVal().get(), 1f));
             return true;
         });
@@ -100,14 +102,16 @@ public abstract class Slider< Telo extends GraphicalPrimitive<? super BasicRende
      * {@inheritDoc}
      * */
     @Override
-    public void draw(BasicRenderer renderer, Vect2f position) {
-        Vect2f dims = getSize(), telo_dims = telo.getDimensions(), cudlik_dims = cudlik.getDimensions();
+    public boolean draw(BasicRenderer renderer, Vect2f position) {
+        Vect2f dims = getSize(), telo_dims = telo.getSize(), cudlik_dims = cudlik.getSize();
         telo.draw(renderer, position.addY((dims.y - telo_dims.y)/2) );
         cudlik.draw(renderer, position.add((dims.x - cudlik_dims.x)*getValue(), (dims.y - cudlik_dims.y)/2));
+        return true;
     }
 
     /**
      * Nedělá nic.
+     * <p></p>
      * {@inheritDoc}
      * */
     @Override public void update(float delta, int frameId) {}
@@ -129,7 +133,6 @@ public abstract class Slider< Telo extends GraphicalPrimitive<? super BasicRende
     public Float setValue(Float newVal){return value().set(newVal);}
 
 
-    /**{@inheritDoc}*/
     @Override
     public VectUtil<Vect2f, Float> getVectUtil() { return Vect2f.getUtility(); }
 

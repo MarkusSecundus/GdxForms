@@ -1,15 +1,19 @@
 package com.markussecundus.forms.wrappers.property.impl.general;
 
 import com.markussecundus.forms.events.EventDelegate;
+import com.markussecundus.forms.utils.datastruct.DefaultDict;
 import com.markussecundus.forms.wrappers.property.Property;
 
 import java.util.Arrays;
+import java.util.Map;
 
 
 /**
  * Objekt sdružující dohromady pole Properties mapovaných na pole jim odpovídajících hodnot.
- *
+ * <p>
  * Poskytuje i hromadné listenery vztahující se na všechny properties v poli.
+ *
+ * @param <T> typ, jehož {@link Property}ies v poli nabývají
  *
  * @see Property
  * @see SimpleProperty
@@ -19,6 +23,7 @@ import java.util.Arrays;
  * */
 public class ArrayProperty<T> {
 //public:
+
     /**
      * Vytvoří pole Properties mapovaných na prvky vstupního pole. K prvkům pole by dále mělo být
      * přistupováno jedině skrze tyto Properties.
@@ -35,6 +40,25 @@ public class ArrayProperty<T> {
                 protected T change(T val) { return elems[i] = val; }
             };
         }
+
+
+        massSetterDelegates = new DefaultDict<>(priority->{
+            EventDelegate<Property.SetterListenerArgs<T>> delegate = EventDelegate.make();
+
+            for(Property<T> prop: properties)
+                prop.getSetterListeners().getListeners(priority).add(delegate);
+
+            return delegate;
+        });
+
+        massGetterDelegates = new DefaultDict<>(priority->{
+            EventDelegate<Property.GetterListenerArgs<T>> delegate = EventDelegate.make();
+
+            for(Property<T> prop: properties)
+                prop.getGetterListeners().getListeners(priority).add(delegate);
+
+            return delegate;
+        });
     }
 
     /**
@@ -55,68 +79,32 @@ public class ArrayProperty<T> {
 
 
     /**
-     * @return Delegát, jehož listenery budou vykonávány v <code>_utilListener</code>u setteru každé z Properties v poli.
+     * Delegát, jehož listenery budou vykonávány v <code>Listener(priority)</code>u setteru každé z Properties v poli.
+     *
+     * @param priority priorita, pod kterou je delegát uložen
+     *
+     * @return Delegát, jehož listenery budou vykonávány v <code>Listener(priority)</code>u setteru každé z Properties v poli.
      * */
-    public EventDelegate<Property.SetterListenerArgs<T>> _massSetterUtilDelegate(){
-        if(_massSetterUtilDelegate ==null){
-            _massSetterUtilDelegate = EventDelegate.make();
-            for(Property<T> prop: properties)
-                prop.getSetterListeners()._getUtilListeners().add(_massSetterUtilDelegate);
-        }
-        else for(Property<T> prop: properties)
-            prop.getSetterListeners();
-        return _massSetterUtilDelegate;
+    public EventDelegate<Property.SetterListenerArgs<T>> massSetterDelegate(Integer priority){
+        return massSetterDelegates.get(priority);
     }
 
     /**
-     * @return Delegát, jehož listenery budou vykonávány v <code>listener</code>u setteru každé z Properties v poli.
+     * Delegát, jehož listenery budou vykonávány v <code>Listener(priority)</code>u getteru každé z Properties v poli.
+     *
+     * @param priority priorita, pod kterou je delegát uložen
+     *
+     * @return Delegát, jehož listenery budou vykonávány v <code>Listener(priority)</code>u getteru každé z Properties v poli.
      * */
-    public EventDelegate<Property.SetterListenerArgs<T>> _massSetterDelegate(){
-        if(_massSetterDelegate ==null){
-            _massSetterDelegate = EventDelegate.make();
-            for(Property<T> prop: properties)
-                prop.getSetterListeners().getListeners().add(_massSetterDelegate);
-        }
-        else for(Property<T> prop: properties)
-            prop.getSetterListeners();
-        return _massSetterDelegate;
+    public EventDelegate<Property.GetterListenerArgs<T>> massGetterDelegate(Integer priority){
+        return massGetterDelegates.get(priority);
     }
 
-
-    /**
-     * @return Delegát, jehož listenery budou vykonávány v <code>_utilListener</code>u getteru každé z Properties v poli.
-     * */
-    public EventDelegate<Property.GetterListenerArgs<T>> _massGetterUtilDelegate(){
-        if(_massGetterUtilDelegate == null){
-            _massGetterUtilDelegate = EventDelegate.make();
-            for(Property<T> prop: properties)
-                prop.getGetterListeners()._getUtilListeners().add(_massGetterUtilDelegate);
-        }
-        else for(Property<T> prop: properties)
-            prop.getGetterListeners();
-        return _massGetterUtilDelegate;
-    }
-
-    /**
-     * @return Delegát, jehož listenery budou vykonávány v <code>listener</code>u getteru každé z Properties v poli.
-     * */
-    public EventDelegate<Property.GetterListenerArgs<T>> _massGetterDelegate(){
-        if(_massGetterDelegate ==null){
-            _massGetterDelegate = EventDelegate.make();
-            for(Property<T> prop: properties)
-                prop.getGetterListeners().getListeners().add(_massGetterDelegate);
-        }
-        else for(Property<T> prop: properties)
-            prop.getGetterListeners();
-        return _massGetterDelegate;
-    }
 
 //private:
     private final Property<T>[] properties;
     private final T[] elems;
 
-    private EventDelegate<Property.SetterListenerArgs<T>> _massSetterUtilDelegate = null;
-    private EventDelegate<Property.SetterListenerArgs<T>> _massSetterDelegate = null;
-    private EventDelegate<Property.GetterListenerArgs<T>> _massGetterUtilDelegate = null;
-    private EventDelegate<Property.GetterListenerArgs<T>> _massGetterDelegate = null;
+    private final Map<Integer, EventDelegate<Property.SetterListenerArgs<T>>> massSetterDelegates;
+    private final Map<Integer, EventDelegate<Property.GetterListenerArgs<T>>> massGetterDelegates;
 }

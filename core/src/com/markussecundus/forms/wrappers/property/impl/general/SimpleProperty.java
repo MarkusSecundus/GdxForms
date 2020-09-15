@@ -31,12 +31,10 @@ public class SimpleProperty<T> extends AbstractProperty<T> {
 
 //protected:
 
-    /**{@inheritDoc}*/
     @Override protected T obtain() {
         return t;
     }
 
-    /**{@inheritDoc}*/
     @Override protected T change(T t) {
         return this.t = t;
     }

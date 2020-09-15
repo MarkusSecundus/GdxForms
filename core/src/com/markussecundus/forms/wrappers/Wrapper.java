@@ -23,11 +23,9 @@ import com.markussecundus.forms.wrappers.property.ConstProperty;
  * */
 public interface Wrapper<T> extends ReadonlyWrapper<T>, WriteonlyWrapper<T> {
 
-    /**{@inheritDoc}*/
     @Override
     public T get();
 
-    /**{@inheritDoc}*/
     @Override
     public T set(T t);
 
@@ -169,19 +167,19 @@ public interface Wrapper<T> extends ReadonlyWrapper<T>, WriteonlyWrapper<T> {
          * */
         public LazyWrapper(Supplier<T> generator){this.sup= generator;}
 
-        /**{@inheritDoc}*/
-        @Override public T set(T o) {
+        @Override
+        public T set(T o) {
             sup = null;
             return t;
         }
 
-        /**{@inheritDoc}*/
-        @Override public T get() {
+        @Override
+        public T get() {
             useSup();
             return t;
         }
 
-     //private:
+    //private:
         private T t;
         private Supplier<T> sup;
 

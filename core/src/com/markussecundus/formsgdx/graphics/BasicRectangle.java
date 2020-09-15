@@ -40,7 +40,7 @@ public class BasicRectangle implements GraphicalPrimitive<ShapeRenderer, Vect2f,
      * {@inheritDoc}
      * */
     @Override public boolean draw(ShapeRenderer renderer, Vect2f pos) {
-        Vect2f dims = getDimensions();
+        Vect2f dims = getSize();
         Color col = getColor();
 
         renderer.setColor(col);
@@ -54,7 +54,7 @@ public class BasicRectangle implements GraphicalPrimitive<ShapeRenderer, Vect2f,
      *
      * @return rozměry obdélníku
      * */
-    @Override public Property<Vect2f> dimensions() { return dimensions; }
+    @Override public Property<Vect2f> size() { return dimensions; }
 
     /**
      * @return Barva v které bude obdélník vykreslen na obrazovku.
@@ -72,8 +72,8 @@ public class BasicRectangle implements GraphicalPrimitive<ShapeRenderer, Vect2f,
     public Color setColor(Color newColor){return color().set(newColor);}
 
 
-    /**{@inheritDoc}*/
-    @Override public VectUtil<Vect2f, Float> getVectUtil() {return Vect2f.getUtility();}
+    @Override
+    public VectUtil<Vect2f, Float> getVectUtil() {return Vect2f.getUtility();}
 
 //private:
     private final Property<Vect2f> dimensions;

@@ -7,8 +7,10 @@ package com.markussecundus.forms.utils.vector;
  *
  *
  * @see VectUtil
+ * @see VectComparator
  * @see Vect2f
- * @see Vect2f
+ * @see Vect2i
+ * @see Vect2d
  *
  * @author MarkusSecundus
  * */
@@ -30,7 +32,7 @@ public interface VectDecomposer<Vect, Scalar> {
      *
      * @throws InconsistentNumberOfDimensionsException pokud vstupní hodnota nemá požadovaný počet dimenzí
      * */
-    public Vect compose(Scalar[] s) throws InconsistentNumberOfDimensionsException;
+    public Vect compose(Scalar... s) throws InconsistentNumberOfDimensionsException;
 
     /**
      * Udává konstantní počet dimenzí, kterého by mělo být vždy,

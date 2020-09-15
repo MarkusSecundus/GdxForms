@@ -1,7 +1,8 @@
 package com.markussecundus.forms.elements.impl.layouts;
 
-import com.markussecundus.forms.elements.Drawable;
+import com.markussecundus.forms.elements.DrawableElem;
 import com.markussecundus.forms.events.EventListener;
+import com.markussecundus.forms.events.ListenerPriorities;
 import com.markussecundus.forms.utils.FormsUtil;
 import com.markussecundus.forms.utils.vector.VectUtil;
 import com.markussecundus.forms.wrappers.property.Property;
@@ -15,7 +16,13 @@ import java.util.List;
 /**
  * Basic layout for arranging Elements in line.
  *
+ * @param <Rend> The renderer type that performs the drawing of the element to the screen or anywhere else
+ * @param <Pos> Vector type used to define the position and dimensions of the element
+ * @param <Scalar> The type that Pos's individual components consist of (- see {@link VectUtil} )
+ *
+ *
  * @see BasicAbstractLayout
+ * @see BasicGridLayout
  *
  * @author MarkusSecundus
  * */
@@ -38,7 +45,7 @@ public class BasicLinearLayout<Rend, Pos, Scalar extends Comparable<Scalar>> ext
         this(posUtil.MAX_VAL(),posUtil.ZERO(), prefSize, posUtil, posUtil.ZERO(), posUtil.ZERO_SCALAR(), 0, FormsUtil.fillArray(new Double[posUtil.DIMENSION_COUNT()], 0d));
     }
     /**
-     * Inits the layout with default values.
+     * Inits the layout.
      *
      * @param maxSize initial value for layout's max size
      * @param minSize initial value for layout's min size
@@ -69,13 +76,13 @@ public class BasicLinearLayout<Rend, Pos, Scalar extends Comparable<Scalar>> ext
             return true;
         };
 
-        onChildResizedAction.getListeners().add(positions_dirty);
-        this.allignments._massSetterUtilDelegate().getListeners().add(positions_dirty);
+        onChildResizedAction.getListeners(ListenerPriorities.USER).add(positions_dirty);
+        this.allignments.massSetterDelegate(ListenerPriorities.PRE_UTIL).getListeners(ListenerPriorities.USER).add(positions_dirty);
 
         size().getSetterListeners()._getUtilListeners().add(dirty_marker);
-        childrenContainer.onDrawableAdded.getListeners().add(dirty_marker);
+        childrenContainer.onDrawableAdded.getListeners(ListenerPriorities.USER).add(dirty_marker);
 
-        childrenContainer.onElementRemoved.getListeners().add(e->{
+        childrenContainer.onElementRemoved.getListeners(ListenerPriorities.USER).add(e->{
             if(_isDrawableChild(e)) {
                 markChildSizesAsDirty();
                 markChildPositionsAsDirty();
@@ -114,56 +121,54 @@ public class BasicLinearLayout<Rend, Pos, Scalar extends Comparable<Scalar>> ext
     /**
      * @return Shinier shortcut for <code>outerPaddingBegin().get()</code>
      * */
-    public Pos getOuterPaddingBegin(){return outerPaddingBegin().get();}
+    public final  Pos getOuterPaddingBegin(){return outerPaddingBegin().get();}
     /**
      * @return Shinier shortcut for <code>outerPaddingEnd().get()</code>
      * */
-    public Pos getOuterPaddingEnd(){return outerPaddingEnd().get();}
+    public final  Pos getOuterPaddingEnd(){return outerPaddingEnd().get();}
     /**
      * @return Shinier shortcut for <code>innerPadding().get()</code>
      * */
-    public Scalar getInnerPadding(){return innerPadding().get();}
+    public final  Scalar getInnerPadding(){return innerPadding().get();}
     /**
      * @return Shinier shortcut for <code>dimension().get()</code>
      * */
-    public int getDimension(){return dimension().get();}
+    public final  int getDimension(){return dimension().get();}
     /**
      * @return Shinier shortcut for <code>allignment(dimension).get()</code>
      * */
-    public double getAlignment(int dimension){return allignment(dimension).get();}
+    public final  double getAlignment(int dimension){return allignment(dimension).get();}
 
 
 
     /**
      * @return Shinier shortcut for <code>outerPaddingBegin().set(newPadding)</code>
      * */
-    public Pos setOuterPaddingBegin(Pos newPadding){return outerPaddingBegin.set(newPadding);}
+    public  final Pos setOuterPaddingBegin(Pos newPadding){return outerPaddingBegin.set(newPadding);}
     /**
      * @return Shinier shortcut for <code>outerPaddingEnd().set(newPadding)</code>
      * */
-    public Pos setOuterPaddingEnd(Pos newPadding){return outerPaddingEnd.set(newPadding);}
+    public final  Pos setOuterPaddingEnd(Pos newPadding){return outerPaddingEnd.set(newPadding);}
     /**
      * Shinier shortcut for setting both <code>setOuterPaddingBegin</code> and <code>setOuterPaddingEnd</code> to <code>newPadding</code> value
      * */
-    public void setOuterPadding(Pos newPadding){setOuterPaddingBegin(newPadding);setOuterPaddingEnd(newPadding);}
+    public  final void setOuterPadding(Pos newPadding){setOuterPaddingBegin(newPadding);setOuterPaddingEnd(newPadding);}
     /**
      * @return Shinier shortcut for <code>innerPadding().set(newPadding)</code>
      * */
-    public Scalar setInnerPadding(Scalar newPadding){return innerPadding.set(newPadding);}
+    public  final Scalar setInnerPadding(Scalar newPadding){return innerPadding.set(newPadding);}
     /**
      * @return Shinier shortcut for <code>dimension().set(newDimensionOfLinearity)</code>
      * */
-    public int setDimension(int newDimensionOfLinearity){return dimension().set(newDimensionOfLinearity);}
+    public final  int setDimension(int newDimensionOfLinearity){return dimension().set(newDimensionOfLinearity);}
     /**
      * @return Shinier shortcut for <code>allignment(dimension).set(newAllignment)</code>
      * */
-    public double setAlignment(int dimension, double newAlignment){ return allignment(dimension).set(newAlignment); }
+    public  final double setAlignment(int dimension, double newAlignment){ return allignment(dimension).set(newAlignment); }
 
-    /**
-     * {@inheritDoc}
-     * */
+
     @Override
-    public ReadonlyProperty<Pos> childPosition(Drawable<Rend, Pos> child) {
+    public ReadonlyProperty<Pos> childPosition(DrawableElem<Rend, Pos> child) throws LayoutTooShortException{
         applySizeChanges();
         return super.childPosition(child);
     }
@@ -181,9 +186,9 @@ public class BasicLinearLayout<Rend, Pos, Scalar extends Comparable<Scalar>> ext
 
         elemsSize[linearity_dim] = POS.subScalar(elemsSize[linearity_dim],inner_padding);
 
-        for(Drawable<Rend, Pos> child: getDrawableChildren()){
+        for(DrawableElem<Rend, Pos> child: getDrawableChildren()){
             Scalar[] childSize = POS.decompose(child.getSize());
-            FormsUtil.checkNumDimensions(elemsSize.length, childSize);
+            FormsUtil.checkNumDimensions(elemsSize.length, childSize.length);
 
             elemsSize[linearity_dim] = POS.addScalar(POS.addScalar(elemsSize[linearity_dim], childSize[linearity_dim]), inner_padding);
 
@@ -228,10 +233,20 @@ public class BasicLinearLayout<Rend, Pos, Scalar extends Comparable<Scalar>> ext
     }
 
     /**
-     * Decides whether the {@link LayoutTooShortException} is thrown at the end of child positions recompute
+     * Decides whether the {@link BasicAbstractLayout.LayoutTooShortException} is thrown at the end of child positions recompute
      * if the children don't fit into the layout, or if it is ignored.
      * */
-    public final Property<Boolean> ignoreTooShort = new SimpleProperty<>(false);
+    public Property<Boolean> ignoreTooShort(){return ignoreTooShort;}
+
+    /**
+     * @return Shinier shortcut for <code>ignoreTooShort().get()</code>
+     * */
+    public final Boolean getIgnoreTooShort(){return ignoreTooShort().get();}
+
+    /**
+     * @return Shinier shortcut for <code>ignoreTooShort().set(newValue)</code>
+     * */
+    public final Boolean setIgnoreTooShort(Boolean newValue){return ignoreTooShort().set(newValue);}
 
     //private:
     private final Property<Integer> dimension;
@@ -242,6 +257,9 @@ public class BasicLinearLayout<Rend, Pos, Scalar extends Comparable<Scalar>> ext
 
     private final Property<Pos> outerPaddingBegin, outerPaddingEnd;
     private final Property<Scalar> innerPadding;
+
+
+    private final Property<Boolean> ignoreTooShort = new SimpleProperty<>(false);
 
 
     private  boolean _onResizedIsBeingCalled = false;
@@ -258,7 +276,7 @@ public class BasicLinearLayout<Rend, Pos, Scalar extends Comparable<Scalar>> ext
             Scalar[] constrs = POS.decompose(dims);
             constrs[dim_of_linearity] = POS.MAX_VAL_SCALAR();
 
-            for (Drawable<Rend, Pos> child : getDrawableChildren())
+            for (DrawableElem<Rend, Pos> child : getDrawableChildren())
                 child._sizeConstraint().set(POS.compose(constrs));
 
             childSizesDirty = false;
@@ -266,7 +284,7 @@ public class BasicLinearLayout<Rend, Pos, Scalar extends Comparable<Scalar>> ext
     }
 
     private void recomputeChildrenPositions(){
-        List<Drawable<Rend,Pos>> drw_children = getDrawableChildren();
+        List<DrawableElem<Rend,Pos>> drw_children = getDrawableChildren();
         List<Pos> pozice = new ArrayList<>(drw_children.size());
         Pos layout_size = getSize();
         Pos outer_padding_begin = getOuterPaddingBegin();
@@ -278,7 +296,7 @@ public class BasicLinearLayout<Rend, Pos, Scalar extends Comparable<Scalar>> ext
 
         Scalar line = POS.getNth(outer_padding_begin, dim_of_linearity);
 
-        for(Drawable<Rend, Pos> child : drw_children){
+        for(DrawableElem<Rend, Pos> child : drw_children){
             Pos child_size = child.getSize();
             Pos child_pos = POS.sub(POS.cpy(size_without_outer_padding), child_size);
 
@@ -314,8 +332,4 @@ public class BasicLinearLayout<Rend, Pos, Scalar extends Comparable<Scalar>> ext
     }
 
 
-    /**
-     * Thrown by {@link BasicLinearLayout} on children positions recomputation when the children don't fit into the layout
-     * */
-    public static class LayoutTooShortException extends RuntimeException{}
 }

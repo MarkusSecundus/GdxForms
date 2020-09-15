@@ -31,8 +31,8 @@ public class SimpleConstProperty<T> extends AbstractConstProperty<T> {
 
 //protected:
 
-    /**{@inheritDoc}*/
-    @Override protected T obtain() {
+    @Override
+    protected T obtain() {
         return val;
     }
 

@@ -1,18 +1,19 @@
 package com.markussecundus.formsgdx.input.mixins;
 
-import com.markussecundus.forms.elements.Drawable;
+import com.markussecundus.forms.elements.DrawableElem;
 import com.markussecundus.forms.elements.UberDrawable;
 import com.markussecundus.forms.events.EventDelegate;
 import com.markussecundus.forms.events.EventListener;
 import com.markussecundus.forms.events.ListenerPriorities;
+import com.markussecundus.forms.extensibility.Extensible;
+import com.markussecundus.forms.gfx.Drawable;
 import com.markussecundus.forms.gfx.GraphicalPrimitive;
 import com.markussecundus.forms.utils.Pair;
-import com.markussecundus.forms.utils.FormsUtil;
 import com.markussecundus.forms.utils.function.BiFunction;
 import com.markussecundus.forms.utils.function.BiPredicate;
 import com.markussecundus.forms.utils.function.Function;
 import com.markussecundus.forms.utils.function.Supplier;
-import com.markussecundus.forms.utils.datastruct.DefaultDict;
+import com.markussecundus.forms.utils.vector.Vect2d;
 import com.markussecundus.forms.utils.vector.Vect2f;
 import com.markussecundus.forms.utils.vector.Vect2i;
 import com.markussecundus.forms.utils.vector.VectUtil;
@@ -30,19 +31,20 @@ import java.util.Map;
 
 /**
  * Mixin-Rozhraní Implementující skrze defaultní metody veškerou funkcionalitu {@link ListeneredTouchConsumer}.
- *
+ * <p></p>
  * Účel je, aby by bylo jednoduše možné přidat požadovanou funkcionalitu i do tříd,
  * které již mají předka a nemohou dědit z další třídy, aby získaly funkcionalitu zpracování vstupu.
- *
+ * <p></p>
  * Každé své instanci poskytuje Delegáty náležící daným vstupním událostem. Ty budou vytvořeny všechny
  * najednou při prvním vyžádání nějakého z nich. Taktéž těmto Delegátům rovnou vygeneruje
  * prvky poskytující základní, obecně užitečnou logiku pro zpracování vstupu z obrazovky
  * blíže konfigurovatelnou / vypnutelnou přepsáním pomocných metod
  * (označených <code>__ListeneredTouchConsumer_...</code>)
- *
+ * <p></p>
  *
  * Definuje velmi ošklivě pojmenované pomocné a konfigurační metody, které nikomu z venčí nikdy k ničemu
  * nebudou a ideálně by měly být <code>protected</code>, kdyby to Java dovolovala.
+ * <p>
  * Pro jejich skrytí před náhodným uživatelem vašich implementací lze použít např. tento pattern:
  * <pre>
  * <code>
@@ -77,45 +79,40 @@ import java.util.Map;
  *
  * @see ListeneredTouchConsumer
  *
- * @see IListeneredScrollConsumer
+ * @see com.markussecundus.formsgdx.input.mixins.IListeneredScrollConsumer
  * @see IListeneredKeyConsumer
  * @see IListeneredUniversalConsumer
  *
  * @author MarkusSecundus
  * */
-public interface IListeneredTouchConsumer extends InputConsumer, ListeneredTouchConsumer {
+public interface IListeneredTouchConsumer extends InputConsumer, ListeneredTouchConsumer, Extensible {
 
-    /**{@inheritDoc}*/
     @Override
     default boolean isClicked(){return Util.getImpl(this).isClicked;}
 
-    /**{@inheritDoc}*/
+
     @Override
     default ConstProperty<EventDelegate<OnTouchArgs>> onTouchDownListener(){
         return Util.getImpl(this).onTouchDown;
     }
-    /**{@inheritDoc}*/
     @Override
     default ConstProperty<EventDelegate<OnTouchArgs>> onTouchUpListener(){
         return Util.getImpl(this).onTouchUp;
     }
-    /**{@inheritDoc}*/
     @Override
     default ConstProperty<EventDelegate<OnTouchDraggedArgs>> onTouchDraggedListener(){
         return Util.getImpl(this).onTouchDragged;
     }
-    /**{@inheritDoc}*/
     @Override
     default ConstProperty<EventDelegate<OnMouseMovedArgs>> onMouseMovedListener(){
         return Util.getImpl(this).onMouseMoved;
     }
 
-    /**{@inheritDoc}*/
+
     @Override
     default ConstProperty<EventDelegate<OnTouchArgs>> onClickedListener(){
         return Util.getImpl(this).onClicked;
     }
-    /**{@inheritDoc}*/
     @Override
     default ConstProperty<EventDelegate<OnTouchArgs>> onUnclickedListener(){
         return Util.getImpl(this).onUnclicked;
@@ -152,45 +149,42 @@ public interface IListeneredTouchConsumer extends InputConsumer, ListeneredTouch
     /**
      * @return <code>null</code> pokud má být příjímán veškerý vstup z obrazovky, nezávisle na pozici, na které k události došlo,
      *  jinak funkce, která pro každý Delegát náležící jedné ze vstupních událostí vygeneruje funkci generující hranice, za kterými když
-     *  ke vstupu dojde, má být událost bez reakce přeskočena; V základní implementaci vygeneruje pro libovolnou instanci {@link Drawable}
-     *  nebo {@link GraphicalPrimitive}, jejíž rozměry jsou udávané alespon 2D vektorem se skaláry typu {@link Number}
+     *  ke vstupu dojde, má být událost bez reakce přeskočena; V základní implementaci vygeneruje pro libovolnou instanci {@link Drawable},
+     *  jejíž rozměry jsou udávané alespon 2D vektorem se skaláry typu {@link Number}
      *  hranice odpovídající přesně rozměrům daného objektu v prvních 2 dimenzích převedeným na celočíselné hodnoty.
      * */
     default BiFunction<IListeneredTouchConsumer.Util.Impl,EventDelegate<? extends OnMouseMovedArgs>, Function<OnMouseMovedArgs,Pair<Vect2i, Vect2i>>> __ListeneredTouchConsumer_option__touchInputBoundsGetter(){
-        try {
-            Supplier<VectUtil> Pos = null;
-            Supplier<?> Dim = null;
-            if (this instanceof Drawable<?, ?>) {
-                Drawable drw = ((Drawable) this);
-                Pos = drw::getVectUtil;
-                Dim = drw::getSize;
-            } else if (this instanceof GraphicalPrimitive<?, ?, ?>) {
-                GraphicalPrimitive grp = ((GraphicalPrimitive) this);
-                Pos = grp::getVectUtil;
-                Dim = grp::getDimensions;
-            }
-            if (Pos == null || Dim == null)
-                return null;
+        if (!(this instanceof Drawable<?, ?>))
+            return null;
 
-            Function<OnMouseMovedArgs,Pair<Vect2i, Vect2i>> ret = null;
+        Drawable drw = ((Drawable) this);
+        Supplier<VectUtil> Pos = drw::getVectUtil;
+        Supplier<?> Dim = drw::getSize;
 
-            if (Vect2i.class.isAssignableFrom(Pos.get().getVectClass())) {
-                Supplier<Vect2i> dim = ((Supplier) Dim);
-                ret = a -> Pair.make(Vect2i.ZERO, dim.get());
-            } else if (Vect2f.class.isAssignableFrom(Pos.get().getVectClass())) {
-                Supplier<Vect2f> dim = ((Supplier) Dim);
-                ret = a -> Pair.make(Vect2i.ZERO, dim.get().toInt());
-            } else if (Pos.get().DIMENSION_COUNT()>=2 && Number.class.isAssignableFrom(Pos.get().getScalarClass())) {
-                Supplier<?> dim = Dim;
-                Supplier<VectUtil<Object, ? extends Number>> pos = ((Supplier) Pos);
-                ret = a -> Pair.make(Vect2i.ZERO, Vect2i.make(pos.get().getNth(dim.get(), 0).intValue(), pos.get().getNth(dim.get(), 1).intValue()));
-            }
+        Function<OnMouseMovedArgs, Pair<Vect2i, Vect2i>> ret = null;
 
-            if (ret != null) {
-                Function<OnMouseMovedArgs,Pair<Vect2i, Vect2i>> Ret = ret;
-                return (a,b) -> Ret;
-            }
-        }catch(Exception e){}
+        if (Vect2i.class.isAssignableFrom(Pos.get().getVectClass())) {
+            Supplier<Vect2i> dim = ((Supplier) Dim);
+            ret = a -> Pair.make(Vect2i.ZERO, dim.get());
+        }
+        else if (Vect2f.class.isAssignableFrom(Pos.get().getVectClass())) {
+            Supplier<Vect2f> dim = ((Supplier) Dim);
+            ret = a -> Pair.make(Vect2i.ZERO, dim.get().toInt());
+        }
+        else if (Vect2d.class.isAssignableFrom(Pos.get().getVectClass())) {
+            Supplier<Vect2d> dim = ((Supplier) Dim);
+            ret = a -> Pair.make(Vect2i.ZERO, dim.get().toInt());
+        }
+        else if (Pos.get().DIMENSION_COUNT() >= 2 && Number.class.isAssignableFrom(Pos.get().getScalarClass())) {
+            Supplier<?> dim = Dim;
+            Supplier<VectUtil<Object, ? extends Number>> pos = ((Supplier) Pos);
+            ret = a -> Pair.make(Vect2i.ZERO, Vect2i.make(pos.get().getNth(dim.get(), 0).intValue(), pos.get().getNth(dim.get(), 1).intValue()));
+        }
+
+        if (ret != null) {
+            Function<OnMouseMovedArgs, Pair<Vect2i, Vect2i>> Ret = ret;
+            return (a, b) -> Ret;
+        }
         return null;
     }
 
@@ -201,12 +195,7 @@ public interface IListeneredTouchConsumer extends InputConsumer, ListeneredTouch
      * @author MarkusSecundus
      * */
     static final class Util {
-        private static final Map<FormsUtil.WrapperForReferenceComparison<IListeneredTouchConsumer>, Impl> implementations = new DefaultDict<>(
-                self->self.item.__ListeneredTouchConsumer__MakeInstance(),
-                FormsUtil.WrapperForReferenceComparison::cpy
-        );
-
-        private static final FormsUtil.WrapperForReferenceComparison<IListeneredTouchConsumer> instanceFinder = new FormsUtil.WrapperForReferenceComparison<>(null);
+        private static final Function<Extensible, Impl> INSTANCE_SUPPLIER = self->((IListeneredTouchConsumer)self).__ListeneredTouchConsumer__MakeInstance();
 
         /**
          * (pozn.: V žádném případě nesmí být volána v rámci konfiguračních metod již tázané mixinové komponenty.)
@@ -214,7 +203,7 @@ public interface IListeneredTouchConsumer extends InputConsumer, ListeneredTouch
          * @return Mixinová komponenta příslušící dané instanci {@link IListeneredTouchConsumer}
          * */
         protected static Impl getImpl(IListeneredTouchConsumer self){
-            return  implementations.get(instanceFinder.with(self));
+            return self.getExtension(Util.Impl.class, INSTANCE_SUPPLIER);
         }
 
         /**
@@ -394,7 +383,7 @@ public interface IListeneredTouchConsumer extends InputConsumer, ListeneredTouch
          *  Defaultní implementace poskytnuta pro libovolné {@link UberDrawable} používající alespon 2D
          *  vektor, jehož Skalární složky jsou kompatibilní s typem {@link Number}.
          * */
-        public default BiFunction<Vect2i, Drawable<?,?>, Vect2i> __ListeneredTouchConsumer_util__childPosTransformer(){
+        public default BiFunction<Vect2i, DrawableElem<?,?>, Vect2i> __ListeneredTouchConsumer_util__childPosTransformer(){
             if(this instanceof UberDrawable){
                 UberDrawable self = ((UberDrawable)this);
                 VectUtil POS = self.getVectUtil();
@@ -412,10 +401,10 @@ public interface IListeneredTouchConsumer extends InputConsumer, ListeneredTouch
             return null;
         }
 
-        /**{@inheritDoc}*/
-        @Override default IListeneredTouchConsumer.Util.Impl __ListeneredTouchConsumer__MakeInstance() {
+        @Override
+        default IListeneredTouchConsumer.Util.Impl __ListeneredTouchConsumer__MakeInstance() {
             if(this instanceof UberDrawable){
-                BiFunction<Vect2i, Drawable<?,?>, Vect2i> func = __ListeneredTouchConsumer_util__childPosTransformer();
+                BiFunction<Vect2i, DrawableElem<?,?>, Vect2i> func = __ListeneredTouchConsumer_util__childPosTransformer();
                 if(func!=null)
                     return new Util.Impl(this, func);
             }
@@ -439,12 +428,12 @@ public interface IListeneredTouchConsumer extends InputConsumer, ListeneredTouch
                 return (Impl) IListeneredTouchConsumer.Util.getImpl(instance);
             }
 
-            /**{@inheritDoc}*/
+
             public static class Impl extends IListeneredTouchConsumer.Util.Impl{
                 /**
                  * Vytvoří instanci mixinové komponenty pro danou instanci {@link IListeneredTouchConsumer.ForLayout}.
                  * */
-                public Impl(IListeneredTouchConsumer.ForLayout self, BiFunction<Vect2i, Drawable<?,?>, Vect2i> childPosTransform){
+                public Impl(IListeneredTouchConsumer.ForLayout self, BiFunction<Vect2i, DrawableElem<?,?>, Vect2i> childPosTransform){
                     super(self);
 
                     distrTouchUp = e->distrToChildren(self, e,  childPosTransform, (c,v)->c.touchUp(e.with(c, v.x, v.y)));
@@ -474,9 +463,9 @@ public interface IListeneredTouchConsumer extends InputConsumer, ListeneredTouch
                  * */
                 public final EventListener<OnMouseMovedArgs> distrMouseMoved;
 
-                private static boolean distrToChildren(IListeneredTouchConsumer.ForLayout self, OnMouseMovedArgs v, BiFunction<Vect2i, Drawable<?,?>, Vect2i> childPosTransform, BiPredicate<InputConsumer, Vect2i> distr){
+                private static boolean distrToChildren(IListeneredTouchConsumer.ForLayout self, OnMouseMovedArgs v, BiFunction<Vect2i, DrawableElem<?,?>, Vect2i> childPosTransform, BiPredicate<InputConsumer, Vect2i> distr){
                     boolean ret = false;
-                    for(Drawable<?,?> child: ((UberDrawable<?,?>) self).getDrawableChildren())
+                    for(DrawableElem<?,?> child: ((UberDrawable<?,?>) self).getDrawableChildren())
                         ret |= (child instanceof InputConsumer && distr.test((InputConsumer) child, childPosTransform.apply(Vect2i.make(v.x, v.y), child)));
 
                     return ret;

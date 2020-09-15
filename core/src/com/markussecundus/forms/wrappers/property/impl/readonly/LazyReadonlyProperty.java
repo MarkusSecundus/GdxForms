@@ -54,9 +54,6 @@ public class LazyReadonlyProperty<T> extends AbstractReadonlyProperty<T> {
         return val;
     }
 
-    /**
-     * {@inheritDoc}
-     * */
     @Override protected T change(T val) {
         if(sup!=null)
             consumeSupply();

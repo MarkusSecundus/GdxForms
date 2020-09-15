@@ -58,9 +58,7 @@ public abstract class AbstractReadonlyProperty<T> extends ReadonlyWrapper.Abstra
 
 //public:
 
-    /**{@inheritDoc}*/
     @Override public final T get() {
-        T ret = obtain();
         if( getterListeners!=null)
             getterListeners.get().exec( GetterListenerArgs.make(this, obtainListenerlessWrapper()));
         return obtain();
@@ -101,7 +99,7 @@ public abstract class AbstractReadonlyProperty<T> extends ReadonlyWrapper.Abstra
         return setterListeners;
     }
 
-    //private:
+//private:
 
     private AbstractConstProperty<EventDelegate<GetterListenerArgs<T>>> getterListeners = null;
     private AbstractConstProperty<EventDelegate<SetterListenerArgs<T>>> setterListeners = null;

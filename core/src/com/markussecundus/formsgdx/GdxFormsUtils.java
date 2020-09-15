@@ -140,6 +140,8 @@ public class GdxFormsUtils {
         @Override
         public Vector2 withNth(Vector2 p, int n, Float s) { return n==0?p.cpy().set(s, p.y):p.cpy().set(p.x, s); }
 
+        public boolean lt(Vector2 a, Vector2 b){return a.x < b.x && a.y < b.y;}
+        public boolean le(Vector2 a, Vector2 b){return a.x <= b.x && a.y <= b.y;}
 
         /**{@inheritDoc}*/
         @Override
@@ -222,6 +224,9 @@ public class GdxFormsUtils {
             return ret;
         }
 
+
+        public boolean lt(Vector3 a, Vector3 b){return a.x < b.x && a.y < b.y && a.z < b.z;}
+        public boolean le(Vector3 a, Vector3 b){return a.x <= b.x && a.y <= b.y && a.z <= b.z;}
 
         /**{@inheritDoc}*/
         @Override

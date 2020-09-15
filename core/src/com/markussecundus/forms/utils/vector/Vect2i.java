@@ -1,6 +1,6 @@
 package com.markussecundus.forms.utils.vector;
 
-import com.markussecundus.forms.utils.datastruct.readonly.ReadonlyList_int;
+import com.markussecundus.forms.utils.datastruct.ReadonlyList;
 
 import java.io.Serializable;
 
@@ -14,7 +14,7 @@ import java.io.Serializable;
  *
  * @author MarkusSecundus
  * */
-public class Vect2i implements Cloneable, Serializable, ReadonlyList_int {
+public class Vect2i implements Cloneable, Serializable, ReadonlyList.Int {
 
     /**
      * Souřadnice vektoru.
@@ -47,6 +47,9 @@ public class Vect2i implements Cloneable, Serializable, ReadonlyList_int {
      * */
     public static Vect2i make(Vect2f v){return make((int)v.x, (int)v.y);}
 
+    public static Vect2i make(Vect2d v){return make((int)v.x, (int)v.y);}
+
+
     private Vect2i(int x, int y){this.x = x;this.y = y;}
 
     private static final int POOL_X = 8, POOL_Y = 32;
@@ -72,11 +75,16 @@ public class Vect2i implements Cloneable, Serializable, ReadonlyList_int {
      * (viz {@link Vect2f})
      * */
     public Vect2f toFloat(){return Vect2f.make(this);}
+    /**
+     * @return převod tohoto vektoru na doublovou variantu.
+     * (viz {@link Vect2f})
+     * */
+    public Vect2d toDouble(){return Vect2d.make(this);}
 
     /**
      * @return součet tohoto vektoru s danou hodnotou.
      * */
-    public Vect2i add(int x, int y){return make(this.x + x, this.y+y);}
+    public Vect2i add(int x, int y){return make(this.x + x, this.y + y);}
     /**
      * @return součet tohoto vektoru s danou hodnotou.
      * */
@@ -85,7 +93,7 @@ public class Vect2i implements Cloneable, Serializable, ReadonlyList_int {
     /**
      * @return rozdíl tohoto vektoru s danou hodnotou.
      * */
-    public Vect2i sub(int x, int y){return make(this.x - x, this.y-y);}
+    public Vect2i sub(int x, int y){return make(this.x - x, this.y - y);}
     /**
      * @return rozdíl tohoto vektoru s danou hodnotou.
      * */
@@ -118,7 +126,7 @@ public class Vect2i implements Cloneable, Serializable, ReadonlyList_int {
     /**
      * @return délka vektoru
      * */
-    public double len(){return (int)Math.sqrt(len2());}
+    public double len(){return Math.sqrt(len2());}
 
 
     /**
@@ -191,11 +199,10 @@ public class Vect2i implements Cloneable, Serializable, ReadonlyList_int {
         return obj instanceof Vect2i && ((Vect2i)obj).equals(this);
     }
 
-    /**
-     * {@inheritDoc}
-     * */
+
+
     @Override
-    protected Object clone() {
+    public Object clone() {
         try {
             return super.clone();
         } catch (CloneNotSupportedException e) {
@@ -203,9 +210,7 @@ public class Vect2i implements Cloneable, Serializable, ReadonlyList_int {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * */
+
     @Override
     public String toString() {
         return String.format("(%d, %d)^T", x,y);
@@ -233,7 +238,7 @@ public class Vect2i implements Cloneable, Serializable, ReadonlyList_int {
 
 
     @Override
-    public int getNth(int n) {
+    public int getNth_raw(int n) {
         return n==0 ? x : y;
     }
 
@@ -258,59 +263,55 @@ public class Vect2i implements Cloneable, Serializable, ReadonlyList_int {
          * */
         public static final Util INSTANCE = new Util();
 
-        /**{@inheritDoc}*/
+
         public Vect2i add(Vect2i a, Vect2i b){return a.add(b);}
-        /**{@inheritDoc}*/
         public Vect2i sub(Vect2i a, Vect2i b){return a.sub(b);}
 
-        /**{@inheritDoc}*/
+
         public Vect2i scl(Vect2i a, Integer b){return a.scl(b);}
-        /**{@inheritDoc}*/
         public Vect2i div(Vect2i a, Integer b){return a.div(b);}
 
-        /**{@inheritDoc}*/
+
         public Vect2i scl(Vect2i a, double b) { return a.scl(b); }
-        /**{@inheritDoc}*/
         public Vect2i div(Vect2i a, double b) { return a.div(b); }
 
-        /**{@inheritDoc}*/
+
         public  Integer len2(Vect2i v){return v.len2();}
-        /**{@inheritDoc}*/
         public  Integer len(Vect2i v){return (int)v.len();}
 
-        /**{@inheritDoc}*/
+
         public  Integer dst2(Vect2i a, Vect2i b){return a.dst2(b);}
-        /**{@inheritDoc}*/
         public  Integer dst(Vect2i a, Vect2i b){return (int)a.dst(b);}
 
-        /**{@inheritDoc}*/
+
+        public boolean lt(Vect2i a, Vect2i b){return a.x < b.x && a.y < b.y;}
+        public boolean le(Vect2i a, Vect2i b){return a.x <= b.x && a.y <= b.y;}
+
+
         public Vect2i cpy(Vect2i v){return v;}
 
-        /**{@inheritDoc}*/
+
         public Integer minScalar(Vect2i v) { return v.min(); }
-        /**{@inheritDoc}*/
         public Integer maxScalar(Vect2i v) { return v.max(); }
 
 
-        /**{@inheritDoc}*/
+
         public Integer[] decompose(Vect2i p) { return p.decompose(); }
-        /**{@inheritDoc}*/
         public Vect2i compose(Integer[] s) { return Vect2i.compose(s); }
-        /**{@inheritDoc}*/
+
         public int DIMENSION_COUNT(){return 2;}
 
-        /**{@inheritDoc}*/
-        public Integer getNth(Vect2i v, int n) { return v.getNth(n); }
-        /**{@inheritDoc}*/
+
+        public Integer getNth(Vect2i v, int n) { return v.getNth_raw(n); }
         public Vect2i withNth(Vect2i p, int n, Integer s) { return n==0?make(s, p.y):make(p.x, s); }
 
-        /**{@inheritDoc}*/
+
         public Vect2i ZERO(){return ZERO;}
 
-        /**{@inheritDoc}*/
+
         public Vect2i MAX_VAL(){return MAX_VALUE;}
 
-        /**{@inheritDoc}*/
+
         @Override public Class<Vect2i> getVectClass() { return Vect2i.class; }
     }
 

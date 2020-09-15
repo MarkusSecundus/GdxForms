@@ -1,9 +1,10 @@
 package com.markussecundus.formsgdx.rendering;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.markussecundus.forms.elements.DrawableElem;
 
 /**
- * Rozhraní, určené jako <code>Rend</code> parametr pro {@link com.markussecundus.forms.elements.Drawable}s,
+ * Rozhraní, určené jako <code>Rend</code> parametr pro {@link DrawableElem}s,
  * která ke svému vykreslení potřebují pouze služby {@link ShapeRenderer}u.
  *
  *

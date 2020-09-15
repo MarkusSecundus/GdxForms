@@ -1,5 +1,6 @@
 package com.markussecundus.forms.gfx;
 
+import com.markussecundus.forms.elements.DrawableElem;
 import com.markussecundus.forms.utils.vector.VectUtil;
 import com.markussecundus.forms.wrappers.property.Property;
 
@@ -17,11 +18,11 @@ import com.markussecundus.forms.wrappers.property.Property;
  *
  * @see VectUtil
  * @see BinaryGraphicalComposite
- * @see com.markussecundus.forms.elements.Drawable
+ * @see DrawableElem
  *
  * @author MarkusSecundus
  * */
-public interface GraphicalPrimitive<Rend, Pos, Scalar extends Comparable<Scalar>> {
+public interface GraphicalPrimitive<Rend, Pos, Scalar extends Comparable<Scalar>> extends Drawable<Rend, Pos> {
 
     /**
      * Vykreslí objekt na obrazovku.
@@ -40,26 +41,18 @@ public interface GraphicalPrimitive<Rend, Pos, Scalar extends Comparable<Scalar>
      *
      * @return Rozměry, kterých objekt nabývá.
      * */
-    public Property<Pos> dimensions();
+    public Property<Pos> size();
 
-    /**
-     * Pohodlnější zkratka pro <code>dimensions().get()</code>.
-     *
-     * @return Pohodlnější zkratka pro <code>dimensions().get()</code>.
-     * */
-    public default Pos getDimensions(){
-        return dimensions().get();
-    }
 
     /**
      * Pohodlnější zkratka pro <code>dimensions().set(newPos)</code>.
      *
-     * @param newPos nová hodnota pro rozměry objektu.
+     * @param newSize nová hodnota pro rozměry objektu.
      *
      * @return Pohodlnější zkratka pro <code>dimensions().set(newPos)</code>.
      * */
-    public default Pos setDimensions(Pos newPos){
-        return dimensions().set(newPos);
+    public default Pos setSize(Pos newSize){
+        return size().set(newSize);
     }
 
     /**

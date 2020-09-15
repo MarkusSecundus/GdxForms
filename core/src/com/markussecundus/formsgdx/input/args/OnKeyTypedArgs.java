@@ -9,7 +9,7 @@ import com.markussecundus.formsgdx.input.InputManager;
  *
  * @see OnKeyClickedArgs
  *
- * @see OnInputEventArgs
+ * @see com.markussecundus.formsgdx.input.args.OnInputEventArgs
  *
  * @see InputConsumer
  * @see InputManager

@@ -91,13 +91,28 @@ public interface Pair<A, B> {
     }
 
 
-
+    /**
+     * Základní abstraktní implementace poskytující kanonickou implementaci metod
+     * <code>hashCode</code>, <code>equals</code> a <code>toString</code>.
+     * */
     public static abstract class Abstract<A,B> implements Pair<A,B>{
+
+        /**
+         * Vrátí hodnotu závisející na hodnotách prvků páru.
+         *
+         * {@inheritDoc}
+         * */
         @Override
         public int hashCode() {
             return FormsUtil.hashCode(first(), second());
         }
 
+
+        /**
+         * Závisí na shodě jednotlivých prvků páru.
+         *
+         * {@inheritDoc}
+         * */
         @Override
         public boolean equals(Object o) {
             if(!(o instanceof Pair<?,?>))
@@ -108,7 +123,7 @@ public interface Pair<A, B> {
 
         @Override
         public String toString() {
-            return String.format("{%s, %s}", first(), second());
+            return String.format("{'%s', '%s'}", first(), second());
         }
 
 
@@ -120,11 +135,36 @@ public interface Pair<A, B> {
             public boolean equals(Object o) { return o.equals(importantPart()); }
         }
 
-
+        /**
+         * Varianta {@link Pair.Abstract}, kde se výsledek metod <code>hashCode</code>
+         * a <code>equals</code> odvíjí čistě od hodnoty prvního prvku páru.
+         *
+         * @see Pair.Abstract
+         *
+         * @author MarkusSecundus
+         * */
         public static abstract class AbstractFirstWeighted<A,B> extends Abstract.AbstractWeighted<A,B>{
+            /**
+             * Vrátí první prvek páru.
+             *
+             * @return <code>this.first()</code>
+             * */
             protected Object importantPart() { return first(); }
         }
+        /**
+         * Varianta {@link Pair.Abstract}, kde se výsledek metod <code>hashCode</code>
+         * a <code>equals</code> odvíjí čistě od hodnoty druhého prvku páru.
+         *
+         * @see Pair.Abstract
+         *
+         * @author MarkusSecundus
+         * */
         public static abstract class AbstractSecondWeighted<A,B> extends Abstract.AbstractWeighted<A,B>{
+            /**
+             * Vrátí druhý prvek páru.
+             *
+             * @return <code>this.second()</code>
+             * */
             protected Object importantPart() { return second(); }
         }
     }

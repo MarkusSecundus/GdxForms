@@ -7,14 +7,14 @@ import java.util.List;
 
 
 /**
- * Basic inteface for any {@link Drawable} that groups together multiple other Drawables.
+ * Basic inteface for any {@link DrawableElem} that groups together multiple other Drawables.
  *
  * @param <Pos> Vector type used to define the position and dimensions of the element
  * @param <Rend> The renderer type that performs the drawing of the element to the screen or anywhere else
  *
  * @author MarkusSecundus
  * */
-public interface UberDrawable<Rend, Pos> extends Drawable<Rend, Pos>, UberElement {
+public interface UberDrawable<Rend, Pos> extends DrawableElem<Rend, Pos>, UberElement {
 
 
     /**
@@ -26,12 +26,12 @@ public interface UberDrawable<Rend, Pos> extends Drawable<Rend, Pos>, UberElemen
      * Try to avoid simultaneous modifications of both the lists.
      * @see com.markussecundus.forms.elements.impl.utils.ElementLists
      * */
-    public ConstProperty<List<Drawable<Rend, Pos>>> drawableChildren();
+    public ConstProperty<List<DrawableElem<Rend, Pos>>> drawableChildren();
 
     /**
      * Shinier shortcut for calling <code>drawableChildren().get()</code>.
      * */
-    public default List<Drawable<Rend, Pos>> getDrawableChildren(){
+    public default List<DrawableElem<Rend, Pos>> getDrawableChildren(){
         return drawableChildren().get();
     }
 
@@ -42,7 +42,7 @@ public interface UberDrawable<Rend, Pos> extends Drawable<Rend, Pos>, UberElemen
      *
      * @param child the child of this whose position is being obtained
      * */
-    public ReadonlyProperty<Pos> childPosition(Drawable<Rend, Pos> child);
+    public ReadonlyProperty<Pos> childPosition(DrawableElem<Rend, Pos> child);
 
 
     /**
@@ -50,7 +50,7 @@ public interface UberDrawable<Rend, Pos> extends Drawable<Rend, Pos>, UberElemen
      *
      * @param child the child of this whose position is being obtained
      * */
-    public default Pos getChildPosition(Drawable<Rend, Pos> child){
+    public default Pos getChildPosition(DrawableElem<Rend, Pos> child){
         return childPosition(child).get();
     }
 }

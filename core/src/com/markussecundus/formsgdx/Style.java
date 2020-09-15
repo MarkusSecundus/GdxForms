@@ -12,45 +12,38 @@ import com.markussecundus.forms.utils.vector.Vect2f;
  * @author MarkusSecnudus
  * */
 public class Style {
-    public Style(Color innerColor, Color outerColor, Color transitionColor, float edgeRoundness, float borderRatio, Vect2f borderThickness) {
-        this.innerColor = innerColor;
-        this.outerColor = outerColor;
-        this.transitionColor = transitionColor;
-        this.edgeRoundness = edgeRoundness;
-        this.borderRatio = borderRatio;
-        this.borderThickness = borderThickness;
-    }
+    public Style(){}
 
     /**
      * Vnitřní barva pro dvoubarevné útvary.
      * */
-    public final Color innerColor;
+    public Color innerColor;
 
 
     /**
      * Vnější barva pro dvoubarevné útvary.
      * */
-    public final Color outerColor;
+    public Color outerColor;
 
     /**
      * Speciální barva, značící, že je útvar v přechodném stavu.
      * */
-    public final Color transitionColor;
+    public Color transitionColor;
 
     /**
      * Kulatost pro zaoblené útvary.
      * */
-    public final float edgeRoundness;
+    public float edgeRoundness;
 
     /**
      * Poměr tloušťky okrajů pro relativně obrubové útvary.
      * */
-    public final float borderRatio;
+    public float borderRatio;
 
     /**
      * Rozměry okrajů pro absolutně obrubové útvary.
      * */
-    public final Vect2f borderThickness;
+    public Vect2f borderThickness;
 
 
 

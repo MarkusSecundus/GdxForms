@@ -1,5 +1,6 @@
 package com.markussecundus.forms.elements;
 
+import com.markussecundus.forms.extensibility.Extensible;
 import com.markussecundus.forms.wrappers.property.ConstProperty;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  *
  * @author MarkusSecundus
  * */
-public interface UberElement extends Element {
+public interface UberElement extends Element, Extensible {
 
     /**
      * Instance of {@link java.util.List} containing only and all the children, that are to be updated in the game loop.

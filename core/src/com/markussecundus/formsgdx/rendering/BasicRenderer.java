@@ -3,6 +3,7 @@ package com.markussecundus.formsgdx.rendering;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.markussecundus.forms.elements.DrawableElem;
 import com.markussecundus.forms.gfx.GraphicalPrimitive;
 import com.markussecundus.forms.utils.vector.VectUtil;
 import com.markussecundus.forms.wrappers.property.Property;
@@ -14,7 +15,7 @@ import com.markussecundus.forms.wrappers.property.impl.general.SimpleProperty;
  *
  * Zastřešuje spojenou funkcionalitu {@link Batch} a {@link ShapeRenderer} a režii potřebnou při jejich střídavém používání.
  *
- * @see com.markussecundus.forms.elements.Drawable
+ * @see DrawableElem
  * @see GraphicalPrimitive
  *
  * @see Batch
@@ -142,8 +143,8 @@ public class BasicRenderer implements BatchRenderer, BasicShapeRenderer {
          * {@inheritDoc}
          * */
         @Override
-        public Property<Vect> dimensions() {
-            return base.dimensions();
+        public Property<Vect> size() {
+            return base.size();
         }
 
         /**

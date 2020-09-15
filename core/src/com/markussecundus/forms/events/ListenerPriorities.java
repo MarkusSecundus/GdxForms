@@ -1,20 +1,45 @@
 package com.markussecundus.forms.events;
 
+
+/**
+ * Statická třída specifikující některé konkrétní hodnoty priorit {@link EventListener}ů
+ * používané napříč Formulářovou knihovnou.
+ *
+ * @see EventDelegate
+ * @see EventListener
+ *
+ * @author MarkusSecundus
+ * * */
 public class ListenerPriorities {
-    public static final class Raw {
-        public static final int USER = 0;
-        public static final int PRE_UTIL = 100;
-        public static final int POST_UTIL = -100;
-        public static final int ARG_GUARD = 127;
-        public static final int TAIL_RECURSION = Integer.MIN_VALUE;
-    }
 
+    /**
+     * Listener, který má kontrolovat zda hodnota splnuje nějaké kriterium a případně utnout běh delegáta hned na začátku.
+     * */
+    public static final int ARG_GUARD = 1000;
 
-    public static final Integer USER = Raw.USER;
-    public static final Integer PRE_UTIL = Raw.PRE_UTIL;
-    public static final Integer POST_UTIL = Raw.POST_UTIL;
-    public static final Integer ARG_GUARD = Raw.ARG_GUARD;
-    public static final Integer TAIL_RECURSION = Raw.TAIL_RECURSION;
+    /**
+     * Listenery, který musí proběhnout před listenery uživatelskými.
+     * */
+    public static final int PRE_UTIL = 100;
 
+    /**
+     * Listenery přidané uživatelem.
+     * */
+    public static final int USER = 0;
+
+    /**
+     * Listenery, který musí proběhnout po listenerech uživatelských.
+     * */
+    public static final int POST_UTIL = -100;
+
+    /**
+     * Listener provádějící aktualizaci hodnot nabindovaných na property.
+     * */
+    public static final int BINDING_EXECUTOR = -1000;
+
+    /**
+     * Koncová rekurze :-D.
+     * */
+    public static final int TAIL_RECURSION = Integer.MIN_VALUE;
 
 }

@@ -39,16 +39,15 @@ public class LazyProperty<T> extends AbstractProperty<T> {
      *
      * {@inheritDoc}
      * */
-    @Override protected T obtain() {
+    @Override
+    protected T obtain() {
         if(sup!=null)
             consumeSupply();
         return t;
     }
 
-    /**
-     * {@inheritDoc}
-     * */
-    @Override protected T change(T t) {
+    @Override
+    protected T change(T t) {
         if(sup!=null)
             consumeSupply();
         return this.t = t;

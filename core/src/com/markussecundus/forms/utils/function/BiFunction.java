@@ -9,6 +9,9 @@ import java.util.Objects;
  *
  * @see java.util.function.BiFunction
  *
+ * @see Function
+ * @see TriFunction
+ *
  * @author MarkusSecundus
  * */
 @FunctionalInterface

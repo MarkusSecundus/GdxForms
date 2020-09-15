@@ -1,15 +1,18 @@
 package com.markussecundus.forms.elements.impl.layouts;
 
-import com.markussecundus.forms.elements.Drawable;
+import com.markussecundus.forms.elements.DrawableElem;
 import com.markussecundus.forms.elements.Element;
 import com.markussecundus.forms.elements.UberDrawable;
-import com.markussecundus.forms.elements.impl.BasicAbstractDrawable;
+import com.markussecundus.forms.elements.impl.BasicAbstractDrawableElem;
 import com.markussecundus.forms.elements.impl.utils.DefaultSizeBehavior;
 import com.markussecundus.forms.elements.impl.utils.ElementLists;
 import com.markussecundus.forms.elements.impl.utils.ElementsTagMap;
 import com.markussecundus.forms.events.EventDelegate;
+import com.markussecundus.forms.events.EventListener;
 import com.markussecundus.forms.events.ListenerPriorities;
+import com.markussecundus.forms.gfx.Drawable;
 import com.markussecundus.forms.utils.Pair;
+import com.markussecundus.forms.utils.function.Function;
 import com.markussecundus.forms.utils.vector.VectUtil;
 import com.markussecundus.forms.wrappers.WriteonlyWrapper;
 import com.markussecundus.forms.wrappers.property.ConstProperty;
@@ -24,7 +27,7 @@ import java.util.Map;
 /**
  * Basic base class for all Layouts.
  *
- * Provides the default size behavior (as in {@link BasicAbstractDrawable}) and
+ * Provides the default size behavior (as in {@link BasicAbstractDrawableElem}) and
  * basic logic for containment and management  of children and their relative positions.
  *
  *
@@ -39,7 +42,7 @@ import java.util.Map;
  *
  * @author MarkusSecundus
  * */
-public abstract class BasicAbstractLayout<Rend, Pos, Scalar extends Comparable<Scalar>> extends BasicAbstractDrawable<Rend, Pos, Scalar> implements UberDrawable<Rend, Pos> {
+public abstract class BasicAbstractLayout<Rend, Pos, Scalar extends Comparable<Scalar>> extends BasicAbstractDrawableElem<Rend, Pos, Scalar> implements UberDrawable<Rend, Pos> {
 
     /**
      * Initialises the size behavior and children management.
@@ -55,25 +58,27 @@ public abstract class BasicAbstractLayout<Rend, Pos, Scalar extends Comparable<S
         this.POS = posUtil;
     }
 
-    /**
-     * {@inheritDoc}
-     * */
-    @Override public ConstProperty<List<Drawable<Rend, Pos>>> drawableChildren() {
+    @Override public ConstProperty<List<DrawableElem<Rend, Pos>>> drawableChildren() {
         return childrenContainer.drawablesAsProperty;
     }
 
-    /**
-     * {@inheritDoc}
-     * */
     @Override public ConstProperty<List<Element>> children() {
         return childrenContainer.elementsAsProperty;
     }
 
-    /**
-     * {@inheritDoc}
-     * */
-    @Override public ReadonlyProperty<Pos> childPosition(Drawable<Rend, Pos> child) {
-        return childPositionsContainer.get(child).positionProperty;
+    @Override public ReadonlyProperty<Pos> childPosition(DrawableElem<Rend, Pos> child) {
+        ChildPosition pos = childPositionsContainer.get(child);
+        return pos.positionProperty;
+    }
+
+    @Override
+    public final List<DrawableElem<Rend, Pos>> getDrawableChildren() {
+        return UberDrawable.super.getDrawableChildren();
+    }
+
+    @Override
+    public final Pos getChildPosition(DrawableElem<Rend, Pos> child) {
+        return UberDrawable.super.getChildPosition(child);
     }
 
     /**
@@ -81,17 +86,18 @@ public abstract class BasicAbstractLayout<Rend, Pos, Scalar extends Comparable<S
      *
      * {@inheritDoc}
      * */
-    @Override public void draw(Rend renderer, Pos position) {
-        for(Drawable<Rend, Pos> child: drawableChildren().get())
+    @Override public boolean draw(Rend renderer, Pos position) {
+        for(DrawableElem<Rend, Pos> child: drawableChildren().get())
             child.draw(renderer, POS.add(position, childPosition(child).get()  ) );
+        return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override public VectUtil<Pos, Scalar> getVectUtil() {
         return POS;
     }
+
+
+//protected:
 
     /**
      * {@link VectUtil} for the vector type used in the layout.
@@ -111,12 +117,65 @@ public abstract class BasicAbstractLayout<Rend, Pos, Scalar extends Comparable<S
      *
      * @see ElementsTagMap
      * */
-    protected final ElementsTagMap<Drawable<Rend, Pos>> drawableChildrenByTag = new ElementsTagMap<>();
+    protected final ElementsTagMap<DrawableElem<Rend, Pos>> drawableChildrenByTag = new ElementsTagMap<>();
 
     /**
      * Add any logic here, that needs to be applied whenever a drawable child changes its size.
      * */
     protected final EventDelegate<ReadonlyProperty.SetterListenerArgs<Pos>> onChildResizedAction = EventDelegate.make();
+
+
+    /**
+     * Container class for all the listeners, that are automatically added
+     * to the delegates on <code>childrenContainer</code>, to make them easily refferentiable
+     * and possibly able to be deleted from the particular delegate if necessary.
+     * */
+    protected final class ChildrenListeners {
+        /**
+         * Skips execution of the listener for all Objects attempted to be removed, that aren't instances of {@link Element}.
+         * <p>
+         * Gets added to <code>childrenContainer.onElementRemoved</code>
+         * */
+        public final EventListener<Object> IS_ELEMENT_GUARD = o-> o instanceof Element;
+
+        /**
+         * Sets the <code>_sizeConstraint</code> of the drawable child being removed to null.
+         *<p>
+         *Gets added to <code>childrenContainer.onElementRemoved</code>
+         * */
+        public final EventListener<Object> SIZE_CONSTRAINT_REMOVER__ON_UNCHILD = o -> {
+            if (_isDrawableChild(o)) {
+                DrawableElem<?, ?> drw = (DrawableElem<?, ?>) o;
+                ((EventDelegate<?>) (drw.size().setterListeners().get()))._getUtilListeners().remove(onChildResizedAction);
+                drw._sizeConstraint().set(null);
+            }
+            return true;
+        };
+
+        /**
+         * Adds the <code>onChildResizedAction</code> delegate to the setter listener of <code>size</code> property
+         * of the drawable child being added.
+         * */
+        public final EventListener<Drawable<Rend, Pos>> ADDER_OF__ON_RESIZED_LISTENER = drw -> {
+            drw.size().setterListeners().get()._getUtilListeners().add(onChildResizedAction);
+            return true;
+        };
+
+        /**
+         * Removes the <code>onChildResizedAction</code> delegate from the setter listener of <code>size</code> property
+         * of the drawable child being removed.
+         * */
+        public final EventListener<Object> REMOVER_OF__ON_RESIZED_LISTENER = drw -> {
+            if(_isDrawableChild(drw)) {
+                ((DrawableElem<?,?>)drw).size().setterListeners().get()._getUtilListeners().remove(onChildResizedAction);
+            }
+            return true;
+        };
+    }
+    /**
+     * The instance of {@link ChildrenListeners} belonging to the particular instance of <code>BasicAbstractLayout</code>.
+     * */
+    protected final ChildrenListeners CHILDREN_LISTENERS = new ChildrenListeners();
 
 
     /**
@@ -131,33 +190,24 @@ public abstract class BasicAbstractLayout<Rend, Pos, Scalar extends Comparable<S
      * */
     protected final ElementLists.Delegated<Rend, Pos> childrenContainer = new ElementLists.Delegated<>();
     {
-        childrenContainer.onElementRemoved.getListeners(ListenerPriorities.ARG_GUARD).add(
-                o -> (o instanceof Element));
-        childrenContainer.onElementRemoved._getUtilListeners().add(
-                o -> {
-                    if (_isDrawableChild(o)) {
-                        Drawable<?, ?> drw = (Drawable<?, ?>) o;
-                        ((EventDelegate<?>) (drw.size().setterListeners().get()))._getUtilListeners().remove(onChildResizedAction);
-                        drw._sizeConstraint().set(null);
-                    }
-                    return true;
-                });
+        childrenContainer.onElementRemoved.getListeners(ListenerPriorities.ARG_GUARD).add(CHILDREN_LISTENERS.IS_ELEMENT_GUARD);
+        childrenContainer.onElementRemoved._getUtilListeners().add(CHILDREN_LISTENERS.SIZE_CONSTRAINT_REMOVER__ON_UNCHILD);
 
-        childrenContainer.onDrawableAdded._getUtilListeners().add(
-                drw -> {
-                    drw.size().setterListeners().get()._getUtilListeners().add(onChildResizedAction);
-                    return true;
-                });
+        childrenContainer.onDrawableAdded._getUtilListeners().add(CHILDREN_LISTENERS.ADDER_OF__ON_RESIZED_LISTENER);
+        childrenContainer.onElementRemoved._getUtilListeners().add(CHILDREN_LISTENERS.REMOVER_OF__ON_RESIZED_LISTENER);
 
-        drawableChildrenByTag.bindTag(childrenContainer.onDrawableAdded, childrenContainer.onElementRemoved, Drawable::size);
+        setDrawableChildToTagBinding(DrawableElem::size);
     }
+
+
+
 
     /**
      * Creates the <code>childPositionsContainer</code> container used to store positions of drawable children.
      *
      * Override this when needed to use something else than {@link HashMap}.
      * */
-    protected Map<Drawable<Rend, Pos>, ChildPosition> MAKE_CONTAINER_FOR_CHILD_POSITIONS(){return new HashMap<>(); }
+    protected Map<DrawableElem<Rend, Pos>, ChildPosition> MAKE_CONTAINER_FOR_CHILD_POSITIONS(){return new HashMap<>(); }
 
     /**
      * Stores positions of drawable children.
@@ -165,15 +215,15 @@ public abstract class BasicAbstractLayout<Rend, Pos, Scalar extends Comparable<S
      * Key... the drawable child
      * Value... its position
      * */
-    protected final Map<Drawable<Rend, Pos>, ChildPosition> childPositionsContainer = MAKE_CONTAINER_FOR_CHILD_POSITIONS();
+    protected final Map<DrawableElem<Rend, Pos>, ChildPosition> childPositionsContainer = MAKE_CONTAINER_FOR_CHILD_POSITIONS();
 
     /**
-     * Associates a {@link Drawable} child with a position in this Layout.
+     * Associates a {@link DrawableElem} child with a position in this Layout.
      *
      * @param child The child to which the position is being given
      * @param pos The position being given to the <code>child</code>
      * */
-    protected Pos setChildPosition(Drawable<Rend, Pos> child, Pos pos){
+    protected Pos setChildPosition(DrawableElem<Rend, Pos> child, Pos pos){
         ChildPosition child_pos = childPositionsContainer.get(child);
         if(child_pos==null) {
             childPositionsContainer.put(child, new ChildPosition(pos));
@@ -211,7 +261,7 @@ public abstract class BasicAbstractLayout<Rend, Pos, Scalar extends Comparable<S
      * @param o the object to recognize
      * */
     protected final boolean _isDrawableChild(Object o){
-        return o instanceof Drawable && getDrawableChildren().contains(o);
+        return o instanceof DrawableElem && getDrawableChildren().contains(o);
     }
 
     /**
@@ -222,4 +272,27 @@ public abstract class BasicAbstractLayout<Rend, Pos, Scalar extends Comparable<S
     protected final boolean _isChild(Object o){
         return o instanceof Element && getChildren().contains(o);
     }
+
+    /**
+     * Ensures that all newly added drawable children will be bound to a tag in <code>drawableChildrenByTag</code>
+     * specified by the <code>tagGetter</code> function.
+     *
+     * @param tagGetter logic for extracting tag object from a <code>DrawableElem</code>.
+     * */
+    protected final void setDrawableChildToTagBinding(Function<DrawableElem<Rend, Pos>, Object> tagGetter){
+        drawableChildrenByTag.bindTag(childrenContainer.onDrawableAdded, childrenContainer.onElementRemoved, tagGetter);
+    }
+
+
+
+
+
+
+
+
+
+    /**
+     * Thrown on recomputation of the children positions when the children do not fit into the layout.
+     * */
+    public static class LayoutTooShortException extends RuntimeException{}
 }

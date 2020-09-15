@@ -38,13 +38,13 @@ public class SimpleReadonlyProperty<T> extends AbstractReadonlyProperty<T> {
 
 //protected:
 
-    /**{@inheritDoc}*/
-    @Override protected T obtain() {
+    @Override
+    protected T obtain() {
         return val;
     }
 
-    /**{@inheritDoc}*/
-    @Override protected T change(T val) { return this.val=val; }
+    @Override
+    protected T change(T val) { return this.val=val; }
 
 //private:
 

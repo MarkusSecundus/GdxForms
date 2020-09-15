@@ -4,15 +4,23 @@ import com.badlogic.gdx.Gdx;
 import com.markussecundus.forms.utils.FormsUtil;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.StreamSupport;
 
+
+/**
+ * Kanonická implementace {@link AutobucketedList}.
+ *
+ * @see AutobucketedList
+ *
+ * @author MarkusSecundus
+ * */
 public class IAutobucketedList<T,K> implements AutobucketedList<T,K> {
 
 
     private final List<T> base;
+
+    private final ReadonlyList<T> base_readonly;
 
     private final Comparator<K> orderer;
 
@@ -20,27 +28,40 @@ public class IAutobucketedList<T,K> implements AutobucketedList<T,K> {
 
 
 
-
+    /**
+     * Vytvoří přihrádkovaný list nad danou instancí {@link List}u a s daným použitým řazením.
+     *
+     * @param base Bazický list - musí být prázdný
+     * @param ordering řazení použité pro řazení přihrádek v závislosti na jejich klíči
+     *
+     * @throws IllegalArgumentException pokud dodávaná báze není prázdná
+     * */
     public IAutobucketedList(List<T> base, Comparator<K> ordering){
         if(!base.isEmpty())
             throw new IllegalArgumentException("Base list must be empty!");
         this.base = base;
+        this.base_readonly = ReadonlyList.make(base);
         this.orderer = ordering;
     }
 
+    /**
+     * Vytvoří přihrádkovaný list nad novou instancí {@link List}u a s daným použitým řazením.
+     *
+     * @param ordering řazení použité pro řazení přihrádek v závislosti na jejich klíči
+     * */
     public IAutobucketedList(Comparator<K> ordering){
-        this(DEF_LIST_GENERATOR(), ordering);
+        this(DEF_LIST__FACTORY(), ordering);
     }
 
 
 
     @Override
-    public List<? extends T> getBase() {
-        return base;
+    public ReadonlyList<T> getBase() {
+        return base_readonly;
     }
 
 
-    protected int findBucketForIndex(int t){
+    private int findBucketForIndex(int t){
         for(int i = 0; i < bucketList.size(); ++i)
             if(bucketList.get(i).endIndex > t)
                 return i;
@@ -50,20 +71,20 @@ public class IAutobucketedList<T,K> implements AutobucketedList<T,K> {
 
 
     @Override
-    public T remove(int t) {
+    public T remove(int i) {
 
-        int kyblik = findBucketForIndex(t);
+        int kyblik = findBucketForIndex(i);
         if(kyblik < 0)
             return null;
 
         shiftIndices(kyblik, -1);
 
-        return base.remove(t);
+        return base.remove(i);
     }
 
     @Override
-    public boolean remove(Object t){
-        int i = base.indexOf(t);
+    public boolean remove(Object o){
+        int i = base.indexOf(o);
         if(i>=0){
             remove(i);
             return true;
@@ -105,7 +126,7 @@ public class IAutobucketedList<T,K> implements AutobucketedList<T,K> {
         return getBucket(i);
     }
 
-    protected List<T> getBucket(int bucketIndex){
+    private List<T> getBucket(int bucketIndex){
 
         final int beg = bucketIndex>0? bucketList.get(bucketIndex-1).endIndex : 0;
         final int endd = bucketList.get(bucketIndex).endIndex;
@@ -132,7 +153,7 @@ public class IAutobucketedList<T,K> implements AutobucketedList<T,K> {
         }
     }
 
-    protected void shiftIndices(int beginBucketIndex, int shiftAmmount){
+    private void shiftIndices(int beginBucketIndex, int shiftAmmount){
         for (int i = beginBucketIndex; i < bucketList.size(); ++i)
             bucketList.get(i).endIndex += shiftAmmount;
     }
@@ -153,6 +174,9 @@ public class IAutobucketedList<T,K> implements AutobucketedList<T,K> {
 
 
 
-
-    protected static<T> List<T> DEF_LIST_GENERATOR(){return new ArrayList<>();}
+    /**
+     * @return nová instance {@link List}, nad kterou je defaultně {@link IAutobucketedList} postaven,
+     * není-li udáno jinak
+     * */
+    public static<T> List<T> DEF_LIST__FACTORY(){return new ArrayList<>();}
 }

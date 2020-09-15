@@ -1,8 +1,8 @@
 package com.markussecundus.formsgdx.input.mixins;
 
 import com.markussecundus.forms.events.EventDelegate;
-import com.markussecundus.forms.utils.FormsUtil;
-import com.markussecundus.forms.utils.datastruct.DefaultDict;
+import com.markussecundus.forms.extensibility.Extensible;
+import com.markussecundus.forms.utils.function.Function;
 import com.markussecundus.forms.wrappers.property.ConstProperty;
 import com.markussecundus.forms.wrappers.property.impl.constant.SimpleConstProperty;
 import com.markussecundus.formsgdx.input.InputConsumer;
@@ -10,20 +10,19 @@ import com.markussecundus.formsgdx.input.args.OnKeyClickedArgs;
 import com.markussecundus.formsgdx.input.args.OnKeyTypedArgs;
 import com.markussecundus.formsgdx.input.interfaces.ListeneredKeyConsumer;
 
-import java.util.Map;
-
 /**
  * Mixin-Rozhraní Implementující skrze defaultní metody veškerou funkcionalitu {@link ListeneredKeyConsumer}.
- *
+ * <p></p>
  * Účel je, aby by bylo jednoduše možné přidat požadovanou funkcionalitu i do tříd,
  * které již mají předka a nemohou dědit z další třídy, aby získaly funkcionalitu zpracování vstupu.
- *
+ * <p></p>
  * Každé své instanci poskytuje Delegáty náležící daným klávesnicovým událostem. Ty budou vytvořeny všechny
  * najednou při prvním vyžádání nějakého z nich.
- *
+ * <p></p>
  *
  * Definuje velmi ošklivě pojmenované pomocné a konfigurační metody, které nikomu z venčí nikdy k ničemu
  * nebudou a ideálně by měly být <code>protected</code>, kdyby to Java dovolovala.
+ * <p>
  * Pro jejich skrytí před náhodným uživatelem vašich implementací lze použít např. tento pattern:
  * <pre>
  * <code>
@@ -54,17 +53,17 @@ import java.util.Map;
  * </code>
  *</pre>
  *
- * @see com.markussecundus.formsgdx.input.InputConsumer
+ * @see InputConsumer
  *
  * @see ListeneredKeyConsumer
  *
  * @see IListeneredTouchConsumer
- * @see IListeneredScrollConsumer
+ * @see com.markussecundus.formsgdx.input.mixins.IListeneredScrollConsumer
  * @see IListeneredUniversalConsumer
  *
  * @author MarkusSecundus
  * */
-public interface IListeneredKeyConsumer extends InputConsumer, ListeneredKeyConsumer {
+public interface IListeneredKeyConsumer extends InputConsumer, ListeneredKeyConsumer, Extensible {
 
 
     /**{@inheritDoc}*/
@@ -110,19 +109,14 @@ public interface IListeneredKeyConsumer extends InputConsumer, ListeneredKeyCons
      * @author MarkusSecundus
      * */
     static final class Util {
-        private static final Map<FormsUtil.WrapperForReferenceComparison<IListeneredKeyConsumer>, Impl> impls = new DefaultDict<>(
-                self -> self.item.__ListeneredKeyConsumer__MakeInstance(),
-                FormsUtil.WrapperForReferenceComparison::cpy);
-
-        private static final FormsUtil.WrapperForReferenceComparison<IListeneredKeyConsumer> instanceFinder = new FormsUtil.WrapperForReferenceComparison<>(null);
-
+        private static final Function<Extensible, Impl> INSTANCE_SUPPLIER = self->((IListeneredKeyConsumer)self).__ListeneredKeyConsumer__MakeInstance();
         /**
          * (pozn.: V žádném případě nesmí být volána v rámci konfiguračních metod již tázané mixinové komponenty.)
          *
          * @return Mixinová komponenta příslušící dané instanci {@link IListeneredKeyConsumer}
          * */
         protected static Impl getImpl(IListeneredKeyConsumer self){
-            return impls.get(instanceFinder.with(self));
+            return self.getExtension(Util.Impl.class, INSTANCE_SUPPLIER);
         }
 
         /**

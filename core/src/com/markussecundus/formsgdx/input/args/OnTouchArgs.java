@@ -8,7 +8,7 @@ import com.markussecundus.formsgdx.input.InputManager;
  * Datová třída reprezentující argument pro funkce <code>onTouchDown</code>, <code>onTouchUp</code> rozhraní {@link InputConsumer}.
  *
  * @see OnMouseMovedArgs
- * @see OnTouchDraggedArgs
+ * @see com.markussecundus.formsgdx.input.args.OnTouchDraggedArgs
  *
  * @see OnInputEventArgs
  *
@@ -22,7 +22,7 @@ import com.markussecundus.formsgdx.input.InputManager;
  *
  * @author MarkusSecundus
  * */
-public class OnTouchArgs extends OnTouchDraggedArgs{
+public class OnTouchArgs extends OnTouchDraggedArgs {
     /**
      * Stejný význam jako hodnota <code>button</code> předávaná
      * metodě <code>onTouchDown</code> / <code>onTouchUp</code>

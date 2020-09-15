@@ -28,25 +28,43 @@ import com.markussecundus.forms.wrappers.Wrapper;
  * */
 public interface Property<T> extends Wrapper<T>, ReadonlyProperty<T>, WriteonlyProperty<T>, ConstProperty<T> {
 
+    @Override
     public ConstProperty<? extends EventDelegate<? extends GetterListenerArgs<T>>> getterListeners();
 
+    @Override
     public ConstProperty<? extends EventDelegate<? extends SetterListenerArgs<T>>> setterListeners();
 
-
+    @Override
     public default EventDelegate<? extends GetterListenerArgs<T>> getGetterListeners(){
         return getterListeners().get();
     }
+    @Override
     public default EventDelegate<? extends SetterListenerArgs<T>> getSetterListeners(){
         return setterListeners().get();
     }
 
+    /**
+     * Proběhne <code>setterListener</code> aniž by musela být modifikována vnitřní hodnota.
+     * */
     public T pretendSet();
 
 
+    /**
+     * Datová třída pro argumenty, které přebírá getterový listener.
+     *
+     * @see Property
+     *
+     * @author MarkusSecundus
+     * */
     public static interface GetterListenerArgs<T> extends ReadonlyProperty.GetterListenerArgs<T>, WriteonlyProperty.GetterListenerArgs<T>{
+        @Override
         public Property<T> caller();
+        @Override
         public Wrapper<T> currentVal();
 
+        /**
+         * Zkonstruuje instanci z daných argumentů.
+         * */
         public static<T> GetterListenerArgs<T> make(Property<T> caller, Wrapper<T> currentVal){
             return new GetterListenerArgs<T>() {
                 public Property<T> caller() { return caller; }
@@ -56,13 +74,25 @@ public interface Property<T> extends Wrapper<T>, ReadonlyProperty<T>, WriteonlyP
     }
 
 
+    /**
+     * Datová třída pro argumenty, které přebírá setterový listener.
+     *
+     * @see Property
+     *
+     * @author MarkusSecundus
+     * */
     public static interface SetterListenerArgs<T> extends ReadonlyProperty.SetterListenerArgs<T>, WriteonlyProperty.SetterListenerArgs<T>{
+        @Override
         public Property<T> caller();
+        @Override
         public T oldVal();
-
+        @Override
         public Wrapper<T> newVal();
 
 
+        /**
+         * Zkonstruuje instanci z daných argumentů.
+         * */
         public static<T> SetterListenerArgs<T> make(Property<T> caller, T oldVal, Wrapper<T> newVal){
             return new SetterListenerArgs<T>() {
                 public Property<T> caller() { return caller; }
@@ -73,8 +103,5 @@ public interface Property<T> extends Wrapper<T>, ReadonlyProperty<T>, WriteonlyP
 
     }
 
-
-
-    public static final EventListener<SetterListenerArgs<?>> SKIP_IF_VALUE_DIDNT_CHANGE = o-> !FormsUtil.equals(o.oldVal(), o.newVal().get());
 
 }

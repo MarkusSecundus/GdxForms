@@ -1,26 +1,31 @@
 package com.markussecundus.formsgdx.input;
 
 import com.badlogic.gdx.InputProcessor;
+import com.markussecundus.formsgdx.input.interfaces.ListeneredKeyConsumer;
+import com.markussecundus.formsgdx.input.interfaces.ListeneredScrollConsumer;
+import com.markussecundus.formsgdx.input.interfaces.ListeneredTouchConsumer;
+import com.markussecundus.formsgdx.input.interfaces.ListeneredUniversalConsumer;
 import com.markussecundus.formsgdx.input.args.OnKeyClickedArgs;
 import com.markussecundus.formsgdx.input.args.OnKeyTypedArgs;
 import com.markussecundus.formsgdx.input.args.OnMouseMovedArgs;
 import com.markussecundus.formsgdx.input.args.OnScrolledArgs;
 import com.markussecundus.formsgdx.input.args.OnTouchArgs;
 import com.markussecundus.formsgdx.input.args.OnTouchDraggedArgs;
+import com.markussecundus.formsgdx.input.mixins.IListeneredTouchConsumer;
 
 
 /**
  * Rozhraní pro objekty reagující na vstup z klávesnice a myši / dotykové obrazovky.
- *
+ * <p></p>
  * Robustnější a s {@link com.markussecundus.forms.events.EventDelegate}s lépe sladitelná obdoba standardního LibGDXího {@link InputProcessor}.
  *
  * @see InputProcessor
  * @see InputManager
  *
- * @see com.markussecundus.formsgdx.input.interfaces.ListeneredTouchConsumer
- * @see com.markussecundus.formsgdx.input.interfaces.ListeneredScrollConsumer
- * @see com.markussecundus.formsgdx.input.interfaces.ListeneredKeyConsumer
- * @see com.markussecundus.formsgdx.input.interfaces.ListeneredUniversalConsumer
+ * @see ListeneredTouchConsumer
+ * @see ListeneredScrollConsumer
+ * @see ListeneredKeyConsumer
+ * @see ListeneredUniversalConsumer
  *
  *
  * @author MarkusSecundus
@@ -81,7 +86,7 @@ public interface InputConsumer {
     /**
      * Voláno když je na objekt kliknuto.
      *
-     * Má volnou definici, pro kanonický výklad viz {@link com.markussecundus.formsgdx.input.mixins.IListeneredTouchConsumer}
+     * Má volnou definici, pro kanonický výklad viz {@link IListeneredTouchConsumer}
      *
      * @return Zda byla událost úspěšně přijata a zpracována
      * */
@@ -90,42 +95,39 @@ public interface InputConsumer {
     /**
      * Voláno když je objekt odkliknut.
      *
-     * Má volnou definici, pro kanonický výklad viz {@link com.markussecundus.formsgdx.input.mixins.IListeneredTouchConsumer}
+     * Má volnou definici, pro kanonický výklad viz {@link IListeneredTouchConsumer}
      *
      * @return Zda byla událost úspěšně přijata a zpracována
      * */
     public boolean unclicked(OnTouchArgs e);
 
     /**
-     * @return Zda je objekt aktuálně zakliknutý (pro definici zakliknutosti viz {@link com.markussecundus.formsgdx.input.mixins.IListeneredTouchConsumer})
+     * @return Zda je objekt aktuálně zakliknutý (pro definici zakliknutosti viz {@link IListeneredTouchConsumer})
      * */
     public default boolean isClicked(){return false;}
 
-    /**
-     * @return Instance ze vstupu obalená do {@link InputConsumer} wrapperu.
-     * */
-    public static FromInputProcessor make(InputProcessor processor){return new FromInputProcessor(processor);}
 
 
 
     /**
-     * Wrapper sloužící k obalení instance {@link InputProcessor} do rozhraní kompatibilního s {@link InputConsumer}.
+     * Wrapper sloužící k obalení instance {@link InputProcessor} do rozhraní kompatibilního s {@link com.markussecundus.formsgdx.input.InputConsumer}.
      *
      * @see InputProcessor
      * @see InputConsumer
      *
      * @author MarkusSecundus
      * */
-    public static class FromInputProcessor implements InputConsumer{
+    @FunctionalInterface
+    public static interface FromInputProcessor extends InputConsumer {
         /**
          * Vytvoří instanci nad danou bází.
          * */
-        public FromInputProcessor(InputProcessor base){this.base=base;}
+        public static com.markussecundus.formsgdx.input.InputConsumer.FromInputProcessor make(InputProcessor base){return ()->base;}
 
         /**
          * Instance {@link InputProcessor} na kterou wrapper ukazuje.
          * */
-        public final InputProcessor base;
+        public InputProcessor __InputConsumerFromProcessor_getBase();
 
         /**
          * Přesměrovává na bázi.
@@ -133,7 +135,7 @@ public interface InputConsumer {
          * {@inheritDoc}
          * */
         @Override
-        public boolean keyDown(OnKeyClickedArgs e) { return base.keyDown(e.keycode); }
+        public default boolean keyDown(OnKeyClickedArgs e) { return __InputConsumerFromProcessor_getBase().keyDown(e.keycode); }
 
         /**
          * Přesměrovává na bázi.
@@ -141,7 +143,7 @@ public interface InputConsumer {
          * {@inheritDoc}
          * */
         @Override
-        public boolean keyUp(OnKeyClickedArgs e) { return base.keyUp(e.keycode); }
+        public default boolean keyUp(OnKeyClickedArgs e) { return __InputConsumerFromProcessor_getBase().keyUp(e.keycode); }
 
         /**
          * Přesměrovává na bázi.
@@ -149,7 +151,7 @@ public interface InputConsumer {
          * {@inheritDoc}
          * */
         @Override
-        public boolean keyTyped(OnKeyTypedArgs e) { return base.keyTyped(e.character); }
+        public default boolean keyTyped(OnKeyTypedArgs e) { return __InputConsumerFromProcessor_getBase().keyTyped(e.character); }
 
         /**
          * Přesměrovává na bázi.
@@ -157,7 +159,7 @@ public interface InputConsumer {
          * {@inheritDoc}
          * */
         @Override
-        public boolean touchDown(OnTouchArgs e) { return base.touchDown(e.x, e.y, e.pointer, e.button); }
+        public default boolean touchDown(OnTouchArgs e) { return __InputConsumerFromProcessor_getBase().touchDown(e.x, e.y, e.pointer, e.button); }
 
         /**
          * Přesměrovává na bázi.
@@ -165,7 +167,7 @@ public interface InputConsumer {
          * {@inheritDoc}
          * */
         @Override
-        public boolean touchUp(OnTouchArgs e) { return base.touchUp(e.x, e.y, e.pointer,e.button); }
+        public default boolean touchUp(OnTouchArgs e) { return __InputConsumerFromProcessor_getBase().touchUp(e.x, e.y, e.pointer,e.button); }
 
         /**
          * Přesměrovává na bázi.
@@ -173,7 +175,7 @@ public interface InputConsumer {
          * {@inheritDoc}
          * */
         @Override
-        public boolean touchDragged(OnTouchDraggedArgs e) { return base.touchDragged(e.x,e.y, e.pointer); }
+        public default boolean touchDragged(OnTouchDraggedArgs e) { return __InputConsumerFromProcessor_getBase().touchDragged(e.x,e.y, e.pointer); }
 
         /**
          * Přesměrovává na bázi.
@@ -181,7 +183,7 @@ public interface InputConsumer {
          * {@inheritDoc}
          * */
         @Override
-        public boolean mouseMoved(OnMouseMovedArgs e) { return base.mouseMoved(e.x,e.y); }
+        public default boolean mouseMoved(OnMouseMovedArgs e) { return __InputConsumerFromProcessor_getBase().mouseMoved(e.x,e.y); }
 
         /**
          * Přesměrovává na bázi.
@@ -189,7 +191,7 @@ public interface InputConsumer {
          * {@inheritDoc}
          * */
         @Override
-        public boolean scrolled(OnScrolledArgs e) { return base.scrolled(e.amount); }
+        public default boolean scrolled(OnScrolledArgs e) { return __InputConsumerFromProcessor_getBase().scrolled(e.amount); }
 
         /**
          * Nedělá nic.
@@ -197,7 +199,7 @@ public interface InputConsumer {
          * @return <code>false</code> (vždy)
          * */
         @Override
-        public boolean clicked(OnTouchArgs e) { return false; }
+        public default boolean clicked(OnTouchArgs e) { return false; }
 
         /**
          * Nedělá nic.
@@ -205,7 +207,7 @@ public interface InputConsumer {
          * @return <code>false</code> (vždy)
          * */
         @Override
-        public boolean unclicked(OnTouchArgs e) { return false; }
+        public default boolean unclicked(OnTouchArgs e) { return false; }
 
         /**
          * Nedělá nic.
@@ -213,7 +215,7 @@ public interface InputConsumer {
          * @return <code>false</code> (vždy)
          * */
         @Override
-        public boolean isClicked() { return false; }
+        public default boolean isClicked() { return false; }
     }
 
 
@@ -282,4 +284,5 @@ public interface InputConsumer {
          * */
         InputManager __InputConsumerToProcessor_getInputManager();
     }
+
 }

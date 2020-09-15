@@ -28,7 +28,9 @@ public interface EventDelegate<Args> extends EventListener<Args> {
 
 
 
-
+    /**
+     * @return List listenerů náležících k dané prioritě
+     * */
     public List<EventListener<? super Args>> getListeners(Integer priority);
 
 
@@ -43,9 +45,7 @@ public interface EventDelegate<Args> extends EventListener<Args> {
      *
      * @return list {@link EventListener}ů tohoto Delegáta
      * */
-    public default List<EventListener<? super Args>> getListeners(){
-        return getListeners(ListenerPriorities.USER);
-    }
+    public default List<EventListener<? super Args>> getUserListeners(){ return getListeners(ListenerPriorities.USER); }
 
     /**
      * Obsahuje listenery, které se provedou na začátku volání Delegáta,
@@ -87,9 +87,15 @@ public interface EventDelegate<Args> extends EventListener<Args> {
         return getListeners(ListenerPriorities.POST_UTIL);
     }
 
-
+    /**
+     * Pokud je kdekoliv v delegátovi přítomen, odebere daný listener, nezávisle na jeho prioritě.
+     * */
     public boolean removeListener(EventListener<?> list);
 
+    /**
+     * Odebere neprosto všechny listenery náležící danému delegátovi nezávisle na jejich prioritě -
+     * potenciálně i systémové listenery, jež by smazány být neměly.
+     * */
     public void clear();
 
 
@@ -150,14 +156,34 @@ public interface EventDelegate<Args> extends EventListener<Args> {
          * Delegát vždy vrací <code>true</code>, bez ohledu na to, jestli jeho vykonávání
          * bylo ukončeno předčasně či ne.
          * */
-        public static final ReturnValuePolicy ALWAYS_TRUE = b->true;
+        public static final ReturnValuePolicy ALWAYS_TRUE = new ReturnValuePolicy() {
+            @Override
+            public boolean convRetVal(boolean retVal) {
+                return true;
+            }
+
+            @Override
+            public String toString() {
+                return "ALWAYS_TRUE";
+            }
+        };
 
         /**
          *
          * Delegát vždy vrací <code>false</code>, bez ohledu na to, jestli jeho vykonávání
          * bylo ukončeno předčasně či ne.
          * */
-        public static final ReturnValuePolicy ALWAYS_FALSE = b->false;
+        public static final ReturnValuePolicy ALWAYS_FALSE = new ReturnValuePolicy() {
+            @Override
+            public boolean convRetVal(boolean retVal) {
+                return false;
+            }
+
+            @Override
+            public String toString() {
+                return "ALWAYS_FALSE";
+            }
+        };
 
         /**
          *
@@ -165,7 +191,17 @@ public interface EventDelegate<Args> extends EventListener<Args> {
          * (tj. nějaký jeho prvek vrátil <code>false</code>), v opačném případě
          * vrací <code>true</code>.
          * */
-        public static final ReturnValuePolicy USE_CHILD = b->b;
+        public static final ReturnValuePolicy USE_CHILD = new ReturnValuePolicy() {
+            @Override
+            public boolean convRetVal(boolean retVal) {
+                return retVal;
+            }
+
+            @Override
+            public String toString() {
+                return "USE_CHILD";
+            }
+        };
 
         /**
          *
@@ -173,8 +209,19 @@ public interface EventDelegate<Args> extends EventListener<Args> {
          * (tj. nějaký jeho prvek vrátil <code>false</code>), v opačném případě
          * vrací <code>false</code>.
          * */
-        public static final ReturnValuePolicy INVERSE_CHILD= b->!b;
+        public static final ReturnValuePolicy INVERSE_CHILD= new ReturnValuePolicy() {
+            @Override
+            public boolean convRetVal(boolean retVal) {
+                return !retVal;
+            }
+
+            @Override
+            public String toString() {
+                return "INVERSE_CHILD";
+            }
+        };
     }
+
 
     /**
      *
@@ -210,7 +257,7 @@ public interface EventDelegate<Args> extends EventListener<Args> {
      * @param list listener pro přidání do Delegáta
      * */
     public default void add(EventListenerX<? super Args> list){
-        getListeners().add(list);
+        getListeners(Priorities.USER).add(list);
     }
 
 
@@ -234,24 +281,40 @@ public interface EventDelegate<Args> extends EventListener<Args> {
 
 
 
-
+    /**
+     * Když je vyhozena z listeneru, delegát ji odchytí a provede na sobě její metodu <code>exec</code>.
+     * */
     public static abstract class ApplyOnParentDelegate extends RuntimeException{
         private ApplyOnParentDelegate(){}
 
+        /**
+         * Akce, kterou má na sobě delegát provést.
+         *
+         * @param parent delegát, jež zavolal listener vyhodivší tuto instanci {@link ApplyOnParentDelegate}
+         * @param currentlyExecuted listener vyhodivší tuto instanci {@link ApplyOnParentDelegate}
+         *
+         * @return návratová hodnota, jaká má být přiznána listeneru, jež tuto výjimku vyhodil
+         * (<code>false</code> pokud má být běh delegáta přerušen).
+         * */
+        public abstract boolean exec(EventDelegate<?> parent, EventListener<?> currentlyExecuted);
 
-        public abstract boolean exec(EventDelegate<?> parent, EventListener<?> currently_executed);
-
+        /**
+         * @return instance {@link ApplyOnParentDelegate}, provádějící danou akci na otcovském delegátu, berouc
+         * v úvahu listener, ze kterého byla výjimka hozena.
+         * */
         public static ApplyOnParentDelegate make(BiPredicate<EventDelegate<?>, EventListener<?>> action){
             return new ApplyOnParentDelegate() {
-                public boolean exec(EventDelegate<?> parent, EventListener<?> currently_executed) {
-                    return action.test(parent, currently_executed);
+                public boolean exec(EventDelegate<?> parent, EventListener<?> currentlyExecuted) {
+                    return action.test(parent, currentlyExecuted);
                 }
             };
         }
-
+        /**
+         * @return instance {@link ApplyOnParentDelegate}, provádějící danou akci na otcovském delegátu.
+         * */
         public static ApplyOnParentDelegate make(EventListener<EventDelegate<?>> action){
             return new ApplyOnParentDelegate() {
-                public boolean exec(EventDelegate<?> parent, EventListener<?> currently_executed) {
+                public boolean exec(EventDelegate<?> parent, EventListener<?> currentlyExecuted) {
                     return action.exec(parent);
                 }
             };

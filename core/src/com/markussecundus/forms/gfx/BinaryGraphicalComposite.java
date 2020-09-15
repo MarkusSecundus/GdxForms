@@ -6,6 +6,7 @@ import com.markussecundus.forms.utils.function.Function;
 import com.markussecundus.forms.utils.vector.Vect2f;
 import com.markussecundus.forms.utils.vector.VectUtil;
 import com.markussecundus.forms.wrappers.property.Property;
+import com.markussecundus.forms.wrappers.property.binding.Bindings;
 import com.markussecundus.forms.wrappers.property.impl.general.SimpleProperty;
 
 
@@ -59,14 +60,16 @@ public class BinaryGraphicalComposite<Rend, Pos, Scalar extends Comparable<Scala
         this.obj1to2ratio = new SimpleProperty<>(obj1to2ratio);
 
 
-        this.obj1to2ratio().getSetterListeners()._getPostUtilListeners().add(e->{
-            this.obj2.setDimensions(e.newVal().get().apply(obj1.getDimensions()));
+        /*this.obj1to2ratio().getSetterListeners()._getPostUtilListeners().add(e->{
+            this.obj2.setSize(e.newVal().get().apply(obj1.getSize()));
             return true;
         });
-        this.dimensions().getSetterListeners()._getPostUtilListeners().add(e->{
-            this.obj2.setDimensions(getObj1to2ratio().apply(e.newVal().get()));
+        this.size().getSetterListeners()._getPostUtilListeners().add(e->{
+            this.obj2.setSize(getObj1to2ratio().apply(e.newVal().get()));
             return true;
-        });
+        });*/
+        Bindings.bind(this.obj2.size(),(ratio, size)-> ratio.apply(size), this.obj1to2ratio(), this.size());
+
         this.obj1to2ratio().pretendSet();
     }
 
@@ -93,8 +96,9 @@ public class BinaryGraphicalComposite<Rend, Pos, Scalar extends Comparable<Scala
      *
      * {@inheritDoc}
      * */
-    @Override public Property<Pos> dimensions() {
-        return obj1.dimensions();
+    @Override
+    public Property<Pos> size() {
+        return obj1.size();
     }
 
     /**
@@ -132,10 +136,8 @@ public class BinaryGraphicalComposite<Rend, Pos, Scalar extends Comparable<Scala
     public Ratio setObj1to2ratio( Ratio newRatio){return obj1to2ratio().set(newRatio);}
 
 
-    /**
-     * {@inheritDoc}
-     * */
-    @Override public VectUtil<Pos, Scalar> getVectUtil() { return obj1.getVectUtil(); }
+    @Override
+    public VectUtil<Pos, Scalar> getVectUtil() { return obj1.getVectUtil(); }
 
     /**
      * 1. komponenta slepence
@@ -172,15 +174,15 @@ public class BinaryGraphicalComposite<Rend, Pos, Scalar extends Comparable<Scala
      * */
     public EventListener<Property.SetterListenerArgs<Pos>> setCentered(double[] ratios){
         EventListener<Property.SetterListenerArgs<Pos>> list = e->{
-            Pos dim1 = POS().cpy(getDimensions());
-            Pos dim2 = e==null?obj2.getDimensions():e.newVal().get();
+            Pos dim1 = POS().cpy(getSize());
+            Pos dim2 = e==null?obj2.getSize():e.newVal().get();
             dim2 = POS().sub(dim1, dim2);
             dim2 = POS().sclComponents(dim2, ratios);
             setObj2detachment(dim2);
             return true;
         };
-        obj2.dimensions().getSetterListeners()._getPostUtilListeners().add(list);
-        obj2.dimensions().pretendSet();
+        obj2.size().getSetterListeners()._getPostUtilListeners().add(list);
+        obj2.size().pretendSet();
         return list;
     }
 
@@ -196,7 +198,7 @@ public class BinaryGraphicalComposite<Rend, Pos, Scalar extends Comparable<Scala
     BinaryGraphicalComposite<Rend, Pos, Scalar, Obj1, Obj2, Ratio> makeCentered(Obj1 o1, Obj2 o2, Ratio obj1to2ratio){
         BinaryGraphicalComposite<Rend, Pos, Scalar, Obj1, Obj2, Ratio> ret = new BinaryGraphicalComposite<>(o1, o2, obj1to2ratio);
         ret.setCentered();
-        ret.obj2.dimensions().pretendSet();
+        ret.obj2.size().pretendSet();
         return ret;
     }
 

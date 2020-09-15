@@ -52,9 +52,7 @@ public class LazyWriteonlyProperty<T> extends AbstractWriteonlyProperty<T> {
         return this.t = t;
     }
 
-    /**
-     * {@inheritDoc}
-     * */
+
     @Override protected T obtain() {
         if(sup!=null)
             consumeSupply();

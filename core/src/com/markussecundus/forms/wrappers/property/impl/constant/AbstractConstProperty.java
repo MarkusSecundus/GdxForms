@@ -39,15 +39,15 @@ public abstract class AbstractConstProperty<T> extends ReadonlyWrapper.AbstractS
 //public:
 
     /**Provede getter a vrátí vnitřní hodnotu.*/
-    @Override public T get() {
-        T ret = obtain();
+    @Override
+    public T get() {
         if(getterListeners!=null)
             getterListeners.get().exec(GetterListenerArgs.make(this, obtainListenerlessWrapper()));
         return obtain();
     }
 
-    /**{@inheritDoc}*/
-    @Override public ConstProperty<EventDelegate<GetterListenerArgs<T>>> getterListeners() {
+    @Override
+    public ConstProperty<EventDelegate<GetterListenerArgs<T>>> getterListeners() {
         if(getterListeners==null)
             getterListeners = new SimpleConstProperty<>(EventDelegate.make());
         return getterListeners;

@@ -1,6 +1,6 @@
 package com.markussecundus.forms.elements.impl.utils;
 
-import com.markussecundus.forms.elements.Drawable;
+import com.markussecundus.forms.elements.DrawableElem;
 import com.markussecundus.forms.elements.Element;
 import com.markussecundus.forms.events.EventDelegate;
 import com.markussecundus.forms.utils.datastruct.ObservedList;
@@ -24,8 +24,8 @@ import java.util.List;
  * present in the list of <code>children</code> and so on. Also provides listeners to inject
  * additional functionality for the events of a child being added, removed, usw.
  *
- * @param <Rend> The renderer type used by contained {@link Drawable}s
- * @param <Pos> Vector type used by contained {@link Drawable}s
+ * @param <Rend> The renderer type used by contained {@link DrawableElem}s
+ * @param <Pos> Vector type used by contained {@link DrawableElem}s
  *
  * @see com.markussecundus.forms.elements.UberDrawable
  * @see com.markussecundus.forms.elements.impl.layouts.BasicAbstractLayout
@@ -59,34 +59,34 @@ public abstract class ElementLists<Rend, Pos> {
 
         @Override protected void onDelete(Object t) {
             onElementRemoved(t);
-            drawables.base.remove(t);
+            drawableElems.base.remove(t);
         }
 
         @Override protected void onSet(Element oldElem, Element newElem, int index) {
             onElementRemoved(oldElem);
-            drawables.base.remove(oldElem);
+            drawableElems.base.remove(oldElem);
             onElementAdded(newElem);
         }
 
         @Override protected void onClear() {
             for(Element v:this.base)
                 onElementRemoved(v);
-            drawables.base.clear();
+            drawableElems.base.clear();
         }
 
         @Override protected void onRemoveAll(Collection<?> col) {
             for(Element v:this.base)
                 if(col.contains(v))
                     onElementRemoved(v);
-            drawables.base.removeAll(col);
+            drawableElems.base.removeAll(col);
         }
     };
 
     /**
      * The list containing all the {@link Element}s, that belong to the owner {@link com.markussecundus.forms.elements.UberDrawable}
-     * that implement the {@link Drawable} interface ant that are explicitly added here to be drawn on the screen.
+     * that implement the {@link DrawableElem} interface ant that are explicitly added here to be drawn on the screen.
      *
-     * An {@link Element} can implement {@link Drawable} and be not present here if it was explicitly
+     * An {@link Element} can implement {@link DrawableElem} and be not present here if it was explicitly
      * added only to <code>children</code>.
      *
      * Calls the <code>onDrawableAdded</code> method for every new Drawable added,
@@ -97,8 +97,8 @@ public abstract class ElementLists<Rend, Pos> {
      *
      * @see ObservedList
      * */
-    public final ObservedList<Drawable<Rend, Pos>> drawables = new ObservedList<Drawable<Rend, Pos>>(_gen_draw_list_type()) {
-        @Override protected void onAdded(Drawable<Rend, Pos> rendPosDrawable, int index) {
+    public final ObservedList<DrawableElem<Rend, Pos>> drawableElems = new ObservedList<DrawableElem<Rend, Pos>>(_gen_draw_list_type()) {
+        @Override protected void onAdded(DrawableElem<Rend, Pos> rendPosDrawable, int index) {
             elements.base.add(rendPosDrawable);
             onDrawableAdded(rendPosDrawable);
         }
@@ -108,7 +108,7 @@ public abstract class ElementLists<Rend, Pos> {
             elements.base.remove(t);
         }
 
-        @Override protected void onSet(Drawable<Rend, Pos> oldElem, Drawable<Rend, Pos> newElem, int index) {
+        @Override protected void onSet(DrawableElem<Rend, Pos> oldElem, DrawableElem<Rend, Pos> newElem, int index) {
             onElementRemoved(oldElem);
             int i = elements.base.indexOf(oldElem);
             if(i>=0)
@@ -146,11 +146,11 @@ public abstract class ElementLists<Rend, Pos> {
     protected abstract void onElementRemoved(Object o);
 
     /**
-     * Called when a new {@link Drawable} is added to the <code>drawables</code> List.
+     * Called when a new {@link DrawableElem} is added to the <code>drawables</code> List.
      *
      * @param drw the newly added drawable
      * */
-    protected abstract void onDrawableAdded(Drawable<Rend, Pos> drw);
+    protected abstract void onDrawableAdded(DrawableElem<Rend, Pos> drw);
 
 
     /**
@@ -184,8 +184,8 @@ public abstract class ElementLists<Rend, Pos> {
      * encapsulating the Lists.
      *
      *
-     * @param <Rend> The renderer type used by contained {@link Drawable}s
-     * @param <Pos> Vector type used by contained {@link Drawable}s
+     * @param <Rend> The renderer type used by contained {@link DrawableElem}s
+     * @param <Pos> Vector type used by contained {@link DrawableElem}s
      *
      * @see ElementLists
      *
@@ -216,9 +216,9 @@ public abstract class ElementLists<Rend, Pos> {
 
         /**
          * The list containing all the {@link Element}s, that belong to the owner {@link com.markussecundus.forms.elements.UberDrawable}
-         * that implement the {@link Drawable} interface ant that are explicitly added here to be drawn on the screen.
+         * that implement the {@link DrawableElem} interface ant that are explicitly added here to be drawn on the screen.
          *
-         * An {@link Element} can implement {@link Drawable} and be not present here if it was explicitly
+         * An {@link Element} can implement {@link DrawableElem} and be not present here if it was explicitly
          * added only to <code>children</code>.
          *
          * Calls the <code>onDrawableAdded</code> method for every new Drawable added,
@@ -227,12 +227,12 @@ public abstract class ElementLists<Rend, Pos> {
          * Makes sure that it contains all the elements in <code>drawables</code> and that
          * <code>drawables</code> do not contain anything that is not present here.
          *
-         * @see Drawable
+         * @see DrawableElem
          * @see ObservedList
          * @see ConstProperty
          * */
-        public final ConstProperty<List<Drawable<Rend, Pos>>> drawablesAsProperty = new AbstractConstProperty<List<Drawable<Rend, Pos>>>() {
-            protected List<Drawable<Rend, Pos>> obtain() { return drawables; }
+        public final ConstProperty<List<DrawableElem<Rend, Pos>>> drawablesAsProperty = new AbstractConstProperty<List<DrawableElem<Rend, Pos>>>() {
+            protected List<DrawableElem<Rend, Pos>> obtain() { return drawableElems; }
         };
     }
 
@@ -261,11 +261,11 @@ public abstract class ElementLists<Rend, Pos> {
         public final EventDelegate<Object> onElementRemoved = EventDelegate.make();
 
         /**
-         * Called when a new {@link Drawable} is added to the <code>drawables</code> List.
+         * Called when a new {@link DrawableElem} is added to the <code>drawables</code> List.
          *
          * Provided with the newly added drawable as argument.
          * */
-        public final EventDelegate<Drawable<Rend, Pos>> onDrawableAdded = EventDelegate.make();
+        public final EventDelegate<DrawableElem<Rend, Pos>> onDrawableAdded = EventDelegate.make();
 
         /**
          * Executes the <code>onElementAdded</code> listener.
@@ -286,6 +286,6 @@ public abstract class ElementLists<Rend, Pos> {
          *
          * {@inheritDoc}
          * */
-        protected void onDrawableAdded(Drawable<Rend, Pos> drw) { onDrawableAdded.exec(drw); }
+        protected void onDrawableAdded(DrawableElem<Rend, Pos> drw) { onDrawableAdded.exec(drw); }
     }
 }

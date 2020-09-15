@@ -1,16 +1,15 @@
 package com.markussecundus.formsgdx.input.args;
 
-import com.badlogic.gdx.InputProcessor;
 import com.markussecundus.formsgdx.input.InputConsumer;
 import com.markussecundus.formsgdx.input.InputManager;
 
 /**
  * Datová třída reprezentující argument pro funkci <code>onMouseMoved</code> rozhraní {@link InputConsumer}.
  *
- * @see OnTouchDraggedArgs
+ * @see com.markussecundus.formsgdx.input.args.OnTouchDraggedArgs
  * @see OnTouchArgs
  *
- * @see OnInputEventArgs
+ * @see com.markussecundus.formsgdx.input.args.OnInputEventArgs
  *
  * @see InputConsumer
  * @see InputManager
@@ -22,7 +21,7 @@ import com.markussecundus.formsgdx.input.InputManager;
  *
  * @author MarkusSecundus
  * */
-public class OnMouseMovedArgs extends OnInputEventArgs{
+public class OnMouseMovedArgs extends OnInputEventArgs {
     /**
      * Souřadnice, na kterých ke vstupní události došlo,
      * relativní vůči pozici objektu aktuálně vstup zpracovávajícího.
@@ -59,7 +58,7 @@ public class OnMouseMovedArgs extends OnInputEventArgs{
     /**
      * @return Instance datové třídy sestávající z nových hodnot, zachovávajíce původní hodnoty tam, kde nové nejsou poskytnuty.
      * */
-    public OnTouchDraggedArgs with(InputConsumer actor, int x, int y, int pointer){return OnTouchDraggedArgs.make(manager, actor, x, y,pointer);}
+    public com.markussecundus.formsgdx.input.args.OnTouchDraggedArgs with(InputConsumer actor, int x, int y, int pointer){return OnTouchDraggedArgs.make(manager, actor, x, y,pointer);}
 
     /**
      * @return Instance datové třídy sestávající z nových hodnot, zachovávajíce původní hodnoty tam, kde nové nejsou poskytnuty.

@@ -4,7 +4,7 @@ import java.util.*;
 
 
 /**
- * Wrapper nad {@link List}, která sleduje modifikace jeho prvků a poskytuje listenery těchto událostíss.
+ * Wrapper nad {@link List}, která sleduje modifikace jeho prvků a poskytuje listenery těchto událostís.
  *
  * @param <T> typ objektů ve sledovaném {@link List}u
  *
@@ -12,6 +12,14 @@ import java.util.*;
  * */
 public abstract class ObservedList<T> implements List<T> {
 //public:
+
+    /**
+     * Vnitřní implementace, na kterou {@link ObservedList} odkazuje.
+     * */
+    public final List<T> base;
+
+
+
     /**
      * Vytvoří wrapper nad danou bází.
      *
@@ -78,55 +86,55 @@ public abstract class ObservedList<T> implements List<T> {
      * */
     public static class Blank<T> extends ObservedList<T>{
         public Blank(List<T> baseList){super(baseList);}
-        /**{@inheritDoc}*/@Override protected void onAdded(T t, int index) { }
-        /**{@inheritDoc}*/@Override protected void onDelete(Object t) { }
-        /**{@inheritDoc}*/@Override protected void onSet(T oldElem, T newElem, int index) { }
+        @Override protected void onAdded(T t, int index) { }
+        @Override protected void onDelete(Object t) { }
+        @Override protected void onSet(T oldElem, T newElem, int index) { }
     }
 
 
-    /**{@inheritDoc}*/@Override public int size() {
+    @Override public int size() {
         return base.size();
     }
 
-    /**{@inheritDoc}*/@Override public boolean isEmpty() {
+    @Override public boolean isEmpty() {
         return base.isEmpty();
     }
 
-    /**{@inheritDoc}*/@Override public boolean contains(Object o) {
+    @Override public boolean contains(Object o) {
         return base.contains(o);
     }
 
-    /**{@inheritDoc}*/@Override public Iterator<T> iterator() {
+    @Override public Iterator<T> iterator() {
         return base.iterator();
     }
 
-    /**{@inheritDoc}*/@Override public Object[] toArray() {
+    @Override public Object[] toArray() {
         return base.toArray();
     }
 
-    /**{@inheritDoc}*/@Override public <T1> T1[] toArray(T1[] a) {
+    @Override public <T1> T1[] toArray(T1[] a) {
         return base.toArray(a);
     }
 
 
 
-    /**{@inheritDoc}*/@Override public boolean add(T t) {
+    @Override public boolean add(T t) {
         boolean ret = base.add(t);
         onAdded(t, base.size()-1);
         return ret;
     }
 
-    /**{@inheritDoc}*/@Override public boolean remove(Object o) { //TODO: udělat aby to fungovalo správně!
+    @Override public boolean remove(Object o) { //TODO: udělat aby to fungovalo správně!
         boolean ret = base.remove(o);
         if(ret) onDelete(o);
         return ret;
     }
 
-    /**{@inheritDoc}*/@Override public boolean containsAll(Collection<?> c) {
+    @Override public boolean containsAll(Collection<?> c) {
         return base.containsAll(c);
     }
 
-    /**{@inheritDoc}*/@Override public boolean addAll(Collection<? extends T> c) {
+    @Override public boolean addAll(Collection<? extends T> c) {
         int i = base.size();
         boolean ret = base.addAll(c);
         for(T v:c)
@@ -134,19 +142,19 @@ public abstract class ObservedList<T> implements List<T> {
         return ret;
     }
 
-    /**{@inheritDoc}*/@Override public boolean addAll(int index, Collection<? extends T> c) {
+    @Override public boolean addAll(int index, Collection<? extends T> c) {
         boolean ret = base.addAll(index, c);
         for(T v:c)
             onAdded(v, index++);
         return ret;
     }
 
-    /**{@inheritDoc}*/@Override public boolean removeAll(Collection<?> c) {
+    @Override public boolean removeAll(Collection<?> c) {
         onRemoveAll(c);
         return base.removeAll(c);
     }
 
-    /**{@inheritDoc}*/@Override public boolean retainAll(Collection<?> col) {
+    @Override public boolean retainAll(Collection<?> col) {
         Collection<?> map = new HashSet<>(col);
 
         int probableApproximateSize = base.size()-col.size();
@@ -159,87 +167,87 @@ public abstract class ObservedList<T> implements List<T> {
         return removeAll(pomList);
     }
 
-    /**{@inheritDoc}*/@Override public void clear() {
+    @Override public void clear() {
         onClear();
         base.clear();
     }
 
-    /**{@inheritDoc}*/@Override public T get(int index) {
+    @Override public T get(int index) {
         return base.get(index);
     }
 
-    /**{@inheritDoc}*/@Override public T set(int index, T element) {
+    @Override public T set(int index, T element) {
         T ret = base.set(index, element);
         onSet(ret, element, index);
         return ret;
     }
 
-    /**{@inheritDoc}*/@Override public void add(int index, T element) {
+    @Override public void add(int index, T element) {
         base.add(index,element);
         onAdded(element, index);
     }
 
-    /**{@inheritDoc}*/@Override public T remove(int index) {
+    @Override public T remove(int index) {
         T ret = base.remove(index);
         onDelete(ret);
         return ret;
     }
 
-    /**{@inheritDoc}*/@Override public int indexOf(Object o) {
+    @Override public int indexOf(Object o) {
         return base.indexOf(o);
     }
 
-    /**{@inheritDoc}*/@Override public int lastIndexOf(Object o) {
+    @Override public int lastIndexOf(Object o) {
         return base.lastIndexOf(o);
     }
 
-    /**{@inheritDoc}*/@Override public ListIterator<T> listIterator() {
+    @Override public ListIterator<T> listIterator() {
         return this.listIterator(0);
     }
 
-    /**{@inheritDoc}*/@Override public ListIterator<T> listIterator(int index) {
+    @Override public ListIterator<T> listIterator(int index) {
         return new ListIterator<T>() {
             //public:
 
-            /**{@inheritDoc}*/@Override public boolean hasNext() {
+            @Override public boolean hasNext() {
                 return it.hasNext();
             }
 
-            /**{@inheritDoc}*/@Override public T next() {
+            @Override public T next() {
                 ++currentIndex;
                 return lastObserved = it.next();
             }
 
-            /**{@inheritDoc}*/@Override public boolean hasPrevious() {
+            @Override public boolean hasPrevious() {
                 return it.hasPrevious();
             }
 
-            /**{@inheritDoc}*/@Override public T previous() {
+            @Override public T previous() {
                 --currentIndex;
                 return lastObserved = it.previous();
             }
 
-            /**{@inheritDoc}*/@Override public int nextIndex() {
+            @Override public int nextIndex() {
                 lastObserved = base.get(currentIndex = it.nextIndex());
                 return currentIndex;
             }
 
-            /**{@inheritDoc}*/@Override public int previousIndex() {
+            @Override public int previousIndex() {
                 lastObserved = base.get(currentIndex = it.previousIndex());
                 return currentIndex;
             }
 
-            /**{@inheritDoc}*/@Override public void remove() {    //TODO: nejsem si jistý, jestli tímhle nerozbiju svoje počítání indexů
+            @Override public void remove() {    //TODO: nejsem si jistý, jestli tímhle nerozbiju svoje počítání indexů
                 it.remove();
                 onDelete(lastObserved);
             }
 
-            /**{@inheritDoc}*/@Override public void set(T t) {
+            @Override public void set(T t) {
                 it.set(t);
                 onSet(lastObserved, t,-1);
             }
 
-            /**{@inheritDoc}*/@Override public void add(T t) {    //TODO: nejsem si jistý, jestli tímhle nerozbiju svoje počítání indexů
+            @Override public void add(T t) {    //TODO: nejsem si jistý, jestli tímhle nerozbiju svoje počítání indexů
                 it.add(t);
                 onAdded(t, currentIndex);
             }
@@ -252,19 +260,19 @@ public abstract class ObservedList<T> implements List<T> {
         };
     }
 
-    /**{@inheritDoc}*/
+
     @Override public List<T> subList(int fromIndex, int toIndex) { //TODO: zamyslet se jestli to takhle vážně má být
         return new ObservedList<T>(base.subList(fromIndex, toIndex)){
             //public:
-            /**{@inheritDoc}*/@Override public void onAdded(T t, int index) {
+            @Override public void onAdded(T t, int index) {
                 ObservedList.this.onAdded(t, realIndex(index));
             }
 
-            /**{@inheritDoc}*/@Override public void onDelete(Object t) {
+            @Override public void onDelete(Object t) {
                 ObservedList.this.onDelete(t);
             }
 
-            /**{@inheritDoc}*/@Override public void onSet(T oldElem, T newElem, int index) {
+            @Override public void onSet(T oldElem, T newElem, int index) {
                 ObservedList.this.onSet(oldElem, newElem, realIndex(index));
             }
 
@@ -273,18 +281,16 @@ public abstract class ObservedList<T> implements List<T> {
         };
     }
 
-    /**{@inheritDoc}*/@Override public int hashCode() {
+    @Override public int hashCode() {
         return base.hashCode();
     }
 
-    /**{@inheritDoc}*/@Override public boolean equals(Object obj) {
+    @Override public boolean equals(Object obj) {
         return base.equals(obj);
     }
 
-    /**{@inheritDoc}*/@Override public String toString() {
+    @Override public String toString() {
         return base.toString();
     }
 
-    //private:
-    public final List<T> base;
 }

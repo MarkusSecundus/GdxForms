@@ -1,6 +1,7 @@
 package com.markussecundus.formsgdx.input.interfaces;
 
 import com.markussecundus.forms.events.EventDelegate;
+import com.markussecundus.formsgdx.input.mixins.IListeneredKeyConsumer;
 import com.markussecundus.forms.wrappers.property.ConstProperty;
 import com.markussecundus.formsgdx.input.InputConsumer;
 import com.markussecundus.formsgdx.input.args.OnKeyClickedArgs;
@@ -9,9 +10,9 @@ import com.markussecundus.formsgdx.input.args.OnKeyTypedArgs;
 /**
  * Rozhraní pro {@link InputConsumer}, jenž má pro zpracovávání klávesnicových událostí dedikované {@link EventDelegate}s.
  *
- * Pro kanonickou implementaci viz {@link com.markussecundus.formsgdx.input.mixins.IListeneredKeyConsumer}.
+ * Pro kanonickou implementaci viz {@link IListeneredKeyConsumer}.
  *
- * @see com.markussecundus.formsgdx.input.mixins.IListeneredKeyConsumer
+ * @see IListeneredKeyConsumer
  *
  * @see ListeneredScrollConsumer
  * @see ListeneredTouchConsumer

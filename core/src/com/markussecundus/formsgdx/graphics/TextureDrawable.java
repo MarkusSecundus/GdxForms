@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.markussecundus.forms.gfx.BinaryGraphicalComposite;
 import com.markussecundus.forms.gfx.GraphicalPrimitive;
 import com.markussecundus.forms.utils.vector.Vect2f;
 import com.markussecundus.forms.utils.vector.VectUtil;
@@ -44,8 +43,9 @@ public class TextureDrawable implements GraphicalPrimitive<Batch, Vect2f, Float>
      *
      * {@inheritDoc}
      * */
-    @Override public boolean draw(Batch renderer, Vect2f pos) {
-        Vect2f dims = getDimensions();
+    @Override
+    public boolean draw(Batch renderer, Vect2f pos) {
+        Vect2f dims = getSize();
         Texture t = getTexture();
 
         renderer.draw(t, pos.x, pos.y, dims.x, dims.y);
@@ -58,7 +58,8 @@ public class TextureDrawable implements GraphicalPrimitive<Batch, Vect2f, Float>
      *
      * @return rozměry v kterých bude daná textura vykreslována
      * */
-    @Override public Property<Vect2f> dimensions() { return dimensions; }
+    @Override
+    public Property<Vect2f> size() { return dimensions; }
 
     /**
      * @return textura tohoto útvaru

@@ -39,12 +39,10 @@ public class SimpleWriteonlyProperty<T> extends AbstractWriteonlyProperty<T> {
 
 //protected:
 
-    /**{@inheritDoc}*/
     @Override protected T change(T t) {
         return this.t = t;
     }
 
-    /**{@inheritDoc}*/
     @Override protected T obtain() {
         return t;
     }

@@ -61,6 +61,8 @@ public class UniqueList<T> extends ObservedList<T> {
 
     /**
      * Výjimka, vyhozená v případě, že se v listu již nalézá prvek ekvivalentní s právě přidávaným.
+     *
+     * @author MarkusSecundus
      * */
     public static class ItemAlreadyPresentException extends RuntimeException{
 

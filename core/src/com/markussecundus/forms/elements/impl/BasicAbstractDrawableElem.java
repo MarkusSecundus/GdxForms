@@ -1,7 +1,8 @@
 package com.markussecundus.forms.elements.impl;
 
-import com.markussecundus.forms.elements.Drawable;
+import com.markussecundus.forms.elements.DrawableElem;
 import com.markussecundus.forms.elements.impl.utils.DefaultSizeBehavior;
+import com.markussecundus.forms.extensibility.IExtensible;
 import com.markussecundus.forms.utils.vector.VectDecomposer;
 import com.markussecundus.forms.utils.vector.VectUtil;
 import com.markussecundus.forms.wrappers.property.Property;
@@ -9,7 +10,7 @@ import com.markussecundus.forms.wrappers.property.ReadonlyProperty;
 
 
 /**
- * The most basic base class for implementations of {@link Drawable}.
+ * The most basic base class for implementations of {@link DrawableElem}.
  *
  * Provides the default size behavior.
  *
@@ -17,12 +18,12 @@ import com.markussecundus.forms.wrappers.property.ReadonlyProperty;
  * @param <Pos> Vector type used to define the position and dimensions of the element
  * @param <Scalar> The type that Pos's individual components consist of (- see {@link VectUtil} )
  *
- * @see Drawable
+ * @see DrawableElem
  * @see DefaultSizeBehavior
  *
  * @author MarkusSecundus
  * */
-public abstract class BasicAbstractDrawable<Rend, Pos, Scalar extends Comparable<Scalar>> implements Drawable<Rend, Pos> {
+public abstract class BasicAbstractDrawableElem<Rend, Pos, Scalar extends Comparable<Scalar>> extends IExtensible implements DrawableElem<Rend, Pos> {
 
     /**
      * Constructs the Properties associated with the size behavior of this.
@@ -32,55 +33,52 @@ public abstract class BasicAbstractDrawable<Rend, Pos, Scalar extends Comparable
      * @param pref default value for <code>prefSize</code> Property
      * @param decomp <code>Pos</code> decomposer to initilize the {@link DefaultSizeBehavior} component
      * */
-    public BasicAbstractDrawable(VectDecomposer<Pos, Scalar> decomp, Pos max, Pos min, Pos pref){
-        this.sizeBehavior = new DefaultSizeBehavior<>(max, min, pref, decomp);
+    public BasicAbstractDrawableElem(VectDecomposer<Pos, Scalar> decomp, Pos max, Pos min, Pos pref){
+        this.sizeBehavior = DEFAULT_SIZE_BEHAVIOR__FACTORY(decomp, max, min, pref);
     }
 
-    /**
-     * {@inheritDoc}
-     * */
     @Override
     public ReadonlyProperty<Pos> size() {
         return sizeBehavior.realSize;
     }
 
-    /**
-     * {@inheritDoc}
-     * */
     @Override
     public Property<Pos> maxSize() {
         return sizeBehavior.maxSize;
     }
 
-    /**
-     * {@inheritDoc}
-     * */
     @Override
     public Property<Pos> minSize() {
         return sizeBehavior.minSize;
     }
 
-    /**
-     * {@inheritDoc}
-     * */
     @Override
     public Property<Pos> prefSize() {
         return sizeBehavior.prefSize;
     }
 
-    /**
-     * {@inheritDoc}
-     * */
     @Override
     public Property<Pos> _sizeConstraint() {
         return sizeBehavior.sizeConstraint;
     }
 
-    /**
-     * {@inheritDoc}
-     * */
     @Override
     public abstract VectUtil<Pos, Scalar> getVectUtil();
+
+
+    /**
+     * Override this if you want to specify the instance of {@link DefaultSizeBehavior} being used by the {@link DrawableElem} yourself.
+     *
+     * @param decomp {@link VectDecomposer} to be used by the {@link DefaultSizeBehavior}
+     * @param max default value for <code>maxSize</code> property
+     * @param min default value for <code>minSize</code> property
+     * @param pref default value for <code>prefSize</code> property
+     *
+     * @return <code>new DefaultSizeBehavior[Pos, Scalar](max, min, pred, decomp)</code>
+     * */
+    protected DefaultSizeBehavior<Pos, Scalar> DEFAULT_SIZE_BEHAVIOR__FACTORY(VectDecomposer<Pos, Scalar> decomp, Pos max, Pos min, Pos pref){
+        return new DefaultSizeBehavior<>(max, min, pref, decomp);
+    }
 
     /**
      * The object implementing the basic behavior pattern for sizes of Drawables.

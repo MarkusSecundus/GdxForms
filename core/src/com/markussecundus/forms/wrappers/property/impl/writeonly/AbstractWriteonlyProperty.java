@@ -59,10 +59,10 @@ public abstract class AbstractWriteonlyProperty<T> implements WriteonlyProperty<
      * @return hodnota která byla předána jako parametr funkce
      * */
     @Override public T set(T t) {
-        T ret = change(t);
+        change(t);
         if(setterListeners!=null)
             setterListeners.get().exec( SetterListenerArgs.make(this, obtainListenerlessWrapper()));
-        return ret;
+        return t;
     }
 
     /**
@@ -71,10 +71,9 @@ public abstract class AbstractWriteonlyProperty<T> implements WriteonlyProperty<
      * Smí být volána pouze skrze proxy z <code>makeGetter</code>.
      * */
     private T get(){
-        T ret = obtain();
         if(getterListeners!=null)
             getterListeners.get().exec( GetterListenerArgs.make(this, obtainListenerlessWrapper()));
-        return ret;
+        return obtain();
     }
 
 

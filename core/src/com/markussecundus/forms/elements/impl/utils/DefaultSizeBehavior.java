@@ -1,5 +1,7 @@
 package com.markussecundus.forms.elements.impl.utils;
 
+import com.markussecundus.forms.elements.DrawableElem;
+import com.markussecundus.forms.elements.impl.BasicAbstractDrawableElem;
 import com.markussecundus.forms.events.EventListener;
 import com.markussecundus.forms.utils.FormsUtil;
 import com.markussecundus.forms.utils.Pair;
@@ -15,10 +17,10 @@ import com.markussecundus.forms.wrappers.property.impl.readonly.SimpleReadonlyPr
 
 /**
  * Utility class that implemets the canonical way of how the dimension
- * properties of {@link com.markussecundus.forms.elements.Drawable} should behave.
+ * properties of {@link DrawableElem} should behave.
  *
- * Supposed use is to make an instance of this owned by a {@link com.markussecundus.forms.elements.Drawable}
- * and let the {@link com.markussecundus.forms.elements.Drawable} redirect the calls for its
+ * Supposed use is to make an instance of this owned by a {@link DrawableElem}
+ * and let the {@link DrawableElem} redirect the calls for its
  * size Properties to this class.
  *
  * The behavior is achieved through {@link EventListener}s added to
@@ -31,15 +33,15 @@ import com.markussecundus.forms.wrappers.property.impl.readonly.SimpleReadonlyPr
  *      be used instead. If <code>sizeConstraint</code> is set, the lower
  *      of the components of either it or <code>maxSize</code> is used as the higher boundary.
  *
- * @param <Pos> Vector type used to define the position and dimensions of the {@link com.markussecundus.forms.elements.Drawable}
+ * @param <Pos> Vector type used to define the position and dimensions of the {@link DrawableElem}
  *               Must by decomposable into separate scalars corresponding to
  *               its individual dimensions by the provided {@link VectDecomposer}.
  * @param <Scalar> The type that Pos's individual components consist of (- see {@link VectUtil} )
  *                must be {@link Comparable} with itself so that it can be determined whether
  *                it is inside the set bounds.
  *
- * @see com.markussecundus.forms.elements.Drawable
- * @see com.markussecundus.forms.elements.impl.BasicAbstractDrawable
+ * @see DrawableElem
+ * @see BasicAbstractDrawableElem
  *
  * @author MarkusSecundus
  * */
@@ -87,13 +89,13 @@ public class DefaultSizeBehavior<Pos, Scalar extends Comparable<Scalar>> {
             if(constrPos!=null){
                 Scalar[] constr = comp.decompose(constrPos);
 
-                FormsUtil.checkNumDimensions(max.length, constr);
+                FormsUtil.checkNumDimensions(max.length, constr.length);
 
                 for(int t=0;t<max.length;++t)
                     max[t] = FormsUtil.min(max[t], constr[t]);
             }}
 
-            FormsUtil.checkNumDimensions(max.length, min, pref);
+            FormsUtil.checkNumDimensions(max.length, min.length, pref.length);
 
             for(int t=0;t<max.length;++t){
                 if(max[t].compareTo(min[t]) < 0) {
@@ -139,7 +141,7 @@ public class DefaultSizeBehavior<Pos, Scalar extends Comparable<Scalar>> {
     public final Property<Pos> sizeConstraint;
 
     /**
-     * Property that represents the real value that a cannonical instance of {@link com.markussecundus.forms.elements.Drawable}
+     * Property that represents the real value that a cannonical instance of {@link DrawableElem}
      * should attain given the values of the other size Properties.
      *
      * Can be set only through modifiing the other size Properties.

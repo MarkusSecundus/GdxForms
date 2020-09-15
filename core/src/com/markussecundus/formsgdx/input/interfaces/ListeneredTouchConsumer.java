@@ -1,6 +1,7 @@
 package com.markussecundus.formsgdx.input.interfaces;
 
 import com.markussecundus.forms.events.EventDelegate;
+import com.markussecundus.formsgdx.input.mixins.IListeneredTouchConsumer;
 import com.markussecundus.forms.wrappers.property.ConstProperty;
 import com.markussecundus.formsgdx.input.InputConsumer;
 import com.markussecundus.formsgdx.input.args.OnMouseMovedArgs;
@@ -10,9 +11,9 @@ import com.markussecundus.formsgdx.input.args.OnTouchDraggedArgs;
 /**
  * Rozhraní pro {@link InputConsumer}, jenž má pro zpracovávání událostí vstupu z myši / dotykové obrazovky dedikované {@link EventDelegate}s.
  *
- * Pro kanonickou implementaci viz {@link com.markussecundus.formsgdx.input.mixins.IListeneredTouchConsumer}.
+ * Pro kanonickou implementaci viz {@link IListeneredTouchConsumer}.
  *
- * @see com.markussecundus.formsgdx.input.mixins.IListeneredTouchConsumer
+ * @see IListeneredTouchConsumer
  *
  * @see ListeneredKeyConsumer
  * @see ListeneredScrollConsumer

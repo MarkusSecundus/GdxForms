@@ -1,23 +1,27 @@
 package com.markussecundus.forms.utils.vector;
 
+import com.markussecundus.forms.elements.DrawableElem;
 import com.markussecundus.forms.utils.FormsUtil;
+import com.markussecundus.forms.utils.datastruct.ReadonlyList;
 import com.markussecundus.forms.utils.function.BiFunction;
 import com.markussecundus.forms.utils.function.Function;
+
+import java.util.Comparator;
 
 
 /**
  * Rozhraní pro pomocné třídy, skrze které ostatní komponenty této knihovny mohou
  * manipulovat s vektorovými a jejich příslušnými skalárními typy.
- *
+ *<p></p>
  * Zvoleno jako robustnější, ačkoliv na použití méně pohodlná alternativa k rozhraní,
  * které by musely splnovat vektorové typy samy o sobě, jelikož takové rozhraní by
  * samozřejmě nebyly schopny formálně implementovat nativní typy již existující v prostředích,
  * kde tato knihovna může potenciálně být uplatněna.
- *
+ *<p></p>
  * Na mnoha místech v knihovně se předpokládá, že pro vektorový typ platí, že všechny operace zde přítomné,
  *  uplatní-li se na dekomponovaný vektor po složkách a následně se složí dohromady,
  *  přinesou stejný výsledek, jako kdyby byly uplatněny na vektor přímo.
- *  -tedy např. že takováta implementace funkce <code>add</code> je korektní:
+ *  - tedy např. že takováta implementace funkce <code>add</code> je korektní:
  *  <pre><code>
  *   public default Vect add(Vect a, Vect b){
  *       Scalar[] as = decompose(a), bs = decompose(b);
@@ -29,14 +33,17 @@ import com.markussecundus.forms.utils.function.Function;
  *
  * @see Vect2f
  * @see Vect2i
+ * @see Vect2d
  * @see com.markussecundus.forms.utils.vector.VectDecomposer
+ * @see VectComparator
  *
- * @see com.markussecundus.forms.elements.Drawable
+ * @see com.markussecundus.forms.gfx.Drawable
+ * @see DrawableElem
  * @see com.markussecundus.forms.gfx.GraphicalPrimitive
  *
  * @author MarkusSecundus
  * */
-public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends VectDecomposer<Vect, Scalar> {
+public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends VectDecomposer<Vect, Scalar>, VectComparator<Vect> {
 
     /**
      * @return součet obou vektorů
@@ -85,6 +92,24 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
         return a;
     }
     /**
+     * @return Vektor vynásobený po složkách s jednotlivými poměry
+     * */
+    public default Scalar[] sclComponents(Scalar[] a, ReadonlyList.Double b) throws InconsistentNumberOfDimensionsException{
+        FormsUtil.checkSufficientNumDimensions(b.size()-1, a);
+        for(int t=b.size()-1;t>=0;--t)
+            a[t] = sclScalar(a[t], b.getNth_raw(t));
+        return a;
+    }
+    /**
+     * @return Vektor vynásobený po složkách s jednotlivými poměry
+     * */
+    public default Scalar[] sclComponents(Scalar[] a, ReadonlyList.Int b) throws InconsistentNumberOfDimensionsException{
+        FormsUtil.checkSufficientNumDimensions(b.size()-1, a);
+        for(int t=b.size()-1;t>=0;--t)
+            a[t] = sclScalar(a[t], b.getNth_raw(t));
+        return a;
+    }
+    /**
      * @return Vektor vydělený po složkách jednotlivými poměry
      * */
     public default Scalar[] divComponents(Scalar[] a, Double[] b) throws InconsistentNumberOfDimensionsException{
@@ -110,6 +135,14 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
      * @return Vektor vynásobený po složkách s jednotlivými poměry
      * */
     public default Vect sclComponents(Vect a, double[] b){return compose(sclComponents(decompose(a), b));}
+    /**
+     * @return Vektor vynásobený po složkách s jednotlivými poměry
+     * */
+    public default Vect sclComponents(Vect a, ReadonlyList.Double b){return compose(sclComponents(decompose(a), b));}
+    /**
+     * @return Vektor vynásobený po složkách s jednotlivými poměry
+     * */
+    public default Vect sclComponents(Vect a, ReadonlyList.Int b){return compose(sclComponents(decompose(a), b));}
     /**
      * @return Vektor vydělený po složkách jednotlivými poměry
      * */
@@ -150,6 +183,25 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
      * */
     public Scalar dst(Vect a, Vect b);
 
+
+    @Override
+    default boolean lt(Vect a, Vect b){
+        for(int dim = 0;dim < DIMENSION_COUNT();++dim) {
+            if (getNth(a, dim).compareTo(getNth(b,dim)) >= 0)
+                return false;
+        }
+        return true;
+    }
+
+    @Override
+    default boolean gt(Vect a, Vect b){
+        for(int dim = 0;dim < DIMENSION_COUNT();++dim) {
+            if (getNth(a, dim).compareTo(getNth(b,dim)) <= 0)
+                return false;
+        }
+        return true;
+    }
+
     /**
      * Vrátí vektor ekvivalentní se vstupním, takový, že voláním libovolné další zde přítomné funkce
      * na návratovou hodnotu, nezměníme stav argumentu, s kterým byla funkce volána.
@@ -181,6 +233,10 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
      * @return daný násobek skaláru
      * */
     public Scalar sclScalar(Scalar a, double scl);
+    /**
+     * @return daný násobek skaláru
+     * */
+    public Scalar sclScalar(Scalar a, int scl);
 
     /**
      * @return daný převrácený násobek skaláru
@@ -208,6 +264,9 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
     public default Scalar avgScalar(Scalar a, Scalar b){
         return sclScalar(addScalar(a,b), 0.5f);
     }
+
+
+    public double ratioScalar(Scalar a, Scalar b);
 
     /**
      * @return zda mají dva skaláry stejnou hodnotu (může být méně striktní, než <code>Objects.equals</code>)
@@ -282,7 +341,7 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
      *
      * @throws com.markussecundus.forms.utils.vector.VectDecomposer.InconsistentNumberOfDimensionsException pokud počet prvků pole neodpovídá požadovanému počtu dimenzí
      * */
-    public default void checkNumDimensions(Scalar[] s)throws InconsistentNumberOfDimensionsException
+    public default void checkNumDimensions(int s)throws InconsistentNumberOfDimensionsException
     { FormsUtil.checkNumDimensions(DIMENSION_COUNT(), s); }
 
     /**
@@ -290,7 +349,7 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
      *
      * @throws com.markussecundus.forms.utils.vector.VectDecomposer.InconsistentNumberOfDimensionsException pokud počet prvků alespon 1 pole neodpovídá požadovanému počtu dimenzí
      * */
-    public default void checkNumDimensions(Scalar[] a, Scalar[] b)throws InconsistentNumberOfDimensionsException
+    public default void checkNumDimensions(int a, int b)throws InconsistentNumberOfDimensionsException
     { FormsUtil.checkNumDimensions(DIMENSION_COUNT(), a,b); }
 
     /**
@@ -370,6 +429,7 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
 
             @Override public default Float sclScalar(Float a, Float b) { return a*b; }
             @Override public default Float sclScalar(Float a, double scl) { return (float)(a*scl); }
+            @Override public default Float sclScalar(Float a, int scl) { return (a*scl); }
 
             @Override public default Float divScalar(Float a, Float b) { return a/b; }
             @Override public default Float divScalar(Float a, double scl) { return (float)(a/scl); }
@@ -389,6 +449,8 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
             @Override public default Float negScalar(Float a) { return -a; }
 
             @Override public default Float avgScalar(Float a, Float b) { return (a+b)*0.5f; }
+
+            @Override public default double ratioScalar(Float a, Float b){return (double)a/b;}
 
             @Override public default boolean eqScalar(Float a, Float b) { return Float.floatToIntBits(a)==Float.floatToIntBits(b); }
 
@@ -412,6 +474,7 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
 
             @Override public default Double sclScalar(Double a, Double b) { return a*b; }
             @Override public default Double sclScalar(Double a, double scl) { return (a*scl); }
+            @Override public default Double sclScalar(Double a, int scl) { return (a*scl); }
 
             @Override public default Double divScalar(Double a, Double b) { return a/b; }
             @Override public default Double divScalar(Double a, double scl) { return (a/scl); }
@@ -432,6 +495,8 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
             @Override public default Double negScalar(Double a) { return -a; }
 
             @Override public default Double avgScalar(Double a, Double b) { return (a+b)*0.5f; }
+
+            @Override public default double ratioScalar(Double a, Double b){return a/b;}
 
             @Override public default boolean eqScalar(Double a, Double b) { return Double.doubleToLongBits(a)==Double.doubleToLongBits(b); }
 
@@ -457,6 +522,7 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
 
             @Override public default Integer sclScalar(Integer a, Integer b) { return a*b; }
             @Override public default Integer sclScalar(Integer a, double scl) { return (int)(a*scl); }
+            @Override public default Integer sclScalar(Integer a, int scl) { return (a*scl); }
 
             @Override public default Integer divScalar(Integer a, Integer b) { return a/b; }
             @Override public default Integer divScalar(Integer a, double scl) { return (int)(a/scl); }
@@ -476,6 +542,8 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
             @Override public default Integer negScalar(Integer a) { return -a; }
 
             @Override public default Integer avgScalar(Integer a, Integer b) { return (a+b)/2; }
+
+            @Override public default double ratioScalar(Integer a, Integer b){return (double)a/b;}
 
             @Override public default boolean eqScalar(Integer a, Integer b) { return FormsUtil.equals(a,b); }
 
@@ -499,6 +567,7 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
 
             @Override public default Long sclScalar(Long a, Long b) { return a*b; }
             @Override public default Long sclScalar(Long a, double scl) { return (long)(a*scl); }
+            @Override public default Long sclScalar(Long a, int scl) { return (a*scl); }
 
             @Override public default Long divScalar(Long a, Long b) { return a/b; }
             @Override public default Long divScalar(Long a, double scl) { return (long)(a/scl); }
@@ -516,6 +585,8 @@ public interface VectUtil<Vect , Scalar extends Comparable<Scalar>> extends Vect
             @Override public default Long negScalar(Long a) { return -a; }
 
             @Override public default Long avgScalar(Long a, Long b) { return (a+b)/2; }
+
+            @Override public default double ratioScalar(Long a, Long b){return (double)a/b;}
 
             @Override public default boolean eqScalar(Long a, Long b) { return FormsUtil.equals(a,b); }
 

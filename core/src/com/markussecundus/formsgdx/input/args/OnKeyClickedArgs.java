@@ -11,7 +11,7 @@ import com.markussecundus.formsgdx.input.InputManager;
  * @see OnKeyTypedArgs
  *
  *
- * @see OnInputEventArgs
+ * @see com.markussecundus.formsgdx.input.args.OnInputEventArgs
  *
  * @see InputConsumer
  * @see InputManager

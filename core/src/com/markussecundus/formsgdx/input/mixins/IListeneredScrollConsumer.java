@@ -1,15 +1,13 @@
 package com.markussecundus.formsgdx.input.mixins;
 
 import com.markussecundus.forms.events.EventDelegate;
-import com.markussecundus.forms.utils.FormsUtil;
-import com.markussecundus.forms.utils.datastruct.DefaultDict;
+import com.markussecundus.forms.extensibility.Extensible;
+import com.markussecundus.forms.utils.function.Function;
 import com.markussecundus.forms.wrappers.property.ConstProperty;
 import com.markussecundus.forms.wrappers.property.impl.constant.SimpleConstProperty;
 import com.markussecundus.formsgdx.input.InputConsumer;
 import com.markussecundus.formsgdx.input.args.OnScrolledArgs;
 import com.markussecundus.formsgdx.input.interfaces.ListeneredScrollConsumer;
-
-import java.util.Map;
 
 /**
  * Mixin-Rozhraní Implementující skrze defaultní metody veškerou funkcionalitu {@link ListeneredScrollConsumer}.
@@ -55,7 +53,7 @@ import java.util.Map;
  * </code>
  *</pre>
  *
- * @see com.markussecundus.formsgdx.input.InputConsumer
+ * @see InputConsumer
  *
  * @see ListeneredScrollConsumer
  *
@@ -65,7 +63,7 @@ import java.util.Map;
  *
  * @author MarkusSecundus
  * */
-public interface IListeneredScrollConsumer extends InputConsumer, ListeneredScrollConsumer {
+public interface IListeneredScrollConsumer extends InputConsumer, ListeneredScrollConsumer, Extensible {
 
 
     /**{@inheritDoc}*/
@@ -101,11 +99,7 @@ public interface IListeneredScrollConsumer extends InputConsumer, ListeneredScro
      * @author MarkusSecundus
      * */
     static final class Util {
-        private static final Map<FormsUtil.WrapperForReferenceComparison<IListeneredScrollConsumer>, Impl> impls =
-                new DefaultDict<>(self -> self.item.__ListeneredScrollConsumer__MakeInstance(),
-                                    FormsUtil.WrapperForReferenceComparison::cpy);
-
-        private static final FormsUtil.WrapperForReferenceComparison<IListeneredScrollConsumer> instanceFinder = new FormsUtil.WrapperForReferenceComparison<>(null);
+        private static final Function<Extensible, Impl> INSTANCE_SUPPLIER = self->((IListeneredScrollConsumer)self).__ListeneredScrollConsumer__MakeInstance();
 
         /**
          * (pozn.: V žádném případě nesmí být volána v rámci konfiguračních metod již tázané mixinové komponenty.)
@@ -113,7 +107,7 @@ public interface IListeneredScrollConsumer extends InputConsumer, ListeneredScro
          * @return Mixinová komponenta příslušící dané instanci {@link IListeneredScrollConsumer}
          * */
         protected static Impl getImpl(IListeneredScrollConsumer self){
-            return impls.get(instanceFinder.with(self));
+            return self.getExtension(Util.Impl.class, INSTANCE_SUPPLIER);
         }
 
         /**

@@ -1,6 +1,7 @@
 package com.markussecundus.forms.events;
 
 import com.markussecundus.forms.utils.datastruct.AutobucketedList;
+import com.markussecundus.forms.utils.datastruct.ReadonlyList;
 import com.markussecundus.forms.wrappers.property.Property;
 import com.markussecundus.forms.wrappers.property.impl.general.AbstractProperty;
 
@@ -13,20 +14,22 @@ import java.util.List;
  * <p></p>
  * 'I' jako 'Implementace'
  * (Ano, je to provokace vůči .NET. A stojím si za tím.)
+ * <p></p>
+ * Poskytuje optimalizaci koncové rekurze.
+ *
+ * @see EventDelegate
+ *
+ * @author MarkusSecundus
 * */
 public class IEventDelegate<Args> implements EventDelegate<Args> {
 //public:
 
 
-    /**
-     *
-     * {@inheritDoc}
-     * */
     @Override public boolean exec(Args e) {
         return getReturnValuePolicy().convRetVal(iterateList(e));
     }
 
-
+    @Override
     public List<EventListener<? super Args>> getListeners(Integer priority){
         return listeners.getBucket(priority);
     }
@@ -51,7 +54,7 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
      *
      * {@inheritDoc}
      * <p></p>
-     * {@link ReturnValuePolicy} je generována líně.
+     * {@link EventDelegate.ReturnValuePolicy} je generována líně.
      * */
     @Override public Property<ReturnValuePolicy> returnValuePolicy(){
         if(returnValuePolicyProperty == null)
@@ -59,18 +62,10 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
         return returnValuePolicyProperty;
     }
 
-    /**
-     *
-     * {@inheritDoc}
-     * */
     @Override public ReturnValuePolicy getReturnValuePolicy() {
         return returnValuePolicyProperty==null ? returnValuePolicy : EventDelegate.super.getReturnValuePolicy();
     }
 
-    /**
-     *
-     * {@inheritDoc}
-     * */
     @Override public ReturnValuePolicy setReturnValuePolicy(ReturnValuePolicy pol) {
         return returnValuePolicyProperty==null? returnValuePolicy = pol : EventDelegate.super.setReturnValuePolicy(pol);
     }
@@ -115,16 +110,16 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
 
 
     private boolean iterateList(Args e){
-        List<? extends EventListener<? super Args>> list = listeners.getBase();
+        ReadonlyList<EventListener<? super Args>> list = listeners.getBase();
 
         while(true) {
             for (int t = 0; t < list.size() - 1; ) {
-                EventListener<? super Args> aktualniListener = list.get(t);
+                EventListener<? super Args> aktualniListener = list.getNth(t);
 
                 if(!invokeListener(e, aktualniListener))
                     return false;
 
-                if (list.get(t) == aktualniListener)
+                if (list.getNth(t) == aktualniListener)
                     ++t;
                 else {
                     int i = list.indexOf(aktualniListener);
@@ -136,7 +131,7 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
             if(list.size()<=0)
                 return true;
 
-            EventListener<? super Args> posledniListener = list.get(list.size()-1);
+            EventListener<? super Args> posledniListener = list.getNth(list.size()-1);
             if(posledniListener != this)
                 return invokeListener(e, posledniListener);
         }

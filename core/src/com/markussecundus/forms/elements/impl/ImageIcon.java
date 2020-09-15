@@ -1,5 +1,6 @@
 package com.markussecundus.forms.elements.impl;
 
+import com.markussecundus.forms.elements.DrawableElem;
 import com.markussecundus.forms.events.EventListener;
 import com.markussecundus.forms.gfx.GraphicalPrimitive;
 import com.markussecundus.forms.utils.vector.VectUtil;
@@ -8,7 +9,7 @@ import com.markussecundus.forms.wrappers.property.ReadonlyProperty;
 
 
 /**
- * A basic {@link com.markussecundus.forms.elements.Drawable} implementation
+ * A basic {@link DrawableElem} implementation
  * that holds a {@link GraphicalPrimitive} and renders it on the screen as the representation of itself.
  *
  *
@@ -19,7 +20,7 @@ import com.markussecundus.forms.wrappers.property.ReadonlyProperty;
  *
  * @author MarkusSecundus
  * */
-public class ImageIcon<Rend, Pos, Scalar extends Comparable<Scalar>, Img extends GraphicalPrimitive<Rend, Pos, Scalar>> extends BasicAbstractDrawable<Rend, Pos, Scalar> {
+public class ImageIcon<Rend, Pos, Scalar extends Comparable<Scalar>, Img extends GraphicalPrimitive<Rend, Pos, Scalar>> extends BasicAbstractDrawableElem<Rend, Pos, Scalar> {
 //public:
 
     /**
@@ -36,14 +37,14 @@ public class ImageIcon<Rend, Pos, Scalar extends Comparable<Scalar>, Img extends
      * @param minSize initial value for the <code>minSize</code> property of this
      * */
     public ImageIcon(Img img, Pos maxSize, Pos minSize){
-        super(img.getVectUtil(), maxSize, minSize, img.getDimensions());
+        super(img.getVectUtil(), maxSize, minSize, img.getSize());
         this.img = img;
 
         Wrapper<Boolean> editFlag = Wrapper.make(false);
         dimsGuardElem = e->{
             editFlag.set(true);
             try {
-                this.img.setDimensions(e.newVal().get());
+                this.img.setSize(e.newVal().get());
             }finally{editFlag.set(false);}
             return true;
         };
@@ -54,15 +55,16 @@ public class ImageIcon<Rend, Pos, Scalar extends Comparable<Scalar>, Img extends
                 throw new RuntimeException("The image is supposed to be resized only through it's ImageIcon owner");
             return true;
         };
-        img.dimensions().getSetterListeners()._getUtilListeners().add(dimsGuardImg);
+        img.size().getSetterListeners()._getUtilListeners().add(dimsGuardImg);
     }
 
     /**
      * Draws the icon on the screen.
      * {@inheritDoc}
      * */
-    @Override public void draw(Rend renderer, Pos position) {
+    @Override public boolean draw(Rend renderer, Pos position) {
         img.draw(renderer, position);
+        return true;
     }
 
     /**
@@ -72,9 +74,7 @@ public class ImageIcon<Rend, Pos, Scalar extends Comparable<Scalar>, Img extends
     @Override public void update(float delta, int frameId) {}
 
 
-    /**
-     * {@inheritDoc}
-     * */
+
     @Override public VectUtil<Pos, Scalar> getVectUtil() {
         return img.getVectUtil();
     }
@@ -86,7 +86,7 @@ public class ImageIcon<Rend, Pos, Scalar extends Comparable<Scalar>, Img extends
      * */
     public void disownImg(){
         size().getSetterListeners()._getUtilListeners().remove(dimsGuardElem);
-        img.dimensions().getSetterListeners()._getUtilListeners().remove(dimsGuardImg);
+        img.size().getSetterListeners()._getUtilListeners().remove(dimsGuardImg);
     }
 
     /**

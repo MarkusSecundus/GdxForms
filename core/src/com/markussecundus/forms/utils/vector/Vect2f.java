@@ -1,5 +1,6 @@
 package com.markussecundus.forms.utils.vector;
 
+import com.markussecundus.forms.utils.datastruct.ReadonlyList;
 import com.markussecundus.forms.utils.function.Function;
 
 import java.io.Serializable;
@@ -13,7 +14,7 @@ import java.io.Serializable;
  *
  * @author MarkusSecundus
  * */
-public class Vect2f implements Cloneable, Serializable {
+public class Vect2f implements Cloneable, Serializable, ReadonlyList.Float {
 
     /**
      * Souřadnice vektoru.
@@ -41,7 +42,7 @@ public class Vect2f implements Cloneable, Serializable {
      * @return vektor s hodnotami odpovídajícími prvním dvěma prvkům v poli.
      * Nemusí nutně jít o novou instanci.
      * */
-    public static Vect2f make(Float[] arr) throws VectDecomposer.InconsistentNumberOfDimensionsException{
+    public static Vect2f make(java.lang.Float[] arr) throws VectDecomposer.InconsistentNumberOfDimensionsException{
         if(arr.length<2) throw new VectDecomposer.InconsistentNumberOfDimensionsException();
         return make(arr[0], arr[1]);
     }
@@ -51,6 +52,8 @@ public class Vect2f implements Cloneable, Serializable {
      * Nemusí nutně jít o novou instanci.
      * */
     public static Vect2f make(Vect2i v){return make(v.x, v.y);}
+
+    public static Vect2f make(Vect2d v){return make(v.x, v.y);}
 
     private Vect2f(float x, float y){this.x = x;this.y = y;}
 
@@ -70,6 +73,12 @@ public class Vect2f implements Cloneable, Serializable {
      * (viz {@link Vect2i})
      * */
     public Vect2i toInt(){return Vect2i.make(this);}
+
+    /**
+     * @return převod tohoto vektoru na přesnější variantu.
+     * (viz {@link Vect2d})
+     * */
+    public Vect2d toDouble(){return Vect2d.make(this);}
 
     /**
      * @return součet tohoto vektoru s danou hodnotou.
@@ -110,19 +119,11 @@ public class Vect2f implements Cloneable, Serializable {
      * @return násobek daného vektoru.
      * */
     public Vect2f scl(float f){return make(x*f, y*f);}
-    /**
-     * @return násobek daného vektoru.
-     * */
-    public Vect2f scl(Float f){return scl(f.floatValue());}
 
     /**
      * @return převrácený násobek daného vektoru.
      * */
     public Vect2f div(float f){return make(x/f, y/f);}
-    /**
-     * @return převrácený násobek daného vektoru.
-     * */
-    public Vect2f div(Float f){return div(f.floatValue());}
 
     /**
      * @return vektor s vynásobenou hodnotou na souřadnici X.
@@ -208,7 +209,7 @@ public class Vect2f implements Cloneable, Serializable {
      *
      * @return 2. mocina vzdálenosti od vstupního vektoru
      * */
-    public Float dst2(Vect2f v){return dst2(v.x, v.y);}
+    public float dst2(Vect2f v){return dst2(v.x, v.y);}
 
     /**
      * @return vzdálenost od vstupního vektoru
@@ -217,7 +218,7 @@ public class Vect2f implements Cloneable, Serializable {
     /**
      * @return vzdálenost od vstupního vektoru
      * */
-    public Float dst(Vect2f v){return dst(v.x, v.y);}
+    public float dst(Vect2f v){return dst(v.x, v.y);}
 
     /**
      * @return minimum z obou souřadnic
@@ -242,14 +243,11 @@ public class Vect2f implements Cloneable, Serializable {
     /**
      * Vektor odpovídající souřadnicím (+Inf, +Inf)^T
      * */
-    public static final Vect2f INF = make(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
+    public static final Vect2f INF = make(java.lang.Float.POSITIVE_INFINITY, java.lang.Float.POSITIVE_INFINITY);
 
-    /**
-     * {@inheritDoc}
-     * */
     @Override
     public int hashCode() {
-        return (1 + Float.floatToIntBits(x))*Float.floatToIntBits(x) + Float.floatToIntBits(y);
+        return (1 + java.lang.Float.floatToIntBits(x))*java.lang.Float.floatToIntBits(x) + java.lang.Float.floatToIntBits(y);
     }
 
     /**
@@ -268,9 +266,6 @@ public class Vect2f implements Cloneable, Serializable {
         return obj instanceof Vect2f && ((Vect2f)obj).equals(this);
     }
 
-    /**
-     * {@inheritDoc}
-     * */
     @Override
     protected Object clone() {
         try {
@@ -280,9 +275,6 @@ public class Vect2f implements Cloneable, Serializable {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     * */
     @Override
     public String toString() {
         return String.format("(%.2f, %.2f)^T", x,y);
@@ -290,23 +282,28 @@ public class Vect2f implements Cloneable, Serializable {
 
 
 
+    @Override
+    public int size() { return 2; }
+
+    @Override
+    public float getNth_raw(int n) { return n==0? x: y; }
 
 
 
     /**
      * Rozloží vektor na pole složek.
      * */
-    public Float[] decompose(){return new Float[]{x,y};}
+    public java.lang.Float[] decompose(){return new java.lang.Float[]{x,y};}
 
     /**
      * Složí vektor z pole složek.
      * */
-    public static Vect2f compose(Float[] arr){return make(arr);}
+    public static Vect2f compose(java.lang.Float[] arr){return make(arr);}
 
     /**
      * Vrátí instanci příslušné {@link VectUtil}.
      * */
-    public static VectUtil<Vect2f, Float> getUtility(){return Util.INSTANCE;}
+    public static VectUtil<Vect2f, java.lang.Float> getUtility(){return Util.INSTANCE;}
 
 
     /**
@@ -324,58 +321,51 @@ public class Vect2f implements Cloneable, Serializable {
          * */
         public static final Util INSTANCE = new Util();
 
-        /**{@inheritDoc}*/
         public  Vect2f add(Vect2f a, Vect2f b){return a.add(b);}
-        /**{@inheritDoc}*/
         public  Vect2f sub(Vect2f a, Vect2f b){return a.sub(b);}
 
-        /**{@inheritDoc}*/
-        public  Vect2f scl(Vect2f a, Float b){return a.scl(b);}
-        /**{@inheritDoc}*/
-        public  Vect2f div(Vect2f a, Float b){return a.div(b);}
+        public  Vect2f scl(Vect2f a, java.lang.Float b){return a.scl(b);}
+        public  Vect2f div(Vect2f a, java.lang.Float b){return a.div(b);}
 
-        /**{@inheritDoc}*/
         public Vect2f scl(Vect2f a, double b) { return a.scl((float)b); }
-        /**{@inheritDoc}*/
         public Vect2f div(Vect2f a, double b) { return a.div((float)b); }
 
-        /**{@inheritDoc}*/
-        public  Float len2(Vect2f v){return v.len2();}
-        /**{@inheritDoc}*/
-        public  Float len(Vect2f v){return v.len();}
 
-        /**{@inheritDoc}*/
-        public  Float dst2(Vect2f a, Vect2f b){return a.dst2(b);}
-        /**{@inheritDoc}*/
-        public  Float dst(Vect2f a, Vect2f b){return a.dst(b);}
+        public java.lang.Float len2(Vect2f v){return v.len2();}
+        public java.lang.Float len(Vect2f v){return v.len();}
 
-        /**{@inheritDoc}*/
+
+        public java.lang.Float dst2(Vect2f a, Vect2f b){return a.dst2(b);}
+        public java.lang.Float dst(Vect2f a, Vect2f b){return a.dst(b);}
+
+
+        public boolean lt(Vect2f a, Vect2f b){return a.x < b.x && a.y < b.y;}
+        public boolean le(Vect2f a, Vect2f b){return a.x <= b.x && a.y <= b.y;}
+
+
         public Vect2f cpy(Vect2f v){return v;}
 
-        /**{@inheritDoc}*/
-        public Float minScalar(Vect2f v) { return v.min(); }
-        /**{@inheritDoc}*/
-        public Float maxScalar(Vect2f v) { return v.max(); }
 
-        /**{@inheritDoc}*/
-        public Float[] decompose(Vect2f p) { return p.decompose(); }
-        /**{@inheritDoc}*/
-        public Vect2f compose(Float[] s) { return Vect2f.compose(s); }
-        /**{@inheritDoc}*/
+        public java.lang.Float minScalar(Vect2f v) { return v.min(); }
+        public java.lang.Float maxScalar(Vect2f v) { return v.max(); }
+
+
+        public java.lang.Float[] decompose(Vect2f p) { return p.decompose(); }
+        public Vect2f compose(java.lang.Float... s) { return Vect2f.compose(s); }
+
         public int DIMENSION_COUNT(){return 2;}
 
-        /**{@inheritDoc}*/
-        public Float getNth(Vect2f v, int n) { return n==0? v.x: v.y; }
-        /**{@inheritDoc}*/
-        public Vect2f withNth(Vect2f p, int n, Float s) { return n==0?make(s, p.y):make(p.x, s); }
 
-        /**{@inheritDoc}*/
+        public java.lang.Float getNth(Vect2f v, int n) { return v.getNth(n); }
+        public Vect2f withNth(Vect2f p, int n, java.lang.Float s) { return n==0?make(s, p.y):make(p.x, s); }
+
+
         public Vect2f ZERO(){return ZERO;}
 
-        /**{@inheritDoc}*/
+
         public Vect2f MAX_VAL(){return INF;}
 
-        /**{@inheritDoc}*/
+
         @Override public Class<Vect2f> getVectClass() { return Vect2f.class; }
     }
 
@@ -493,7 +483,7 @@ public class Vect2f implements Cloneable, Serializable {
          * @param ratio poměr, kterým bude pronásobena výsledná hodnota
          * @param extractor funkce, která z vektoru vytáhne číselnou hodnotu, jenž bude následně násobena poměrem
          * */
-        public ExtractMultAdder(float ratio, Function<Vect2f, Float> extractor){
+        public ExtractMultAdder(float ratio, Function<Vect2f, java.lang.Float> extractor){
             this.ratio = ratio;
             this.extractor = extractor;
         }
@@ -511,7 +501,7 @@ public class Vect2f implements Cloneable, Serializable {
         /**
          * Funkce, která z vektoru vytáhuje číselnou hodnotu, k násobení poměrem.
          */
-        public final Function<Vect2f, Float> extractor;
+        public final Function<Vect2f, java.lang.Float> extractor;
         /**
          * Poměr, k pronásobení výsledné hodnoty.
          * */
@@ -520,7 +510,7 @@ public class Vect2f implements Cloneable, Serializable {
         /**
          * @return instance s danou hodnotou <code>ammount</code>
          * */
-        public static ExtractMultAdder make(float ratio, Function<Vect2f, Float> extractor){return new ExtractMultAdder(ratio, extractor);}
+        public static ExtractMultAdder make(float ratio, Function<Vect2f, java.lang.Float> extractor){return new ExtractMultAdder(ratio, extractor);}
 
         /**
          * @return instance s danou hodnotou <code>ratio</code> a zachovanou transformační funkcí
@@ -529,7 +519,7 @@ public class Vect2f implements Cloneable, Serializable {
         /**
          * @return instance s danou transformační funkcí a zachovanou hodnotou <code>ratio</code>
          * */
-        public ExtractMultAdder with(Function<Vect2f, Float> extractor){return make(ratio, extractor);}
+        public ExtractMultAdder with(Function<Vect2f, java.lang.Float> extractor){return make(ratio, extractor);}
     }
 
     /**
@@ -558,7 +548,7 @@ public class Vect2f implements Cloneable, Serializable {
      *
      * @return instance {@link ExtractMultAdder} s danou hodnotou
      * */
-    public static ExtractMultAdder makeRatioAdder(float ratio, Function<Vect2f, Float> extractor){return ExtractMultAdder.make(ratio, extractor);}
+    public static ExtractMultAdder makeRatioAdder(float ratio, Function<Vect2f, java.lang.Float> extractor){return ExtractMultAdder.make(ratio, extractor);}
 
 
     /**
@@ -566,19 +556,19 @@ public class Vect2f implements Cloneable, Serializable {
      *
      * Může sloužit jako parametr pro {@link ExtractMultAdder}.
      * */
-    public static final Function<Vect2f, Float> minFunc = Vect2f::min;
+    public static final Function<Vect2f, java.lang.Float> minFunc = Vect2f::min;
 
     /**
      * Vytáhne z vektoru jeho maximum.
      *
      * Může sloužit jako parametr pro {@link ExtractMultAdder}.
      * */
-    public static final Function<Vect2f, Float> maxFunc = Vect2f::max;
+    public static final Function<Vect2f, java.lang.Float> maxFunc = Vect2f::max;
 
     /**
      * Vytáhne z vektoru průměr jeho složek.
      *
      * Může sloužit jako parametr pro {@link ExtractMultAdder}.
      * */
-    public static final Function<Vect2f, Float> avgFunc = Vect2f::avg;
+    public static final Function<Vect2f, java.lang.Float> avgFunc = Vect2f::avg;
 }

@@ -42,7 +42,7 @@ public class RoundedRectangle implements GraphicalPrimitive<ShapeRenderer, Vect2
      * */
     @Override public boolean draw(ShapeRenderer renderer, Vect2f pos) {
         float roundness = getRoundness();
-        Vect2f dim = getDimensions();
+        Vect2f dim = getSize();
         Color col = getColor();
 
         renderer.setColor(col);
@@ -66,7 +66,7 @@ public class RoundedRectangle implements GraphicalPrimitive<ShapeRenderer, Vect2
      *
      * @return rozměry obdélníku
      * */
-    @Override public Property<Vect2f> dimensions() { return dimensions; }
+    @Override public Property<Vect2f> size() { return dimensions; }
 
     /**
      * @return zaoblenost hran - poměr poloměrů rohových zaoblovcích kružnic vůči minimu z rozměrů obdélníku

@@ -21,16 +21,48 @@ import com.markussecundus.forms.wrappers.ReadonlyWrapper;
  * */
 public interface ConstProperty<T> extends ReadonlyWrapper<T> {
 
+    /**
+     * Delegát, jenž se provede při každém vyžádání vnitřní hodnoty voláním metody <code>get</code>.
+     *
+     * @return Delegát, jenž se provede při každém vyžádání vnitřní hodnoty voláním metody <code>get</code>.
+     * */
     public ConstProperty<? extends EventDelegate< ? extends GetterListenerArgs<T>>> getterListeners();
 
+    /**
+     * Pohodlnější zkratka pro <code>getterListeners().get()</code>.
+     *
+     * @return Pohodlnější zkratka pro <code>getterListeners().get()</code>.
+     * */
     public default EventDelegate<? extends GetterListenerArgs<T>> getGetterListeners(){
         return getterListeners().get();
     }
 
+    /**
+     * Datový interface pro argumenty, které přebírá getterový listener.
+     *
+     * @see ConstProperty
+     *
+     * @author MarkusSecundus
+     * */
     public static interface GetterListenerArgs<T>{
+
+        /**
+         * {@link ConstProperty}, jejíž hodnota je čtena.
+         *
+         * @return {@link ConstProperty}, jejíž hodnota je čtena.
+         * */
         public ConstProperty<T> caller();
+
+        /**
+         * Wrapper, přes který lze aktuální hodnotu číst, aniž by byl volán getterový Delegát.
+         *
+         * @return Wrapper, přes který lze aktuální hodnotu číst, aniž by byl volán getterový Delegát.
+         * */
         public ReadonlyWrapper<T> currentVal();
 
+        /**
+         * Zkonstruuje instanci z daných argumentů.
+         * */
         public static<T> GetterListenerArgs<T> make(ConstProperty<T> caller, ReadonlyWrapper<T> currentVal){
             return new GetterListenerArgs<T>() {
                 public ConstProperty<T> caller() { return caller; }

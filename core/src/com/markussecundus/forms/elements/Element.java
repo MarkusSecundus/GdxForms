@@ -4,7 +4,7 @@ package com.markussecundus.forms.elements;
 /**
  * The bare minimal Element of the Form interface.
  *
- * Can only be updated, additional functionality is required for it to be drawn on the screen - see {@link Drawable}
+ * Can only be updated, additional functionality is required for it to be drawn on the screen - see {@link DrawableElem}
  * As is can be used to contain pieces of UI logic, that are to be performed on every update.
  *
  * @author MarkusSecundus

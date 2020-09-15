@@ -3,14 +3,19 @@ com.markussecundus.forms.elements.impl
 com.markussecundus.forms.elements.impl.layouts
 com.markussecundus.forms.elements.impl.utils
 com.markussecundus.forms.events
-com.markussecundus.forms.events.deprecated
+com.markussecundus.forms.extensibility
 com.markussecundus.forms.gfx
+com.markussecundus.forms.text
 com.markussecundus.forms.utils
 com.markussecundus.forms.utils.datastruct
+com.markussecundus.forms.utils.datastruct.inout
+com.markussecundus.forms.utils.datastruct.redirected
 com.markussecundus.forms.utils.function
+com.markussecundus.forms.utils.function.raw
 com.markussecundus.forms.utils.vector
 com.markussecundus.forms.wrappers
 com.markussecundus.forms.wrappers.property
+com.markussecundus.forms.wrappers.property.binding
 com.markussecundus.forms.wrappers.property.impl.constant
 com.markussecundus.forms.wrappers.property.impl.general
 com.markussecundus.forms.wrappers.property.impl.readonly
@@ -23,3 +28,4 @@ com.markussecundus.formsgdx.input.args
 com.markussecundus.formsgdx.input.interfaces
 com.markussecundus.formsgdx.input.mixins
 com.markussecundus.formsgdx.rendering
+com.markussecundus.formsgdx.text

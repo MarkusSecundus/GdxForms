@@ -2,6 +2,7 @@ package com.markussecundus.formsgdx.input;
 
 import com.badlogic.gdx.Gdx;
 import com.markussecundus.forms.events.EventDelegate;
+import com.markussecundus.forms.extensibility.IExtensible;
 import com.markussecundus.forms.utils.Pair;
 import com.markussecundus.forms.utils.function.BiFunction;
 import com.markussecundus.forms.utils.function.BiPredicate;
@@ -23,11 +24,11 @@ import java.util.List;
  * Objekt starající se o příjem vstupních událostí a jejich distribuci mezi konzumenty, jež
  * jsou u něj zaregistrováni.
  *
- * @see com.markussecundus.formsgdx.input.InputConsumer
+ * @see InputConsumer
  *
  * @author MarkusSecundus
  * */
-public class InputManager implements  InputConsumer, IListeneredUniversalConsumer {
+public class InputManager extends IExtensible implements  InputConsumer, IListeneredUniversalConsumer {
 
     /**
      * @return List obsahující všechny konzumenty zaregistrované na příjem událostí z klávesnice,
@@ -165,7 +166,7 @@ public class InputManager implements  InputConsumer, IListeneredUniversalConsume
         public AsInputProcessor(){super();}
 
         /**
-         * Jako {@link InputManager} iniciující vstupní událost bude považován on sám.
+         * Jako {@link com.markussecundus.formsgdx.input.InputManager} iniciující vstupní událost bude považován on sám.
          *
          * @return <code>this</code>
          * */

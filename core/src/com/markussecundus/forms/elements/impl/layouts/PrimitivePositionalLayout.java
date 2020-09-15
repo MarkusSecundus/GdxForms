@@ -1,6 +1,7 @@
 package com.markussecundus.forms.elements.impl.layouts;
 
-import com.markussecundus.forms.elements.Drawable;
+import com.markussecundus.forms.elements.DrawableElem;
+import com.markussecundus.forms.elements.impl.BasicAbstractDrawableElem;
 import com.markussecundus.forms.utils.datastruct.DefaultDict;
 import com.markussecundus.forms.utils.vector.VectUtil;
 
@@ -8,7 +9,7 @@ import java.util.Map;
 
 
 /**
- * The most basic and primitive implementation of {@link com.markussecundus.forms.elements.impl.BasicAbstractDrawable},
+ * The most basic and primitive implementation of {@link BasicAbstractDrawableElem},
  * that has the child positions set directly and doesn't apply any logic
  * for restraining its children to not exceed the borders set to the layout.
  *
@@ -17,7 +18,7 @@ import java.util.Map;
  * @param <Pos> Vector type used to define the position and dimensions of the element
  * @param <Scalar> The type that Pos's individual components consist of (- see {@link VectUtil} )
  *
- * @see Drawable
+ * @see DrawableElem
  * @see BasicAbstractLayout
  * @see BasicLinearLayout
  *
@@ -62,7 +63,7 @@ public class PrimitivePositionalLayout<Rend, Pos, Scalar extends Comparable<Scal
      * @param child element whose position is being set
      * @param newPos position realative to the layout's origin
      * */
-    public Pos setChildPosition(Drawable<Rend, Pos> child, Pos newPos){
+    public Pos setChildPosition(DrawableElem<Rend, Pos> child, Pos newPos){
         return childPositionsContainer.get(child).positionWriter.set(newPos);
     }
 
@@ -77,7 +78,7 @@ public class PrimitivePositionalLayout<Rend, Pos, Scalar extends Comparable<Scal
     /**
      * Ensures that the child positions are stored in {@link DefaultDict} and initialized with <code>NEUTRAL_POS</code>
      * */
-    @Override protected Map<Drawable<Rend, Pos>, ChildPosition> MAKE_CONTAINER_FOR_CHILD_POSITIONS() {
+    @Override protected Map<DrawableElem<Rend, Pos>, ChildPosition> MAKE_CONTAINER_FOR_CHILD_POSITIONS() {
         return new DefaultDict<>(e->new ChildPosition(NEUTRAL_POS));
     }
 

@@ -1,8 +1,11 @@
 package com.markussecundus.forms.elements;
 
+import com.markussecundus.forms.extensibility.Extensible;
+import com.markussecundus.forms.elements.impl.BasicAbstractDrawableElem;
 import com.markussecundus.forms.utils.vector.VectUtil;
 import com.markussecundus.forms.wrappers.property.Property;
 import com.markussecundus.forms.wrappers.property.ReadonlyProperty;
+import com.markussecundus.forms.gfx.Drawable;
 
 
 /**
@@ -11,11 +14,11 @@ import com.markussecundus.forms.wrappers.property.ReadonlyProperty;
  * @param <Rend> The renderer type that performs the drawing of the element to the screen or anywhere else
  * @param <Pos> Vector type used to define the position and dimensions of the element
  *
- * @see  com.markussecundus.forms.elements.impl.BasicAbstractDrawable
+ * @see  BasicAbstractDrawableElem
  *
  * @author MarkusSecundus
  * */
-public interface Drawable<Rend, Pos> extends Element{
+public interface DrawableElem<Rend, Pos> extends Element, Drawable<Rend, Pos>, Extensible {
 
     /**
      * Called each frame, renders the <code>Drawable</code> on the screen.
@@ -25,7 +28,7 @@ public interface Drawable<Rend, Pos> extends Element{
      *                 By convention should define the leftmost-downmost edge of
      *                 the rectangle circumscribed to the this if in 2D space
      * */
-    public void draw(Rend renderer, Pos position);
+    public boolean draw(Rend renderer, Pos position);
 
     /**
      * The real size of the <code>Drawable</code>, which it takes when rendered on the screen.
@@ -75,12 +78,6 @@ public interface Drawable<Rend, Pos> extends Element{
      * */
     public VectUtil<Pos, ?> getVectUtil();
 
-    /**
-     * Shinier shortcut for calling <code>size().get()</code>.
-     * */
-    public default Pos getSize(){
-        return size().get();
-    }
 
     /**
      * Shinier shortcut for calling <code>maxSize().get()</code>.

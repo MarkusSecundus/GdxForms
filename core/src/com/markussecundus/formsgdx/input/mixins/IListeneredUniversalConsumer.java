@@ -1,23 +1,21 @@
 package com.markussecundus.formsgdx.input.mixins;
 
-import com.markussecundus.forms.elements.impl.layouts.BasicLinearLayout;
-import com.markussecundus.forms.utils.vector.Vect2f;
-import com.markussecundus.forms.utils.vector.VectUtil;
+import com.markussecundus.formsgdx.input.InputConsumer;
 import com.markussecundus.formsgdx.input.interfaces.ListeneredUniversalConsumer;
-import com.markussecundus.formsgdx.rendering.BasicRenderer;
 
 
 /**
  * Mixin-Rozhraní Implementující skrze defaultní metody veškerou funkcionalitu {@link ListeneredUniversalConsumer}.
- *
+ * <p></p>
  * Účel je, aby by bylo jednoduše možné přidat požadovanou funkcionalitu i do tříd,
  * které již mají předka a nemohou dědit z další třídy, aby získaly funkcionalitu zpracování vstupu.
- *
+ *<p></p>
  * Každé své instanci poskytuje Delegáty náležící daným vstupním událostem.
- *
+ *<p></p>
  *
  * Definuje velmi ošklivě pojmenované pomocné a konfigurační metody, které nikomu z venčí nikdy k ničemu
  * nebudou a ideálně by měly být <code>protected</code>, kdyby to Java dovolovala.
+ * <p>
  * Pro jejich skrytí před náhodným uživatelem vašich implementací lze použít např. tento pattern:
  * <pre>
  * <code>
@@ -48,12 +46,12 @@ import com.markussecundus.formsgdx.rendering.BasicRenderer;
  * </code>
  *</pre>
  *
- * @see com.markussecundus.formsgdx.input.InputConsumer
+ * @see InputConsumer
  *
  * @see ListeneredUniversalConsumer
  *
  * @see IListeneredTouchConsumer
- * @see IListeneredScrollConsumer
+ * @see com.markussecundus.formsgdx.input.mixins.IListeneredScrollConsumer
  * @see IListeneredKeyConsumer
  *
  * @author MarkusSecundus
