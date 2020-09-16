@@ -96,6 +96,14 @@ public class FormsGdxExample extends BasicFormApplication {
 
 	/**
 	 * Mírně spartánská implementace textového čudlíku.
+	 *
+	 * @see BasicLabel
+	 * @see ImageIcon
+	 *
+	 * @see IListeneredUniversalConsumer
+	 *
+	 * @see RoundedRectangle
+	 * @see BasicRenderer
 	 * */
 	static class TextButton extends ImageIcon<BasicRenderer, Vect2f, Float, BasicRenderer.ShapeToBasicDrw<Vect2f, Float, RoundedRectangle.SObrubou>> implements IListeneredUniversalConsumer{
 
@@ -140,6 +148,10 @@ public class FormsGdxExample extends BasicFormApplication {
 
 	/**
 	 * Primitivní utilita pro přepínání mezi několika různými prvky GUI.
+	 *
+	 * @see PrimitivePositionalLayout
+	 *
+	 * @see IListeneredUniversalConsumer.ForLayout
 	 * */
 	static class Switcher extends PrimitivePositionalLayout<BasicRenderer, Vect2f, Float> implements IListeneredUniversalConsumer.ForLayout{
 
@@ -173,7 +185,7 @@ public class FormsGdxExample extends BasicFormApplication {
 		/**
 		 * Posune index aktivního prvku o danou hodnotu
 		 * */
-		public int jumpCurr(int ammount){
+		public int jumpCurrent(int ammount){
 			int size = optionsList().get().size();
 			return currIndex = size<=0 ? 0 : FormsUtil.mod(currIndex+ ammount, size);
 		}
@@ -294,7 +306,7 @@ public class FormsGdxExample extends BasicFormApplication {
 				}},
 				Color.FOREST
 		);
-		switchButton.getOnTouchUpListener().add(e-> {if(e.actor.isClicked())root.jumpCurr(1);});
+		switchButton.getOnTouchUpListener().add(e-> {if(e.actor.isClicked())root.jumpCurrent(1);});
 
 		ly.addDrawableChild(switchButton, 0, 3);
 
@@ -345,8 +357,8 @@ public class FormsGdxExample extends BasicFormApplication {
 		Slider.Basic slider2 = new Slider.Basic(style, Vect2f.make(12000,80), Vect2f.make(100,100));
 
 		//délka ikony i se bude měnit podle hodnoty na 1. posuvníku
-		slider.value().getSetterListeners().add(e->i.setPrefSize(Vect2f.make(ly.getSize().x*e.newVal().get(), i.getPrefSize().y).withFloor(style.borderThickness.scl(2))));
-
+		//  --x-zastaralé-x--  slider.value().getSetterListeners().add(e->i.setPrefSize(Vect2f.make(ly.getSize().x*e.newVal().get(), i.getPrefSize().y).withFloor(style.borderThickness.scl(2))));
+		Bindings.bind(i.prefSize(),(slid, lys, ipr)->Vect2f.make(lys.x*slid, ipr.y), slider.value(), ly.size(), i.prefSize());
 
 		//přidáme do layoutu nevykreslitelného potomka, který akorát každý snímek provede svou funkci update - každý snímek povyroste ikona 'i1' o hodnotu 'rychlostRustu'
 		Wrapper<Vect2f> rychlostRustu = Wrapper.make(Vect2f.make(0.1f, 0.05f));
@@ -354,16 +366,16 @@ public class FormsGdxExample extends BasicFormApplication {
 		ly.getOnClickedListener().add(e->Gdx.app.log("ttt", "clicked!"));
 
 		//hodnota 'rychlostRustu' bude záviset na hodnotách posuvníků
-		slider2.value().getSetterListeners().add(e->rychlostRustu.set(rychlostRustu.get().withX(e.newVal().get()*2f-1f)));
-		slider.value().getSetterListeners().add(e->rychlostRustu.set(rychlostRustu.get().withY(e.newVal().get()*2f-1f)));
-
+		//  --x-zastaralé-x--  slider2.value().getSetterListeners().add(e->rychlostRustu.set(rychlostRustu.get().withX(e.newVal().get()*2f-1f)));
+		//  --x-zastaralé-x--  slider.value().getSetterListeners().add(e->rychlostRustu.set(rychlostRustu.get().withY(e.newVal().get()*2f-1f)));
+		Bindings.bind(rychlostRustu, (x,y)-> Vect2f.make(x*2f - 1f, y*2f - 1f), slider2.value(), slider.value());
 
 		//vytvoříme další slider
 		Slider.Basic slider3 = new Slider.Basic(style, Vect2f.make(12000,80), Vect2f.make(100,100));
 
 		//hodnota slideru bude určovat zarovnání kořenového layoutu
-		slider3.value().getSetterListeners().add(e->ly.setAlignment(0, e.newVal().get()));
-		
+		//  --x-zastaralé-x--  slider3.value().getSetterListeners().add(e->ly.setAlignment(0, e.newVal().get()));
+		Bindings.bind(ly.allignment(0), e->(double)e,  slider3.value());
 
 		//přidáme všechny prvky do kořenového layoutu
 		ly.getDrawableChildren().add(slider3);
@@ -389,11 +401,13 @@ public class FormsGdxExample extends BasicFormApplication {
 
 		//vytvoříme slider a nastavíme, že hodnota na něm udává zarovnání vnitřního layoutu 'll'
 		Slider.Basic sl1 = new Slider.Basic(style, Vect2f.make(300,80), Vect2f.make(50,100));
-		sl1.value().getSetterListeners().add(e->ll.setAlignment(1, e.newVal().get()));
+		//  --x-zastaralé-x--  sl1.value().getSetterListeners().add(e->ll.setAlignment(1, e.newVal().get()));
+		Bindings.bind(ll.allignment(1), x->(double)x, sl1.value());
 
 		//vytvoříme další slider, od jeho hodnoty se bude odvíjet kulatost jeho čudlíku
 		Slider.Basic sl2 = new Slider.Basic(style, Vect2f.make(300,80), Vect2f.make(100,100));
-		sl2.value().getSetterListeners().add(e->sl2.cudlik.base.roundness().set(e.newVal().get()));
+		//  --x-zastaralé-x--  sl2.value().getSetterListeners().add(e->sl2.cudlik.base.roundness().set(e.newVal().get()));
+		Bindings.bindBidirectional(sl2.cudlik.base.roundness(), sl2.value());
 
 		//přidáme prvky do vnitřního layoutu
 		ll2.getDrawableChildren().add(sl1);
@@ -433,7 +447,7 @@ public class FormsGdxExample extends BasicFormApplication {
 				}},
 				Color.FOREST
 		);
-		switchButton.getOnTouchUpListener().add(e->{if(e.actor.isClicked())root.jumpCurr(1);});
+		switchButton.getOnTouchUpListener().add(e->{if(e.actor.isClicked())root.jumpCurrent(1);});
 
 		ly.getDrawableChildren().add(1, switchButton);
 
