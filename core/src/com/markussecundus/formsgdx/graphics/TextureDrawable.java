@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.markussecundus.forms.extensibility.IExtensible;
 import com.markussecundus.forms.gfx.GraphicalPrimitive;
 import com.markussecundus.forms.utils.vector.Vect2f;
 import com.markussecundus.forms.utils.vector.VectUtil;
@@ -23,7 +24,7 @@ import com.markussecundus.forms.wrappers.property.impl.general.SimpleProperty;
  *
  * @author MarkusSecundus
  * */
-public class TextureDrawable implements GraphicalPrimitive<Batch, Vect2f, Float> {
+public class TextureDrawable extends IExtensible implements GraphicalPrimitive<Batch, Vect2f, Float> {
 //public:
     /**
      * Inicializuje útvar danou {@link Texture} a jejími výchozími rozměry.

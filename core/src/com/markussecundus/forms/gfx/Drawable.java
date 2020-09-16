@@ -1,5 +1,7 @@
 package com.markussecundus.forms.gfx;
 
+import com.markussecundus.forms.extensibility.Extensible;
+import com.markussecundus.forms.extensibility.IExtensible;
 import com.markussecundus.forms.utils.vector.VectUtil;
 import com.markussecundus.forms.wrappers.property.ReadonlyProperty;
 
@@ -11,7 +13,7 @@ import com.markussecundus.forms.wrappers.property.ReadonlyProperty;
  *
  * @author MarkusSecundus
  * */
-public interface Drawable<Rend, Pos> {
+public interface Drawable<Rend, Pos> extends Extensible {
 
     /**
      * Called each frame, renders the <code>Drawable</code> on the screen.

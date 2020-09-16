@@ -267,7 +267,7 @@ public interface IListeneredTouchConsumer extends InputConsumer, ListeneredTouch
                             }
                             return true;
                         };
-                        manager.getOnTouchUpListener()._getUtilListeners().add(untouchOnCursorUpApplier);
+                        manager.getOnTouchUpListener()._getPostUtilListeners().add(untouchOnCursorUpApplier);
 
                         return true;
                     };
@@ -279,7 +279,7 @@ public interface IListeneredTouchConsumer extends InputConsumer, ListeneredTouch
                             this.manager.getOnTouchUpListener()._getUtilListeners().remove(this.untouchOnCursorUpApplier);
                         return true;
                     };
-                    this.onUnclicked.get()._getUtilListeners().add(this.onUnclickCleaner);
+                    this.onUnclicked.get()._getPostUtilListeners().add(this.onUnclickCleaner);
                 }
             }
 

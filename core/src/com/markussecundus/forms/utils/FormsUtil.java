@@ -77,6 +77,18 @@ public class FormsUtil {
         return ret;
     }
 
+
+    /**
+     * Vypočítá zbytek po dělení prvního čísla číslem druhým.
+     * Vždy vrátí kladnou hodnotu.
+     *
+     * @return <code>a mod b</code>
+     * */
+    public static int mod(int modulenec, int modulitel){
+        return (modulenec%=modulitel)<0 ? modulenec+modulitel : modulenec;
+    }
+
+
     /**
      * Rozpozná, zda je prostřední hodnota v intervalu daném hodnotami krajními.
      *

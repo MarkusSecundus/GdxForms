@@ -1,4 +1,4 @@
-package com.markussecundus.forms.utils.function;
+package com.markussecundus.forms.utils.function.raw;
 
 /**
  * Náhražka za standardní {@link java.util.function.IntFunction}, který není dostupný na starších verzích Androidího API.

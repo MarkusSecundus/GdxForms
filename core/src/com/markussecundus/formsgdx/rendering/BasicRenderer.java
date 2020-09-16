@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.markussecundus.forms.elements.DrawableElem;
+import com.markussecundus.forms.extensibility.IExtensible;
 import com.markussecundus.forms.gfx.GraphicalPrimitive;
 import com.markussecundus.forms.utils.vector.VectUtil;
 import com.markussecundus.forms.wrappers.property.Property;
@@ -121,7 +122,7 @@ public class BasicRenderer implements BatchRenderer, BasicShapeRenderer {
      *
      * @author MarkusSecundus
      * */
-    public static class ShapeToBasicDrw<Vect, Scalar extends Comparable<Scalar>, Type extends GraphicalPrimitive<ShapeRenderer, Vect, Scalar>> implements GraphicalPrimitive<BasicRenderer, Vect, Scalar>{
+    public static class ShapeToBasicDrw<Vect, Scalar extends Comparable<Scalar>, Type extends GraphicalPrimitive<ShapeRenderer, Vect, Scalar>> extends IExtensible implements GraphicalPrimitive<BasicRenderer, Vect, Scalar>{
         /**
          * Primitivum renderující se přes {@link ShapeRenderer}.
          * */

@@ -2,6 +2,7 @@ package com.markussecundus.formsgdx.graphics;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.markussecundus.forms.extensibility.IExtensible;
 import com.markussecundus.forms.gfx.BinaryGraphicalComposite;
 import com.markussecundus.forms.gfx.GraphicalPrimitive;
 import com.markussecundus.forms.utils.vector.Vect2f;
@@ -23,7 +24,7 @@ import com.markussecundus.formsgdx.Style;
  *
  * @author MarkusSecundus
  * */
-public class BasicRectangle implements GraphicalPrimitive<ShapeRenderer, Vect2f, Float> {
+public class BasicRectangle extends IExtensible implements GraphicalPrimitive<ShapeRenderer, Vect2f, Float> {
 //public:
 
     /**

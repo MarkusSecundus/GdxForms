@@ -108,14 +108,14 @@ public class InputManager extends IExtensible implements  InputConsumer, IListen
             if (fnc.test(consumer, coords))
                 return true;
         }
-        return false;
+        return true;
     }
     private boolean tryConsumers(Iterable<InputConsumer> consumers, Predicate<InputConsumer> fnc){
         for(InputConsumer consumer: consumers) {
             if (fnc.test(consumer))
                 return true;
         }
-        return false;
+        return true;
     }
 
     /**

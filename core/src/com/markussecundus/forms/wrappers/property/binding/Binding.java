@@ -3,6 +3,7 @@ package com.markussecundus.forms.wrappers.property.binding;
 import com.markussecundus.forms.utils.function.Function;
 import com.markussecundus.forms.wrappers.WriteonlyWrapper;
 import com.markussecundus.forms.wrappers.property.Property;
+import com.markussecundus.forms.wrappers.property.ReadonlyProperty;
 
 
 /**
@@ -23,7 +24,7 @@ public  class Binding<T>{
      * @param target Cílová property, do které vede bindovací hrana.
      * @param transform  Funkce, která podle hodnot zdrojových properties vypočítá hodnotu, které má nabýt cílová property.
      * */
-    public Binding(WriteonlyWrapper<T> target, Function<Object[], T> transform, Property<?>[] sources){
+    public Binding(WriteonlyWrapper<T> target, Function<Object[], T> transform, ReadonlyProperty<?>[] sources){
         this.sources = sources;
         this.target = target;
         this.transform = transform;
@@ -32,7 +33,7 @@ public  class Binding<T>{
     /**
      * Množina properties, na nichž závisí cílová property.
      * */
-    public final Property<?>[] sources;
+    public final ReadonlyProperty<?>[] sources;
 
     /**
      * Cílová property, do které vede bindovací hrana.

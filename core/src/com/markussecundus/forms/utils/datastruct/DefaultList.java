@@ -1,13 +1,12 @@
 package com.markussecundus.forms.utils.datastruct;
 
-import com.markussecundus.forms.utils.function.IntFunction;
+import com.markussecundus.forms.utils.function.raw.IntFunction;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 
 /**
  * {@link List}ová obdova {@link DefaultDict}.

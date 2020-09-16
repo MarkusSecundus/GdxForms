@@ -3,13 +3,12 @@ package com.markussecundus.formsgdx;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.markussecundus.forms.elements.DrawableElem;
-import com.markussecundus.forms.elements.UberDrawable;
 import com.markussecundus.forms.elements.impl.BasicLabel;
 import com.markussecundus.forms.elements.impl.ImageIcon;
 import com.markussecundus.forms.elements.impl.layouts.BasicGridLayout;
 import com.markussecundus.forms.elements.impl.layouts.BasicLinearLayout;
+import com.markussecundus.forms.elements.impl.layouts.PrimitivePositionalLayout;
 import com.markussecundus.forms.gfx.GraphicalPrimitive;
 import com.markussecundus.forms.text.Font;
 import com.markussecundus.forms.utils.FormsUtil;
@@ -18,16 +17,17 @@ import com.markussecundus.forms.utils.vector.Vect2f;
 import com.markussecundus.forms.utils.vector.VectUtil;
 import com.markussecundus.forms.wrappers.Wrapper;
 import com.markussecundus.forms.wrappers.property.ConstProperty;
-import com.markussecundus.forms.wrappers.property.Property;
-import com.markussecundus.forms.wrappers.property.ReadonlyProperty;
 import com.markussecundus.forms.wrappers.property.binding.Bindings;
-import com.markussecundus.forms.wrappers.property.impl.general.SimpleProperty;
+import com.markussecundus.forms.wrappers.property.impl.constant.SimpleConstProperty;
 import com.markussecundus.formsgdx.examples.Slider;
 import com.markussecundus.formsgdx.graphics.RoundedRectangle;
 import com.markussecundus.formsgdx.input.InputManager;
 import com.markussecundus.formsgdx.input.mixins.IListeneredUniversalConsumer;
 import com.markussecundus.formsgdx.rendering.BasicRenderer;
 import com.markussecundus.formsgdx.text.FormsBitmapFont;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -94,20 +94,117 @@ public class FormsGdxExample extends BasicFormApplication {
 		public Lbl(){ super(Vect2f.getUtility()); }
 	}
 
+	/**
+	 * Mírně spartánská implementace textového čudlíku.
+	 * */
+	static class TextButton extends ImageIcon<BasicRenderer, Vect2f, Float, BasicRenderer.ShapeToBasicDrw<Vect2f, Float, RoundedRectangle.SObrubou>> implements IListeneredUniversalConsumer{
+
+		/**
+		 * Vytvoří instanci čudlíku.
+		 *
+		 * @param img ikona, která má sloužit jako tělo čudlíku
+		 * @param lbl label, který má sloužit jako popiska čudlíku
+		 * @param transitionColor barva, na kterou se změní vnitřek čudlíku, když je čudlík stisknutý
+		 * */
+		public TextButton(RoundedRectangle.SObrubou img, BasicLabel<BasicRenderer, Vect2f, Float> lbl, Color transitionColor) {
+			super(BasicRenderer.conv(img));
+			this.lbl = lbl;
+
+			//navážeme meze velikosti vnitřního labelu na velikost celého čudlíku
+			Bindings.bind(lbl._sizeConstraint(), size());
+
+			//vytáhneme z ikony barvu, jakou má mít normálně
+			Color normalCol = img.getInner().getColor();
+
+			//při kliknutí na čudlík se barva změní na transitionColor
+			getOnClickedListener()._getUtilListeners().add(e->{
+				img.getInner().setColor(transitionColor);
+				return true;
+			});
+			//při odkliknutí změníme zpět na normalCol
+			getOnUnclickedListener()._getUtilListeners().add(e->{
+				img.getInner().setColor(normalCol);
+				return true;
+			});
+		}
+
+		//popiska obsahující text čudlíku
+		public final BasicLabel<BasicRenderer, Vect2f, Float> lbl;
+
+		//vypkreslí ikonu a přes ni text čudlíku
+		@Override
+		public boolean draw(BasicRenderer renderer, Vect2f position) {
+			return super.draw(renderer, position) | lbl.draw(renderer, position);
+		}
+	}
+
+	/**
+	 * Primitivní utilita pro přepínání mezi několika různými prvky GUI.
+	 * */
+	static class Switcher extends PrimitivePositionalLayout<BasicRenderer, Vect2f, Float> implements IListeneredUniversalConsumer.ForLayout{
+
+		public Switcher(Vect2f prefSize) {
+			super(Vect2f.INF, Vect2f.ZERO, prefSize, Vect2f.getUtility());
+		}
+
+		private final ConstProperty<List<DrawableElem<BasicRenderer, Vect2f>>> childList = new SimpleConstProperty<>(new ArrayList<>());
+
+		/**
+		 * Vrátí vždy jednoprvkový list pouze s jedním právě aktivním potomkem.
+		 * */
+		@Override
+		public ConstProperty<List<DrawableElem<BasicRenderer, Vect2f>>> drawableChildren() {
+			List<DrawableElem<BasicRenderer, Vect2f>> options = optionsList().get(),
+													  childList = this.childList.get();
+			childList.clear();
+			if(options.size()>0)
+				childList.add(options.get(currIndex));
+			return this.childList;
+		}
+
+		/**List prvků, mezi kterými je možno přepínat, který z nich je aktivní*/
+		public ConstProperty<List<DrawableElem<BasicRenderer, Vect2f>>> optionsList(){
+			return super.drawableChildren();
+		}
+
+		/**Index aktuálně aktivního prvku v rámci listu všech možností*/
+		private int currIndex = 0;
+
+		/**
+		 * Posune index aktivního prvku o danou hodnotu
+		 * */
+		public int jumpCurr(int ammount){
+			int size = optionsList().get().size();
+			return currIndex = size<=0 ? 0 : FormsUtil.mod(currIndex+ ammount, size);
+		}
+	}
+
+	private Switcher root;
 
 	@Override
 	public DrawableElem<BasicRenderer, Vect2f> createForm() {
-		BackgroundColor = Color.FOREST;
+		BackgroundColor = Color.GREEN;
 
-		DrawableElem<BasicRenderer, Vect2f> ret =  createFormV2();
+		DrawableElem<BasicRenderer, Vect2f> formV1 = createFormV1();
+		DrawableElem<BasicRenderer, Vect2f> formV2 = createFormV2();
 
-		return ret;
+		root = new Switcher(Vect2f.make(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+
+		root.optionsList().get().add(formV2);
+		root.optionsList().get().add(formV1);
+
+
+		InputManager.AsInputProcessor man = new InputManager.AsInputProcessor();
+		man.getTouchConsumers().add(root); //zaregistrujeme do něj kořenový layout
+		Gdx.input.setInputProcessor(man); //zaregistujeme ho, aby dostával vstup ze systému
+
+		return root;
 	}
 
 	/**
 	 * Druhý ukázkový formulář.
 	 * <p>Náhodná změť prvků sdružených do grid-layoutu.
-	 * <p>Obsahuje ukázku bindování properties.
+	 * <p>Obsahuje ukázku bindování properties a použití labelu.
 	 * */
 	public DrawableElem<BasicRenderer, Vect2f> createFormV2(){
 		GrLy ly = new GrLy(Vect2f.getUtility()){{
@@ -115,9 +212,9 @@ public class FormsGdxExample extends BasicFormApplication {
 			setPrefSize(Vect2f.make(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 			setDefaultCellSize(Vect2f.make(150,150));
 			setDefaultCellAllignment(0d, 1d);
-			//setCollumnSize(0, 2, 300f);
-			//setCollumnSize(1, 2, 10f);
-			//setCollumnSize(0, 3, 300f);
+			setCollumnSize(0, 1, 110f);
+			setCollumnSize(0, 2, 200f);
+			setCollumnSize(0, 3, 300f);
 		}};
 
 		It i = new It(BasicRenderer.conv(new RoundedRectangle.SObrubou(Vect2f.make(200,200), 0.6f, Vect2f.make(30,30), Color.ORANGE, Color.BROWN)));
@@ -126,9 +223,9 @@ public class FormsGdxExample extends BasicFormApplication {
 
 
 		Style style = new Style() {{
-			innerColor = Color.WHITE;
-			outerColor = Color.BLACK;
-			transitionColor = Color.GOLDENROD;
+			innerColor = Color.ORANGE;
+			outerColor = Color.DARK_GRAY;
+			transitionColor = Color.SCARLET;
 			edgeRoundness = 0.5f;
 			borderRatio = 0.15f;
 			borderThickness = Vect2f.make(10,10);
@@ -144,54 +241,62 @@ public class FormsGdxExample extends BasicFormApplication {
 		Bindings.bindBidirectional(slider.value(), slider2.value());
 		//nabindujeme hodnotu 4. slideru na aritmetický průměr hodnot 2. a 3. slideru
 		Bindings.bind(slider4.value(),(a,b)->(a+b)*0.5f, slider2.value(), slider3.value());
+		//nabindujeme zarovnání 1. sloupce na hodnotu 4. slideru
+		Bindings.bind(ly.collumnAllignment(0, 1),val->(double)val,  slider4.value());
 
+		//umístíme ikony do layoutu na nějaké pozice
 		ly.addDrawableChild(i, 0,0);
 		ly.addDrawableChild(i1, 1,1);
 		ly.addDrawableChild(i2, 1,0);
+
+		//umístíme slidery do layoutu na nějaké pozice
 		ly.addDrawableChild(slider, 2,3);
 		ly.addDrawableChild(slider2, 2,2);
 		ly.addDrawableChild(slider3, 0,1);
 		ly.addDrawableChild(slider4, 3,1);
 
-		Font<BasicRenderer, Vect2f, Float> font = FormsBitmapFont.make_Vect2f(new BitmapFont(), Color.BLUE, 2.3f);
+		//vytvoříme font, který bude používat label
+		Font<BasicRenderer, Vect2f, Float> font = FormsBitmapFont.make_Vect2f(new BitmapFont(), Color.SCARLET, 1.9f);
 
-		class Wrap {float deltaSum = 0;int frameCount = 0;float elapsedTime=0;}
-		Wrap wr = new Wrap();
-
+		//vytvoříme label, který bude vypisovat informace o aktuální hodnotě fps
 		Lbl lbl = new Lbl(){{
-			setFont(font);
-			setPrefSize(Vect2f.make(1000, 300));
-			setAllignment(Vect2d.make(1d,0.5d));
+				setFont(font);
+				setPrefSize(Vect2f.make(1000, 300));
+				setAllignment(Vect2d.make(1d,0.5d));
 			}
 
+
+			//pomocné proměnné pro počítání fps
+			float deltaSum = 0;
+			int frameCount = 0;
+			float elapsedTime=0;
+
+			//každý snímek upravíme text labelu na aktuální hodnotu fps
 			@Override public void update(float delta, int frameId) {
 				super.update(delta, frameId);
 				//setText(String.format("FPS: %.2f", 1f/delta));
-				setText(String.format("fps: %.2f\nFPS: %.0f\navg: %.2f\n", 1f/delta, 1/((wr.deltaSum += delta)/++wr.frameCount), 1/((wr.elapsedTime+=delta)/frameId)));
-				if (wr.deltaSum >0.2f){
-					wr.frameCount = 0;
-					wr.deltaSum =0;
+				setText(String.format("fps: %.2f\nFPS: %.0f\navg: %.2f\n", 1f/delta, 1/((deltaSum += delta)/++frameCount), 1/((elapsedTime+=delta)/frameId)));
+				if (deltaSum >0.2f){
+					frameCount = 0;
+					deltaSum =0;
 				}
-			}
-
-			@Override
-			public boolean draw(BasicRenderer renderer, Vect2f position) {
-				ShapeRenderer sh = renderer.getShape();
-				Vect2f size = getSize();
-				sh.setColor(Color.YELLOW);
-				sh.rect(position.x, position.y, size.x, size.y);
-				return super.draw(renderer, position);
 			}
 		};
 
 		ly.addDrawableChild(lbl, 2, 1);
 
-		//ly.getChildren().add((delta, frameId) -> lbl.setText(String.format("FPS: %.2f", 1f/delta)));
+		TextButton switchButton = new TextButton(new RoundedRectangle.SObrubou(Vect2f.make(200,200), 0.6f, Vect2f.make(30,30), Color.ORANGE, Color.BROWN),
+				new Lbl(){{
+					setFont(font);
+					setPrefSize(Vect2f.make(500, 300));
+					setAllignment(Vect2d.make(0.5d, 0.5d));
+					setText("SWITCH");
+				}},
+				Color.FOREST
+		);
+		switchButton.getOnTouchUpListener().add(e-> {if(e.actor.isClicked())root.jumpCurr(1);});
 
-		//vytvoříme manager na zpracování vstupu od uživatele
-		InputManager.AsInputProcessor man = new InputManager.AsInputProcessor();
-		man.getTouchConsumers().add(ly); //zaregistrujeme do něj kořenový layout
-		Gdx.input.setInputProcessor(man); //zaregistujeme ho, aby dostával vstup ze systému
+		ly.addDrawableChild(switchButton, 0, 3);
 
 		return ly;
 	}
@@ -319,12 +424,21 @@ public class FormsGdxExample extends BasicFormApplication {
 		ly.getDrawableChildren().add(ll);
 		ly.getDrawableChildren().add(ll2);
 
+		TextButton switchButton = new TextButton(new RoundedRectangle.SObrubou(Vect2f.make(200,100), 0.6f, Vect2f.make(30,30), Color.ORANGE, Color.BROWN),
+				new Lbl(){{
+					setFont(FormsBitmapFont.make_Vect2f(new BitmapFont(), Color.SCARLET, 1.9f));
+					setPrefSize(Vect2f.make(500, 300));
+					setAllignment(Vect2d.make(0.5d, 0.5d));
+					setText("SWITCH");
+				}},
+				Color.FOREST
+		);
+		switchButton.getOnTouchUpListener().add(e->{if(e.actor.isClicked())root.jumpCurr(1);});
+
+		ly.getDrawableChildren().add(1, switchButton);
+
 		//ly.setPrefSize(ly.computeRealSize());
 
-		//vytvoříme manager na zpracování vstupu od uživatele
-		InputManager.AsInputProcessor man = new InputManager.AsInputProcessor();
-		man.getTouchConsumers().add(ly); //zaregistrujeme do něj kořenový layout
-		Gdx.input.setInputProcessor(man); //zaregistujeme ho, aby dostával vstup ze systému
 
 		return ly; //vrátíme kořenový layout
 	}

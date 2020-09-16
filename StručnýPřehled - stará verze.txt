@@ -1,27 +1,3 @@
-Changelog:
-    16.6.2020... úvodní verze (zápočtový program z Javy (zimní semestr))
-
-    16.9.2020... druhá verze (zápočtový program z Pokročilé Javy (letní semestr))
-        - EventDelegate...    - listenery sdružovány dle priority, kterou mají určenu
-                              - EventDelegate.ApplyOnParentDelegate
-                              - listener může za běhu upravovat delegáta, ve kterém se nalézá
-                              - optimalizace koncové rekurze :-D
-
-        - přidána základní funkcionalita pro vykreslování textu, rozhraní Font (spolu s implementací nad LibGDX)
-
-        - prvky GUI...        - přidán BasicGridLayout, BasicLabel
-
-        - Properties...       - nově splňují intuitivní hierarchii (Property je zároveň WriteonlyProperty a ReadonlyProperty, ReadonlyProperty je zároveň ConstProperty)
-                              - přidána bindovací funkcionalita
-        
-        - datové struktury... - přidáno rozhraní ReadonlyList + varianty pro raw typy (splňovány vektorovými typy)
-                              - přidán AutobucketedList, používaný uvnitř EventDelegate
-                              - přidána InOutCollection (abstrakce pro struktury typu zásobník/fronta)
-
-        - mixiny...           - odhaleno, že původní implementace způsobuje brutální memory leak - vyřešeno (vyžadováno rozhraní Extensible)
-
-
-
 Základní stavební kameny:
     - události...
         - balíček com.markussecundus.forms.events
@@ -36,12 +12,7 @@ Základní stavební kameny:
                            
               - pro všechny události, které někde v knihovně mohou nastat, existuje zpravidla příslušný EventDelegate, do kterého je možné zaregistrovat své Listenery
               - vytvoření EventDelegate... buď přes factory EventDelegate.make(), nebo přímo přes konstruktor standardní implementace IEventDelegate (předpona 'I' na znamení, že jde o Implementaci :-P )
-              - -x-(pokud chce právě probíhající Listener odebrat z Listu sám sebe, nemůže to udělat napřímo (List by vyhodil ConcurrentModificationException nebo tak něco) - musí vyhodit výjímku EventDelegate.DeleteSelf a Delegát ho smaže)-x-
-                ZMĚNA --- nově Listener může odebrat z delegáta i sám sebe, EventDelegate.DeleteSelf je však pořád užitečná v případě, kdy listener neví, v jakém delegátu se aktuálně nachází
-                - EventDelegate.DeleteSelf je nově specielní případ výjimky EventDelegate.ApplyOnParentDelegate - ta je inicializována funkcí a je-li listenerem vyhozena, nejbližší delegát, ji odchytí a spustí onu funkci sám na sobě
-              - NOVĚ --- list listenerů je rozdělen na podlisty seřazené dle priority - listenery sloužící k jednomu účelu sdílí prioritu, uživatelské listenery používají jinou prioritu, než utility formulářové knihovny - tím v je dosažen lepší
-                         pořádek, přehlednost a robustnost i v složitějších systémech listenerů
-                 - prioritou může být libovolná celočíselná hodnota, základní priority používané napříč formulářovou knihovnou jsou sdružené ve třídě com.markussecundus.forms.events.ListenerPriorities
+              - pokud chce právě probíhající Listener odebrat z Listu sám sebe, nemůže to udělat napřímo (List by vyhodil ConcurrentModificationException nebo tak něco) - musí vyhodit výjímku EventDelegate.DeleteSelf a Delegát ho smaže
 
 
     - atributy...
@@ -66,7 +37,7 @@ Základní stavební kameny:
                      @Override protected Integer change(Integer newVal) {return propValue  = newVal;}
                  }
 
-            - jmenná konvence... Property-atributy se jmenují prostě podle toho, co v programu znamenají, (př. Property<Integer> value() pro hodnotu na slideru) navíc by ale objekt, kterému property náleží,
+            - jmenná konvence... Property-atributy se jmenují prostě podle toho, co v programu znamenají, (př. Property<Integer> value() pro hodnotu na slideru) navíc by k ale objekt, kterému property náleží,
                                  měl pro větší pohodlí uživatele definovat funkce s předponou get/set, které přesměrovávají na .get(), .set(T) metody dotyčné Property - např.:
 
                                  public Property<Integer> value(){return _value;}
@@ -74,34 +45,6 @@ Základní stavební kameny:
                                  public Integer getValue(){return value().get();}
                                  public Integer setValue(Integer newVal){return value().set(newVal);}
 
-     - NOVĚ --- - ConstProperty je specielní případ ReadonlyProperty, obecná Property splňuje všechny podtypy ReadonlyProperty(, ConstProperty) i WriteonlyProperty
-                   - aby toho mohlo být dosaženo, jejich GetterListenerArgs i SetterListenerArgs jsou nově definovány pouze jako rozhraní
-                
-                - Vazby mezi Properties ...
-                    - balíček com.markussecundus.forms.wrappers.property.binding
-                    - statické metody k jejich navázání naleznete ve třídě Bindings 
-                        - použití př. Bindings.bind(poměr, (a,b)->a/b,  dělenec, dělitel); // hodnota property poměr bude vázána na podíl properties dělenec a dělitel
-                    - 1 vazba = 1 orientovaná hrana (n -> 1) ve vazebném hypergrafu
-                            - určena jednou cílovou Property, libovolným množstvím zdrojových Properties, na kterých hodnota cílové Property závisí, a transformační funkcí,
-                              která z hodnot zdrojových Properties určuje novou hodnotu cílové
-                    - obousměrná vazba mezi dvěma Properties = dvojice jednosměrných vazeb, každá v jednom směru
-                    - implementace:
-                        - do Setterového delegáta zdrojové Property je na prioritě ListenerPriorities.BINDING_EXECUTOR přidán listener,
-                          který nese informace o všech aktivních vazbách a při spuštění delegáta (tj. při změně hodnoty zdrojové property) 
-                          zahájí průchod bindovacím grafem a aktualizaci hodnot závislé Property, příp. dalších na ní závislých Properties atd.
-                        - za samotný průchod grafem a aktualizaci závislých properties nese zodpovědnost instance BindingExecutor
-                            - při vytváření vazby je možné specifikovat instanci BindingExecutoru, jež bude vazbou použita, jinak bude použit BindingExecutor.DEFAULT
-                            - BindingExecutor je zodpovědný za to, že se na cyklickém vazebném grafu (např. obsahujícím jednoduchou obousměrnou vazbu) nekonečně nezacyklí,
-                              jak to provede, je jeho věc - kanonická implementace provádí jednoduchý průchod grafem (dfs/bfs/..., dle toho,
-                              jakou InOutCollection (zásobník/frontu/...) používá pro ukládání vazeb čekajících na provedení - defaultně dfs), vede si seznam již navštívených 
-                              Properties a ty přeskakuje.
-                             - např. mějme jednoduchou obousměrnou vazbu (property1 <=> property2):
-                                 řekněme property1 dostane novou hodnotu -> aktivuje BindingExecutor - zahájí průchod grafem, tedy
-                                 do vazeb čekajících na zpracování přidá vazbu (property1 => property2), navíc je property1 přidána mezi již navštívené properties ->
-                                 -> zpracování vazby (property1 => property2) - nastavena hodnota property2 (odpovídajícím způsobem podle hodnoty property1), navíc je 
-                                  property2 přidána mezi již navštívené properties a mezi čekající na zpracování je přidána vazba (property2 => property1) ->
-                                 -> zpracování vazby (property2 => property1) - cílová property1 již byla v tomto průchodu navštívena -> vazba přeskočena ->
-                                  fronta čekajících na zpracování je prázdná -> konec průchodu grafem, promazání seznamu již navštívených vrcholů
 
 Prvky GUI...
     - balíček com.markussecundus.forms.elements
@@ -157,7 +100,7 @@ Vektorové typy...
        - ta se pak předá libovolnému generickému prvku GUI, který s typem má pracovat,
       a ten k tomu použije metody poskytnuté tímto pomocným objektem.
     
-    - Základní vektorové typy jsou Vect2f, Vect2d a Vect2i - floatový / doublový / intový, 2D, immutable
+    - Základní vektorové typy jsou Vect2f a Vect2i - floatový / intový, 2D, immutable
         - konstruktor privátní, vytvářejí se skrze statickou metodu make (př. Vect2f.make(1f,2f)), abych je třeba jednou mohl poolovat,
             jinak se s nimi pracuje dost podobně jako s jakýmykoliv jinými vektory v Javě
         - příslušnou implementaci VectUtil lze získat z jejich statické funkce getVectUtil()
@@ -184,8 +127,6 @@ Uživatelský vstup...
                                 - defaultně také rovnou přidá několik listenerů k zajištění intuitivního chování vstupních funkcí - možné konfigurovat přepsáním děsivě pojmenovaných funkcí na rozhraní definovaných
                                     - specielní varianta: IListeneredTouchConsumer.ForLayout ... pokud ji implementuje layout, přidá mu navíc listenery pro distribuci vstupní události mezi jeho podprvky
                                         - obdobně IListeneredUniversalConsumer.ForLayout (ale i ten posílá potomkům také jenom vstup z myši)
-
-                                - NOVĚ --- aby třída mohla implementovat jedno z těchto rozhraní musí také implementovat rozhraní Extensible (jeho implementaci ale již poskytují všechny základní GUI prvky) - viz dedikovaný odstavec
     
     - třída InputManager ... účel: převzít vstupní událost ze systému a přidělit ji prvkům, které jsou u něj pro ni zaregistrované
             - varianta InputManager.AsInputProcessor ... implementuje i rozhranní InputProcessor ->
@@ -194,23 +135,6 @@ Uživatelský vstup...
                                                             var manager = new InputManager.AsInputProcessor();
                                                             Gdx.input.setInputProcessor(manager);
                                                             "
-
-
-NOVĚ --- rozšířování funkcionality objektů nezapadající do třídní hierarchie...
-    - lze implementovat jako interface s defaultními implementacemi metod - ten pak do třídy,
-     kterou chceme rozšířit o funkcionalitu, stačí dopsat mezi implementovaná rozhraní
-     - interface ale může nést pouze metody (a konstanty (~ metody vracející konstantu)) - 
-       většinou potřeba i data - nutno je někde přechovávat
-       - intuitivní řešení: globální hešmapa, kde pro každou instanci implementující dané mixinové rozhraní
-         máme namapovanou instanci privátní třídy nesoucí data, jež mixinová komponenta používá
-         - problém: 
-            i když již instance není nikde potřeba, pořád je na ní odkaz v globální hešmapě -> nikdy nebude
-            sebrána garbage collectorem - memory leak!
-         - řešení:
-            rozšiřované třídy musí implementovat rozhraní Extensible - to poskytuje kontejner pro přechovávání
-            mixinových dat přímo uvnitř rozšiřované instance
-             - jeho kanonická implementace IExtensible by měla sloužit jako kořen třídní hierarchie 
-               pro všechny objekty ve formulářové knihovně (kontejner pro rozšíření je generován líně, takže by to nemělo způsobovat velký paměťový overhead)
 
 
 Tvorba formuláře:

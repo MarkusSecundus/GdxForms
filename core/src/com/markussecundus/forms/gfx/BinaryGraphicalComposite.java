@@ -1,6 +1,7 @@
 package com.markussecundus.forms.gfx;
 
 import com.markussecundus.forms.events.EventListener;
+import com.markussecundus.forms.extensibility.IExtensible;
 import com.markussecundus.forms.utils.FormsUtil;
 import com.markussecundus.forms.utils.function.Function;
 import com.markussecundus.forms.utils.vector.Vect2f;
@@ -27,7 +28,7 @@ import com.markussecundus.forms.wrappers.property.impl.general.SimpleProperty;
  *
  * @author MarkusSecundus
  * */
-public class BinaryGraphicalComposite<Rend, Pos, Scalar extends Comparable<Scalar>, Obj1 extends GraphicalPrimitive<Rend, Pos, Scalar>, Obj2 extends GraphicalPrimitive<Rend, Pos, Scalar>, Ratio extends Function<Pos, Pos>> implements GraphicalPrimitive<Rend, Pos, Scalar> {
+public class BinaryGraphicalComposite<Rend, Pos, Scalar extends Comparable<Scalar>, Obj1 extends GraphicalPrimitive<Rend, Pos, Scalar>, Obj2 extends GraphicalPrimitive<Rend, Pos, Scalar>, Ratio extends Function<Pos, Pos>> extends IExtensible implements GraphicalPrimitive<Rend, Pos, Scalar> {
 //public:
     /**
      * Zkonstruuje slepenec obou objektů a přidá jim listenery
@@ -59,15 +60,6 @@ public class BinaryGraphicalComposite<Rend, Pos, Scalar extends Comparable<Scala
         this.obj2detachment = new SimpleProperty<>(obj2detachment);
         this.obj1to2ratio = new SimpleProperty<>(obj1to2ratio);
 
-
-        /*this.obj1to2ratio().getSetterListeners()._getPostUtilListeners().add(e->{
-            this.obj2.setSize(e.newVal().get().apply(obj1.getSize()));
-            return true;
-        });
-        this.size().getSetterListeners()._getPostUtilListeners().add(e->{
-            this.obj2.setSize(getObj1to2ratio().apply(e.newVal().get()));
-            return true;
-        });*/
         Bindings.bind(this.obj2.size(),(ratio, size)-> ratio.apply(size), this.obj1to2ratio(), this.size());
 
         this.obj1to2ratio().pretendSet();
