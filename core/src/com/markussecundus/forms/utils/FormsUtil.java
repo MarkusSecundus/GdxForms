@@ -5,12 +5,8 @@ import com.markussecundus.forms.utils.datastruct.DefaultDictByIdentity;
 import com.markussecundus.forms.utils.function.BiComparator;
 import com.markussecundus.forms.utils.function.BiFunction;
 import com.markussecundus.forms.utils.function.Function;
-import com.markussecundus.forms.utils.function.raw.IntToCharFunction;
-import com.markussecundus.forms.utils.function.raw.IntToDoubleFunction;
-import com.markussecundus.forms.utils.function.raw.IntToFloatFunction;
-import com.markussecundus.forms.utils.function.raw.IntToIntFunction;
+import com.markussecundus.forms.utils.function.raw.IntFunction;
 import com.markussecundus.forms.utils.function.Predicate;
-import com.markussecundus.forms.utils.function.raw.IntToLongFunction;
 import com.markussecundus.forms.utils.vector.VectDecomposer;
 
 import java.lang.reflect.Array;
@@ -230,9 +226,9 @@ public class FormsUtil {
      *
      * @return vstupní pole - pro účely řetězení
      * */
-    public static char[] fillArray(char[] arr, IntToCharFunction supplier){
+    public static char[] fillArray(char[] arr, IntFunction.ToChar supplier){
         for(int t=arr.length;--t>=0;)
-            arr[t] = supplier.apply(t);
+            arr[t] = supplier.apply_raw(t);
         return arr;
     }
 
@@ -257,9 +253,9 @@ public class FormsUtil {
      *
      * @return vstupní pole - pro účely řetězení
      * */
-    public static int[] fillArray(int[] arr, IntToIntFunction supplier){
+    public static int[] fillArray(int[] arr, IntFunction.ToInt supplier){
         for(int t=arr.length;--t>=0;)
-            arr[t] = supplier.apply(t);
+            arr[t] = supplier.apply_raw(t);
         return arr;
     }
 
@@ -284,9 +280,9 @@ public class FormsUtil {
      *
      * @return vstupní pole - pro účely řetězení
      * */
-    public static long[] fillArray(long[] arr, IntToLongFunction supplier){
+    public static long[] fillArray(long[] arr, IntFunction.ToLong supplier){
         for(int t=arr.length;--t>=0;)
-            arr[t] = supplier.apply(t);
+            arr[t] = supplier.apply_raw(t);
         return arr;
     }
 
@@ -311,9 +307,9 @@ public class FormsUtil {
      *
      * @return vstupní pole - pro účely řetězení
      * */
-    public static float[] fillArray(float[] arr, IntToFloatFunction supplier){
+    public static float[] fillArray(float[] arr, IntFunction.ToFloat supplier){
         for(int t = arr.length ; --t>=0 ;)
-            arr[t] = supplier.apply(t);
+            arr[t] = supplier.apply_raw(t);
         return arr;
     }
     /**
@@ -337,9 +333,9 @@ public class FormsUtil {
      *
      * @return vstupní pole - pro účely řetězení
      * */
-    public static double[] fillArray(double[] arr, IntToDoubleFunction supplier){
+    public static double[] fillArray(double[] arr, IntFunction.ToDouble supplier){
         for(int t = arr.length ; --t>=0 ;)
-            arr[t] = supplier.apply(t);
+            arr[t] = supplier.apply_raw(t);
         return arr;
     }
 

@@ -78,12 +78,12 @@ public class IBindingExecutor implements BindingExecutor{
 
 
     @Override
-    public<T> void putActorValue(ReadonlyWrapper<? super T> actor, T value){
+    public<T> void setValueForActor(ReadonlyWrapper<? super T> actor, T value){
         alreadyVisitedActorsValueCache.put(actor, value);
     }
 
     @Override
-    public void enqueue(Binding<?> actor){
+    public void commitBinding(Binding<?> actor){
         if(alreadyVisitedActorsValueCache.containsKey(actor.target))
             return;
         this.actors.add(actor);

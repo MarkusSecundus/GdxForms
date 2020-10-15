@@ -61,9 +61,9 @@ public class BinderListener<T> implements EventListener<ReadonlyProperty.SetterL
      * */
     @Override
     public boolean exec(ReadonlyProperty.SetterListenerArgs<?> e) {
-        executor.putActorValue((ReadonlyProperty)(e.caller()), e.newVal().get());
+        executor.setValueForActor((ReadonlyProperty)(e.caller()), e.newVal().get());
         for(Binding<T> bind: bindings)
-            executor.enqueue(bind);
+            executor.commitBinding(bind);
         executor.run();
         return true;
     }

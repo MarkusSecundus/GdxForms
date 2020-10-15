@@ -26,7 +26,11 @@ public interface BindingExecutor {
     /**
      * Výchozí {@link BindingExecutor}, který bude k bindingu použit, pokud není specifikován jiný.
      * */
-    public static final BindingExecutor DEFAULT = new IBindingExecutor();
+    public static final BindingExecutor DEFAULT = new Indirect(new IBindingExecutor());
+
+    public static void setDefault(BindingExecutor newDefault){
+        ((Indirect)DEFAULT).base = newDefault;
+    }
 
     /**
      * Spustí průchod bindovacím grafem, pokud již aktuálně neprobíhá.
@@ -39,12 +43,39 @@ public interface BindingExecutor {
      * @param actor {@link com.markussecundus.forms.wrappers.property.Property}, jejíž hodnota má být pro účely bindingu nastavena
      * @param value hodnota, která má při provádění bindingu být považována za hodnotu odpovídající dané property.
      * */
-    public<T> void putActorValue(ReadonlyWrapper<? super T> actor, T value);
+    public<T> void setValueForActor(ReadonlyWrapper<? super T> actor, T value);
 
     /**
      * Zařadí daný binding mezi čekající na zpracování.
      *
      * @param actor binding který je třeba zpracovat
      * */
-    public void enqueue(Binding<?> actor);
+    public void commitBinding(Binding<?> actor);
+
+
+
+
+
+    
+    public static class Indirect implements BindingExecutor{
+
+        public Indirect(BindingExecutor base){this.base = base;}
+
+        public BindingExecutor base;
+
+        @Override
+        public final void run() {
+            base.run();
+        }
+
+        @Override
+        public final <T> void setValueForActor(ReadonlyWrapper<? super T> actor, T value) {
+            base.setValueForActor(actor, value);
+        }
+
+        @Override
+        public final void commitBinding(Binding<?> actor) {
+            base.commitBinding(actor);
+        }
+    }
 }

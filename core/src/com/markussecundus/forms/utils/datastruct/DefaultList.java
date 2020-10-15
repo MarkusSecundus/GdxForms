@@ -85,7 +85,7 @@ public class DefaultList<T> implements List<T> {
 
     private void addElemsUpTo(int requiredIndex){
         for(int t = size(); t<= requiredIndex; ++t)
-            base.add(supplier.apply(t));
+            base.add(supplier.apply_raw_arg(t));
     }
 
 
