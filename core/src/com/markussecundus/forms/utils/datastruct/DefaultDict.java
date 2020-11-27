@@ -1,13 +1,15 @@
 package com.markussecundus.forms.utils.datastruct;
 
 import com.markussecundus.forms.utils.FormsUtil;
+import com.markussecundus.forms.utils.function.Function;
 
-import java.util.function.*;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 
 /**
@@ -24,7 +26,7 @@ import java.util.Set;
  *
  * @author MarkusSecundus
  * */
-public class DefaultDict<K,V> implements Map<K,V> {
+public class DefaultDict<K,V> implements Map<K,V>, Function<K,V> {
 
     /**
      * Vytvoří instanci wrapperu nad novou, prázdnou instancí {@link Map} a používající daný generátor
@@ -201,6 +203,20 @@ public class DefaultDict<K,V> implements Map<K,V> {
             }
         }
         return ret;
+    }
+
+
+    /**
+     * Vrátí hodnotu v {@link Map}ě se nacházející, příp. nově vygenerovanou.
+     *
+     * {@inheritDoc}
+     *
+     * @return <code>null</code> pokud nebyla nalezena nenullová hodnota a novou se nepodařilo vygenerovat,
+     * příp. generátor vygeneroval <code>null</code>. Jinak vrátí stávající nalezenou, či nově vygenerovanou hodnotu.
+     * */
+    @Override
+    public V apply(K key) {
+        return get(key);
     }
 
     /**
@@ -409,7 +425,7 @@ public class DefaultDict<K,V> implements Map<K,V> {
     }
 
     @Override
-    public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+    public V computeIfAbsent(K key, java.util.function.Function<? super K, ? extends V> mappingFunction) {
         return base.computeIfAbsent(key, mappingFunction);
     }
 

@@ -1,5 +1,6 @@
 package com.markussecundus.forms.utils.datastruct;
 
+import com.markussecundus.forms.utils.function.Function;
 import com.markussecundus.forms.utils.function.raw.IntFunction;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import java.util.ListIterator;
  *
  * @author MarkusSecundus
  * */
-public class DefaultList<T> implements List<T> {
+public class DefaultList<T> implements List<T>, IntFunction<T> {
 
     /**
      * Vytvoří instanci wrapperu nad daným objektem {@link List} a používající daný generátor
@@ -81,6 +82,11 @@ public class DefaultList<T> implements List<T> {
         base.add(i, t);
     }
 
+
+    @Override
+    public T apply_raw_arg(int var1) {
+        return get(var1);
+    }
 
 
     private void addElemsUpTo(int requiredIndex){
