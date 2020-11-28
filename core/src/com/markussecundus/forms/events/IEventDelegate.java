@@ -10,12 +10,12 @@ import java.util.List;
 
 
 /**
- * Nová kanonická implementace {@link EventDelegate}.
+ * Canonical implementation of {@link EventDelegate}.
  * <p></p>
- * 'I' jako 'Implementace'
- * (Ano, je to provokace vůči .NET. A stojím si za tím.)
+ * 'I' as 'Implementation'
+ * (Yes, it IS a provocation against .NET, and I am utterly and completely convinced it is well justified)
  * <p></p>
- * Poskytuje optimalizaci koncové rekurze.
+ * Provides tail recursion optimisation :-D.
  *
  * @see EventDelegate
  *
@@ -54,7 +54,7 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
      *
      * {@inheritDoc}
      * <p></p>
-     * {@link EventDelegate.ReturnValuePolicy} je generována líně.
+     * {@link EventDelegate.ReturnValuePolicy} is generated lazily.
      * */
     @Override public Property<ReturnValuePolicy> returnValuePolicy(){
         if(returnValuePolicyProperty == null)
@@ -79,15 +79,14 @@ public class IEventDelegate<Args> implements EventDelegate<Args> {
 
 //protected:
     /**
-     *
-     * Vrací novou instanci prázného {@link List}u, který bude sloužit k přechovávání Listenerů
-     * pro <code>getListeners</code>.
+     * Returns a new instance of an empty {@link AutobucketedList}, which will serve as carrier for the listeners.
      * <p></p>
-     * Volá se jen jednou, v konstruktoru.
-     * Tuto metodu přepište, chcete-li listenery přechovávat v jiné implementaci {@link List}u,
-     * než je defaultní {@link ArrayList}.
+     * Gets called only once, in the constructor.
+     * <p>
+     * Override this method, if you want to use other implementation of {@link AutobucketedList}
+     * than the default {@link com.markussecundus.forms.utils.datastruct.IAutobucketedList}
      *
-     * @return nová instance prázdného {@link List}u pro <code>getListeners</code>
+     * @return new instance of an empty {@link AutobucketedList}
      * */
     protected AutobucketedList<EventListener<? super Args>, Integer> MAKE_LISTENER_LIST(){ return AutobucketedList.make();}
 

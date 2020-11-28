@@ -2,11 +2,11 @@ package com.markussecundus.forms.events;
 
 
 /**
- * Varianta {@link EventListener}u s implicitní návratovou hodnotou <code>true</code>.
+ * Variant of {@link EventListener} with implicit return value <code>true</code>.
  *
- * Slouží pro větší pohodlí uživatelů knihovny.
+ * Serves for better convenience of the users of the library.
  *
- * @param <Args> Argument, který daný listener přebírá.
+ * @param <Args> Type to be passed to the listener as its argument
  *
  * @see EventListener
  * @see EventDelegate
@@ -17,12 +17,14 @@ package com.markussecundus.forms.events;
 public interface EventListenerX<Args> extends EventListener<Args> {
 
     /**
-     * Vykoná listener.
+     * Executes the listener.
      * */
     public void x(Args e);
 
     /**
-     * Vykoná <code>this.x(e)</code> a vrátí <code>true</code>.
+     * Executes <code>this.x(e)</code> and returns <code>true</code>.
+     *
+     * @return <code>true</code>
      * */
     public default boolean exec(Args e){
         x(e);

@@ -2,13 +2,12 @@ package com.markussecundus.forms.events;
 
 
 /**
- * Obecný Listener pro událost.
+ * Generic listener for an event.
  *
- * Přebírá jeden argument a vrací,
- * zda má smysl pokračovat ve vykonávání náseldující činnosti.
+ * Takes one argument and returns,
+ * whether there is any sense in continuing with actions that are next in order.
  *
- *
- * @param <Args> Argument, který daný listener přebírá.
+ * @param <Args> Type to be passed to the listener as its argument
  *
  * @see EventDelegate
  * @see EventListenerX
@@ -19,9 +18,9 @@ package com.markussecundus.forms.events;
 public interface EventListener<Args> {
 
     /**
-     * Vykoná listener
+     * Executes the listener.
      *
-     * @return znamení zda má smysl pokračovat ve vykonávání náseldující činnosti.
+     * @return whether there is any sense in continuing with the actions this listener is part of
      * */
     public boolean exec(Args e);
 }
