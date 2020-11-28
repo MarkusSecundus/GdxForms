@@ -8,7 +8,7 @@ import java.util.Map;
 
 
 /**
- * Rozhraní, přes něž se k objektu připojují rozšiřující objekty - např. datové kontejnery pro mixiny implementované jako interface apod. .
+ * Interface, through which extension objects (e.g. data containers for mixins implemented as a default method interface, etc.) can be plugged to an object.
  *
  * @see IExtensible
  *
@@ -17,19 +17,19 @@ import java.util.Map;
 public interface Extensible {
 
     /**
-     * @return tabulka rozšíření mapovaných na objekty jejich tříd
+     * @return table of extensions mapped to their {@link Class} objects
      * */
     public Map<Class<?>,Object> getExtensionsMap();
 
     /**
-     * Zajistí, že rozšiřovaný objekt disponuje daným rozšířením (rozšíření příp. vytvoří)
-     * a vrátí rozšiřující objekt.
+     * Ensures that the object being extended has the given extension (eventually creates the extension)
+     * and returns the extension object.
      *
-     * @param <T> typ hledaného rozšíření
-     * @param cl třída na níž je mapovaný daný rozšiřující objekt
-     * @param provider funkce, jež objekt rozšíření vytvoří, pokud není přítomen; jako argument bere právě rozšiřovaný objekt
+     * @param <T> type of the sought extension
+     * @param cl class to which the extension object is mapped
+     * @param provider function to create the extension object, if it doesn't already exist; takes the object to be extended as an argument
      *
-     * @return objekt rozšíření, pokud již je přítomen, příp. jeho nově vytvořená a k ostatním rozšířením přidaná instance
+     * @return extension object, if it already exists, eventually its newly created and added instance
      * */
     public default<T> T getExtension(Class<? super T> cl, Function<Extensible, T> provider){
         Map<Class<?>, Object> extensions = getExtensionsMap();
@@ -46,14 +46,14 @@ public interface Extensible {
 
 
     /**
-     * Primitivní implementace, jež sice jakožto <code>interface</code> nepotřebuje zakomponovat
-     * do třídní hierarchie, avšak toho doshuje tak, že všechny mapy rozšíření k příslušným objektům
-     * skladuje v globální tabulce, která nikdy za běhu programu není pročištěna a vede
-     * tím pádem k memory-leaku (objekty, jež v ní jsou odkazované nikdy nebudou garbage-collectované,
-     * ani když na ně není odkazováno z žádného jiného místa programu...).
+     * Primitive, naive implementation, that, being an <code>interface</code> doesn't have to be composed into a class hierarchy,
+     * but it achieves it by storing all the extension maps for particular objects in a global table - which naturally
+     * can not be cleared at any time during the whole run of the programme, which naturally results in a
+     * big memory-leak (objects, that are referenced in it will never be garbage-collected,
+     * even if they are not referenced from any other place in the programme...).
      * <p></p>
-     * Neměla by být používána, slouží spíše jako odstrašující příklad, poukazující na na první pohled
-     * velmi lákavý pattern, jemuž je ale třeba se za každou cenu vyhnout.
+     * Should never be used by any circumstances - it is intended more to present an, on first sight
+     * quite tempting, but actually really dangerous antipattern.
      *
      * @see IExtensible
      * @see Extensible
@@ -65,8 +65,8 @@ public interface Extensible {
         /**
          * {@inheritDoc}
          *
-         * Najde, příp. vytvoří a najde rozšiřující {@link Map}u v globální tabulce indexované
-         * aktuální instancí objektu.
+         * Finds, evntl. creates and finds an extension {@link Map} in a global table indexed by
+         * the provided object reference.
          * */
         @Override
         default Map<Class<?>, Object> getExtensionsMap(){
@@ -74,7 +74,8 @@ public interface Extensible {
         }
 
         /**
-         * Třída obsahující privátní pole interfacu {@link ImplementationThroughMemoryLeak}.
+         * Class encapsulating private static fields of the {@link ImplementationThroughMemoryLeak} interface
+         * (because Java for some reason doesn't allow private fields directly on an interface).
          *
          * @see ImplementationThroughMemoryLeak
          *

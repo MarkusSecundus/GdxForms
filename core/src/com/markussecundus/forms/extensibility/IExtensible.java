@@ -5,9 +5,8 @@ import java.util.Map;
 
 
 /**
- * Kanonická implementace {@link Extensible}, jež v sobě obsahuje mapu rozšíření
- * jako líně inicializovanou instanci {@link HashMap}.
- *
+ * Canonical implementation of {@link Extensible}, that provides extensions map
+ * as a lazily created instance of {@link HashMap} (to minimize overhead in case no extension is ever used).
  *
  * @see Extensible
  *
