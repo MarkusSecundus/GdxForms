@@ -6,8 +6,9 @@ import com.markussecundus.forms.events.EventDelegate;
 import com.markussecundus.forms.events.EventListener;
 import com.markussecundus.forms.events.ListenerPriorities;
 import com.markussecundus.forms.extensibility.Extensible;
+import com.markussecundus.forms.extensibility.ExtensionType;
+import com.markussecundus.forms.extensibility.IExtensionType;
 import com.markussecundus.forms.gfx.Drawable;
-import com.markussecundus.forms.gfx.GraphicalPrimitive;
 import com.markussecundus.forms.utils.Pair;
 import com.markussecundus.forms.utils.function.BiFunction;
 import com.markussecundus.forms.utils.function.BiPredicate;
@@ -195,7 +196,11 @@ public interface IListeneredTouchConsumer extends InputConsumer, ListeneredTouch
      * @author MarkusSecundus
      * */
     static final class Util {
-        private static final Function<Extensible, Impl> INSTANCE_SUPPLIER = self->((IListeneredTouchConsumer)self).__ListeneredTouchConsumer__MakeInstance();
+        private static final ExtensionType<Impl> INSTANCE_SUPPLIER = new IExtensionType<Impl>() {
+            @Override public Impl createInstance(Extensible self) {
+                return ((IListeneredTouchConsumer)self).__ListeneredTouchConsumer__MakeInstance();
+            }
+        };
 
         /**
          * (pozn.: V žádném případě nesmí být volána v rámci konfiguračních metod již tázané mixinové komponenty.)
@@ -203,7 +208,7 @@ public interface IListeneredTouchConsumer extends InputConsumer, ListeneredTouch
          * @return Mixinová komponenta příslušící dané instanci {@link IListeneredTouchConsumer}
          * */
         protected static Impl getImpl(IListeneredTouchConsumer self){
-            return self.getExtension(Util.Impl.class, INSTANCE_SUPPLIER);
+            return self.getExtension( INSTANCE_SUPPLIER);
         }
 
         /**

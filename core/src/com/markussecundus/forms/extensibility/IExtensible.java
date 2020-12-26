@@ -17,11 +17,11 @@ import java.util.Map;
 public class IExtensible implements Extensible {
 
     @Override
-    public Map<Class<?>, Object> getExtensionsMap() {
+    public Map<ExtensionType<?>, Object> getExtensionsMap() {
         if(extensions == null)
             extensions = new HashMap<>();
         return extensions;
     }
 
-    private Map<Class<?>,Object> extensions = null;
+    private Map<ExtensionType<?>,Object> extensions = null;
 }

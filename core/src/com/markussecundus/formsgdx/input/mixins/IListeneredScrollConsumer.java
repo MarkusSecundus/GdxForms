@@ -2,7 +2,8 @@ package com.markussecundus.formsgdx.input.mixins;
 
 import com.markussecundus.forms.events.EventDelegate;
 import com.markussecundus.forms.extensibility.Extensible;
-import com.markussecundus.forms.utils.function.Function;
+import com.markussecundus.forms.extensibility.ExtensionType;
+import com.markussecundus.forms.extensibility.IExtensionType;
 import com.markussecundus.forms.wrappers.property.ConstProperty;
 import com.markussecundus.forms.wrappers.property.impl.constant.SimpleConstProperty;
 import com.markussecundus.formsgdx.input.InputConsumer;
@@ -99,7 +100,11 @@ public interface IListeneredScrollConsumer extends InputConsumer, ListeneredScro
      * @author MarkusSecundus
      * */
     static final class Util {
-        private static final Function<Extensible, Impl> INSTANCE_SUPPLIER = self->((IListeneredScrollConsumer)self).__ListeneredScrollConsumer__MakeInstance();
+        private static final ExtensionType<Impl> INSTANCE_SUPPLIER = new IExtensionType<Impl>() {
+            @Override public Impl createInstance(Extensible self) {
+                return ((IListeneredScrollConsumer)self).__ListeneredScrollConsumer__MakeInstance();
+            }
+        };
 
         /**
          * (pozn.: V žádném případě nesmí být volána v rámci konfiguračních metod již tázané mixinové komponenty.)
@@ -107,7 +112,7 @@ public interface IListeneredScrollConsumer extends InputConsumer, ListeneredScro
          * @return Mixinová komponenta příslušící dané instanci {@link IListeneredScrollConsumer}
          * */
         protected static Impl getImpl(IListeneredScrollConsumer self){
-            return self.getExtension(Util.Impl.class, INSTANCE_SUPPLIER);
+            return self.getExtension(INSTANCE_SUPPLIER);
         }
 
         /**

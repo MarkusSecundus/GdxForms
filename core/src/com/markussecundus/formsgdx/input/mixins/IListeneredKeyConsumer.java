@@ -2,7 +2,8 @@ package com.markussecundus.formsgdx.input.mixins;
 
 import com.markussecundus.forms.events.EventDelegate;
 import com.markussecundus.forms.extensibility.Extensible;
-import com.markussecundus.forms.utils.function.Function;
+import com.markussecundus.forms.extensibility.ExtensionType;
+import com.markussecundus.forms.extensibility.IExtensionType;
 import com.markussecundus.forms.wrappers.property.ConstProperty;
 import com.markussecundus.forms.wrappers.property.impl.constant.SimpleConstProperty;
 import com.markussecundus.formsgdx.input.InputConsumer;
@@ -109,14 +110,18 @@ public interface IListeneredKeyConsumer extends InputConsumer, ListeneredKeyCons
      * @author MarkusSecundus
      * */
     static final class Util {
-        private static final Function<Extensible, Impl> INSTANCE_SUPPLIER = self->((IListeneredKeyConsumer)self).__ListeneredKeyConsumer__MakeInstance();
+        private static final ExtensionType<Impl> INSTANCE_SUPPLIER = new IExtensionType<Impl>() {
+            @Override public Impl createInstance(Extensible self) {
+                return ((IListeneredKeyConsumer)self).__ListeneredKeyConsumer__MakeInstance();
+            }
+        };
         /**
          * (pozn.: V žádném případě nesmí být volána v rámci konfiguračních metod již tázané mixinové komponenty.)
          *
          * @return Mixinová komponenta příslušící dané instanci {@link IListeneredKeyConsumer}
          * */
         protected static Impl getImpl(IListeneredKeyConsumer self){
-            return self.getExtension(Util.Impl.class, INSTANCE_SUPPLIER);
+            return self.getExtension(INSTANCE_SUPPLIER);
         }
 
         /**

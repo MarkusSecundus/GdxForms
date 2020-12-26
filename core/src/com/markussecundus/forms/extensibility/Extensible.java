@@ -1,7 +1,6 @@
 package com.markussecundus.forms.extensibility;
 
 import com.markussecundus.forms.utils.datastruct.DefaultDictByIdentity;
-import com.markussecundus.forms.utils.function.Function;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,25 +18,24 @@ public interface Extensible {
     /**
      * @return table of extensions mapped to their {@link Class} objects
      * */
-    public Map<Class<?>,Object> getExtensionsMap();
+    public Map<ExtensionType<?>,Object> getExtensionsMap();
 
     /**
      * Ensures that the object being extended has the given extension (eventually creates the extension)
      * and returns the extension object.
      *
      * @param <T> type of the sought extension
-     * @param cl class to which the extension object is mapped
      * @param provider function to create the extension object, if it doesn't already exist; takes the object to be extended as an argument
      *
      * @return extension object, if it already exists, eventually its newly created and added instance
      * */
-    public default<T> T getExtension(Class<? super T> cl, Function<Extensible, T> provider){
-        Map<Class<?>, Object> extensions = getExtensionsMap();
-        Object extension = extensions.get(cl);
+    public default<T> T getExtension(ExtensionType<T> provider){
+        Map<ExtensionType<?>, Object> extensions = getExtensionsMap();
+        Object extension = extensions.get(provider);
 
         if(extension == null){
-            extension = provider.apply(this);
-            extensions.put(cl, extension);
+            extension = provider.createInstance(this);
+            extensions.put(provider, extension);
         }
         return (T) extension;
     }
@@ -69,7 +67,7 @@ public interface Extensible {
          * the provided object reference.
          * */
         @Override
-        default Map<Class<?>, Object> getExtensionsMap(){
+        default Map<ExtensionType<?>, Object> getExtensionsMap(){
             return Util.extensions.get(this);
         }
 
@@ -82,7 +80,7 @@ public interface Extensible {
          * @author MarkusSecundus
          * */
         public static class Util{
-            private static final Map<ImplementationThroughMemoryLeak, Map<Class<?>, Object>> extensions = new DefaultDictByIdentity<>(self->new HashMap<>());
+            private static final Map<ImplementationThroughMemoryLeak, Map<ExtensionType<?>, Object>> extensions = new DefaultDictByIdentity<>(self->new HashMap<>());
         }
     }
 }
