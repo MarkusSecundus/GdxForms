@@ -1,4 +1,4 @@
-# Formulářová knihovna psaná v Javě s důrazem na obecnost, modularitu a nezávislost jádra na konkrétní hostující platformě
+## Formulářová knihovna psaná v Javě s důrazem na obecnost, modularitu a nezávislost jádra na konkrétní hostující platformě
 * Doplněna nástinem implementace nad herním enginem LibGDX
 *
 * Pro javadoc dokumentaci viz: https://markussecundus.github.io/GdxForms/
