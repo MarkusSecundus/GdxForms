@@ -1,5 +1,7 @@
-# GdxForms
-* Pro dokumentaci viz: https://markussecundus.github.io/GdxForms/
+# Formulářová knihovna psaná v Javě s důrazem na obecnost, modularitu a nezávislost jádra na konkrétní hostující platformě
+* Doplněna nástinem implementace nad herním enginem LibGDX
+*
+* Pro javadoc dokumentaci viz: https://markussecundus.github.io/GdxForms/
 *
 *
 * Mělo by být zkompilovatelné v Android Studiu 4.0+, testováno s Android API 15, 19, 29
